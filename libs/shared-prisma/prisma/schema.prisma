@@ -1,15 +1,15 @@
 model User {
-    no            Int      @id @default(autoincrement()) @map("USER_NO")
-    uuid          String   @unique @default(uuid()) @map("USER_UUID")
-    email         String   @unique @map("USER_EMAIL")
-    name          String   @map("USER_NAME")
-    profilePhoto  String   @map("USER_PROFILE_PHOTO")
-    regDate       DateTime @default(now()) @map("USER_REG_DATE")
-    lastLoginDate DateTime @map("USER_LAST_LOGIN_DATE")
-    state         Int      @default(1) @map("USER_STATE")
+    no             Int      @id @default(autoincrement()) @map("USER_NO")
+    uuid           String   @unique @default(uuid()) @map("USER_UUID")
+    email          String   @unique @map("USER_EMAIL")
+    name           String   @map("USER_NAME")
+    profilePhoto   String   @map("USER_PROFILE_PHOTO")
+    registeredDate DateTime @default(now()) @map("USER_REGISTERED_DATE")
+    lastLoginDate  DateTime @map("USER_LAST_LOGIN_DATE")
+    state          Int      @default(1) @map("USER_STATE")
 
     socialList UserSocial[] @relation("UserToUserSocial")
-    oauth      UserOAuth[]
+    oauthList  UserOAuth[]  @relation("UserToUserOauth")
 
     @@index([uuid])
 }
@@ -20,32 +20,37 @@ model UserOAuth {
     provider String @map("USER_OAUTH_PROVIDER")
     token    String @map("USER_OAUTH_TOKEN")
 
-    User User @relation(fields: [userNo], references: [no])
+    User User @relation("UserToUserOauth", fields: [userNo], references: [no])
 
     @@unique([provider, userNo])
     @@index([userNo])
 }
 
 model UserSocial {
-    no     Int    @id @default(autoincrement()) @map("USER_SOCIAL_NO")
-    type   String @map("USER_SOCIAL_TYPE")
-    User   User   @relation("UserToUserSocial", fields: [userNo], references: [no])
-    userNo Int
+    no      Int    @id @default(autoincrement()) @map("USER_SOCIAL_NO")
+    type    String @map("USER_SOCIAL_TYPE")
+    User    User   @relation("UserToUserSocial", fields: [userNo], references: [no])
+    userNo  Int
+    content String @map("USER_SOCIAL_CONTENT")
 
     @@unique([type, userNo])
     @@index([userNo])
 }
 
 model Problem {
-    no          Int              @id @default(autoincrement()) @map("PROBLEM_NO")
-    uuid        String           @unique @default(uuid()) @map("PROBLEM_UUID")
-    source      String           @map("PROBLEM_SOURCE")
-    sourceId    String           @map("PROBLEM_SOURCE_ID")
-    sourceUrl   String           @map("PROBLEM_SOURCE_URL")
-    title       String           @map("PROBLEM_TITLE")
-    level       Int              @map("PROBLEM_LEVEL")
-    typeList    ProblemType[]    @relation("ProblemToProblemType")
-    contentList ProblemContent[] @relation("ProblemToProblemContent")
+    no             Int      @id @default(autoincrement()) @map("PROBLEM_NO")
+    uuid           String   @unique @default(uuid()) @map("PROBLEM_UUID")
+    source         String   @map("PROBLEM_SOURCE")
+    sourceId       String   @map("PROBLEM_SOURCE_ID")
+    sourceUrl      String   @map("PROBLEM_SOURCE_URL")
+    title          String   @map("PROBLEM_TITLE")
+    level          Int      @map("PROBLEM_LEVEL")
+    registeredDate DateTime @default(now())
+    updatedDate    DateTime
+
+    typeList        ProblemType[]        @relation("ProblemToProblemType")
+    contentList     ProblemContent[]     @relation("ProblemToProblemContent")
+    inputOutputList ProblemInputOutput[] @relation("ProblemToProblemInputOutput")
 }
 
 model ProblemContent {
@@ -55,13 +60,26 @@ model ProblemContent {
     order     Int      @map("PROBIEM_CONTENT_ORDER")
     problemNo Int?     @map("PROBLEM_NO")
     Problem   Problem? @relation("ProblemToProblemContent", fields: [problemNo], references: [no])
+
+    @@index([problemNo])
 }
 
 model ProblemType {
     no        Int     @id @default(autoincrement()) @map("PROBLEM_TYPE_ID")
     name      String  @map("PROBLEM_TYPE_NAME")
-    problemId Int     @map("PROBLEM_ID") // 외래 키 추가
+    problemId Int     @map("PROBLEM_ID")
     problem   Problem @relation("ProblemToProblemType", fields: [problemId], references: [no])
 
     @@index([problemId])
+}
+
+model ProblemInputOutput {
+    no        Int      @map("PROBLEM_INPUT_OUTPUT_NO")
+    input     String   @map("PROBLEM_INPUT")
+    output    String   @map("PROBLEM_OUTPUT")
+    Problem   Problem? @relation("ProblemToProblemInputOutput", fields: [problemNo], references: [no])
+    problemNo Int
+
+    @@unique([no, problemNo])
+    @@index([problemNo])
 }
