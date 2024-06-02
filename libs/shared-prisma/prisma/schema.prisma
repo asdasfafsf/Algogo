@@ -1,20 +1,60 @@
 model User {
     no            Int      @id @default(autoincrement()) @map("USER_NO")
     uuid          String   @unique @default(uuid()) @map("USER_UUID")
-    email         String   @map("USER_EMAIL")
+    email         String   @unique @map("USER_EMAIL")
     name          String   @map("USER_NAME")
     profilePhoto  String   @map("USER_PROFILE_PHOTO")
     regDate       DateTime @default(now()) @map("USER_REG_DATE")
     lastLoginDate DateTime @map("USER_LAST_LOGIN_DATE")
     state         Int      @default(1) @map("USER_STATE")
+
+    socialList UserSocial[] @relation("UserToUserSocial")
+    oauth      UserOAuth[]
+
+    @@index([uuid])
+}
+
+model UserOAuth {
+    no       Int    @id @default(autoincrement()) @map("OAUTH_NO")
+    userNo   Int    @map("USER_NO")
+    provider String @map("USER_OAUTH_PROVIDER")
+    token    String @map("USER_OAUTH_TOKEN")
+
+    User User @relation(fields: [userNo], references: [no])
+
+    @@unique([provider, userNo])
+    @@index([userNo])
+}
+
+model UserSocial {
+    no     Int    @id @default(autoincrement()) @map("USER_SOCIAL_NO")
+    type   String @map("USER_SOCIAL_TYPE")
+    User   User   @relation("UserToUserSocial", fields: [userNo], references: [no])
+    userNo Int
+
+    @@unique([type, userNo])
+    @@index([userNo])
 }
 
 model Problem {
-    no       Int           @id @default(autoincrement()) @map("PROBLEM_NO")
-    uuid     String        @unique @default(uuid()) @map("PROBLEM_UUID")
-    source   String        @map("PROBLEM_SOURCE")
-    typeList ProblemType[] @relation("ProblemToProblemType")
-    level    Int
+    no          Int              @id @default(autoincrement()) @map("PROBLEM_NO")
+    uuid        String           @unique @default(uuid()) @map("PROBLEM_UUID")
+    source      String           @map("PROBLEM_SOURCE")
+    sourceId    String           @map("PROBLEM_SOURCE_ID")
+    sourceUrl   String           @map("PROBLEM_SOURCE_URL")
+    title       String           @map("PROBLEM_TITLE")
+    level       Int              @map("PROBLEM_LEVEL")
+    typeList    ProblemType[]    @relation("ProblemToProblemType")
+    contentList ProblemContent[] @relation("ProblemToProblemContent")
+}
+
+model ProblemContent {
+    no        Int      @id @default(autoincrement()) @map("PROBLEM_CONTENT_NO")
+    content   String   @map("PROBLEM_CONTENT")
+    type      String   @map("PROBLEM_CONTENT_TYPE")
+    order     Int      @map("PROBIEM_CONTENT_ORDER")
+    problemNo Int?     @map("PROBLEM_NO")
+    Problem   Problem? @relation("ProblemToProblemContent", fields: [problemNo], references: [no])
 }
 
 model ProblemType {
