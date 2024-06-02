@@ -103,4 +103,5 @@ model UserProblemState {
     Problem   Problem @relation("ProblemToUserProblemState", fields: [problemNo], references: [no])
 
     @@unique([userNo, problemNo])
+    @@map("USER_PROBLEM_STATE")
 }
