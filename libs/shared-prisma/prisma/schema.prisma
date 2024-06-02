@@ -53,10 +53,10 @@ model Problem {
     registeredDate DateTime @default(now()) @map("PROBLEM_REGISTERED_DATE")
     updatedDate    DateTime @map("PROBLEM_UPDATED_DATE")
 
-    typeList         ProblemType[]        @relation("ProblemToProblemType")
-    contentList      ProblemContent[]     @relation("ProblemToProblemContent")
-    inputOutputList  ProblemInputOutput[] @relation("ProblemToProblemInputOutput")
-    UserProblemState UserProblemState[]   @relation("ProblemToUserProblemState")
+    typeList        ProblemType[]        @relation("ProblemToProblemType")
+    contentList     ProblemContent[]     @relation("ProblemToProblemContent")
+    inputOutputList ProblemInputOutput[] @relation("ProblemToProblemInputOutput")
+    userList        UserProblemState[]   @relation("ProblemToUserProblemState")
 
     @@map("PROBLEM")
 }
