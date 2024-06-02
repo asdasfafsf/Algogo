@@ -7,9 +7,11 @@ model User {
     registeredDate DateTime @default(now()) @map("USER_REGISTERED_DATE")
     lastLoginDate  DateTime @map("USER_LAST_LOGIN_DATE")
     state          Int      @default(1) @map("USER_STATE")
+    emailVerified  Boolean  @default(false) @map("USER_EMAIL_VERIFIED")
 
-    socialList UserSocial[] @relation("UserToUserSocial")
-    oauthList  UserOAuth[]  @relation("UserToUserOauth")
+    socialList       UserSocial[]       @relation("UserToUserSocial")
+    oauthList        UserOAuth[]        @relation("UserToUserOauth")
+    problemStateList UserProblemState[] @relation("UserToUserProblemState")
 
     @@index([uuid])
     @@map("USER")
@@ -51,9 +53,10 @@ model Problem {
     registeredDate DateTime @default(now()) @map("PROBLEM_REGISTERED_DATE")
     updatedDate    DateTime @map("PROBLEM_UPDATED_DATE")
 
-    typeList        ProblemType[]        @relation("ProblemToProblemType")
-    contentList     ProblemContent[]     @relation("ProblemToProblemContent")
-    inputOutputList ProblemInputOutput[] @relation("ProblemToProblemInputOutput")
+    typeList         ProblemType[]        @relation("ProblemToProblemType")
+    contentList      ProblemContent[]     @relation("ProblemToProblemContent")
+    inputOutputList  ProblemInputOutput[] @relation("ProblemToProblemInputOutput")
+    UserProblemState UserProblemState[]   @relation("ProblemToUserProblemState")
 
     @@map("PROBLEM")
 }
@@ -64,7 +67,7 @@ model ProblemContent {
     type      String   @map("PROBLEM_CONTENT_TYPE")
     order     Int      @map("PROBLEM_CONTENT_ORDER")
     problemNo Int?     @map("PROBLEM_NO")
-    Problem   Problem? @relation("ProblemToProblemContent", fields: [problemNo], references: [no])
+    Problem   Problem? @relation("ProblemToProblemContent", fields: [problemNo], references: [no], onUpdate: Cascade, onDelete: Cascade)
 
     @@index([problemNo])
     @@map("PROBLEM_CONTENT")
@@ -74,7 +77,7 @@ model ProblemType {
     no        Int     @id @default(autoincrement()) @map("PROBLEM_TYPE_NO")
     name      String  @map("PROBLEM_TYPE_NAME")
     problemId Int     @map("PROBLEM_ID")
-    problem   Problem @relation("ProblemToProblemType", fields: [problemId], references: [no])
+    problem   Problem @relation("ProblemToProblemType", fields: [problemId], references: [no], onUpdate: Cascade, onDelete: Cascade)
 
     @@index([problemId])
     @@map("PROBLEM_TYPE")
@@ -84,10 +87,20 @@ model ProblemInputOutput {
     no        Int      @id @default(autoincrement()) @map("PROBLEM_INPUT_OUTPUT_NO")
     input     String   @map("PROBLEM_INPUT")
     output    String   @map("PROBLEM_OUTPUT")
-    Problem   Problem? @relation("ProblemToProblemInputOutput", fields: [problemNo], references: [no])
+    Problem   Problem? @relation("ProblemToProblemInputOutput", fields: [problemNo], references: [no], onUpdate: Cascade, onDelete: Cascade)
     problemNo Int      @map("PROBLEM_NO")
 
     @@unique([no, problemNo])
     @@index([problemNo])
     @@map("PROBLEM_INPUT_OUTPUT")
+}
+
+model UserProblemState {
+    userNo    Int
+    problemNo Int
+    state     Int
+    User      User    @relation("UserToUserProblemState", fields: [userNo], references: [no])
+    Problem   Problem @relation("ProblemToUserProblemState", fields: [problemNo], references: [no])
+
+    @@unique([userNo, problemNo])
 }
