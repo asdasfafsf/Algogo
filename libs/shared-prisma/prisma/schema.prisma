@@ -31,6 +31,7 @@ model UserOAuth {
 
     @@unique([provider, userNo])
     @@index([userNo])
+    @@index([provider, token])
     @@map("USER_OAUTH")
 }
 
