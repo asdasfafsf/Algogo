@@ -1,0 +1,27 @@
+model User {
+    no            Int      @id @default(autoincrement()) @map("USER_NO")
+    uuid          String   @unique @default(uuid()) @map("USER_UUID")
+    email         String   @map("USER_EMAIL")
+    name          String   @map("USER_NAME")
+    profilePhoto  String   @map("USER_PROFILE_PHOTO")
+    regDate       DateTime @default(now()) @map("USER_REG_DATE")
+    lastLoginDate DateTime @map("USER_LAST_LOGIN_DATE")
+    state         Int      @default(1) @map("USER_STATE")
+}
+
+model Problem {
+    no       Int           @id @default(autoincrement()) @map("PROBLEM_NO")
+    uuid     String        @unique @default(uuid()) @map("PROBLEM_UUID")
+    source   String        @map("PROBLEM_SOURCE")
+    typeList ProblemType[] @relation("ProblemToProblemType")
+    level    Int
+}
+
+model ProblemType {
+    no        Int     @id @default(autoincrement()) @map("PROBLEM_TYPE_ID")
+    name      String  @map("PROBLEM_TYPE_NAME")
+    problemId Int     @map("PROBLEM_ID") // 외래 키 추가
+    problem   Problem @relation("ProblemToProblemType", fields: [problemId], references: [no])
+
+    @@index([problemId])
+}
