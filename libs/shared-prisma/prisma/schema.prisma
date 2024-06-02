@@ -12,6 +12,7 @@ model User {
     oauthList  UserOAuth[]  @relation("UserToUserOauth")
 
     @@index([uuid])
+    @@map("USER")
 }
 
 model UserOAuth {
@@ -24,17 +25,19 @@ model UserOAuth {
 
     @@unique([provider, userNo])
     @@index([userNo])
+    @@map("USER_OAUTH")
 }
 
 model UserSocial {
     no      Int    @id @default(autoincrement()) @map("USER_SOCIAL_NO")
     type    String @map("USER_SOCIAL_TYPE")
     User    User   @relation("UserToUserSocial", fields: [userNo], references: [no])
-    userNo  Int
+    userNo  Int    @map("USER_NO")
     content String @map("USER_SOCIAL_CONTENT")
 
     @@unique([type, userNo])
     @@index([userNo])
+    @@map("USER_SOCIAL")
 }
 
 model Problem {
@@ -45,41 +48,46 @@ model Problem {
     sourceUrl      String   @map("PROBLEM_SOURCE_URL")
     title          String   @map("PROBLEM_TITLE")
     level          Int      @map("PROBLEM_LEVEL")
-    registeredDate DateTime @default(now())
-    updatedDate    DateTime
+    registeredDate DateTime @default(now()) @map("PROBLEM_REGISTERED_DATE")
+    updatedDate    DateTime @map("PROBLEM_UPDATED_DATE")
 
     typeList        ProblemType[]        @relation("ProblemToProblemType")
     contentList     ProblemContent[]     @relation("ProblemToProblemContent")
     inputOutputList ProblemInputOutput[] @relation("ProblemToProblemInputOutput")
+
+    @@map("PROBLEM")
 }
 
 model ProblemContent {
     no        Int      @id @default(autoincrement()) @map("PROBLEM_CONTENT_NO")
     content   String   @map("PROBLEM_CONTENT")
     type      String   @map("PROBLEM_CONTENT_TYPE")
-    order     Int      @map("PROBIEM_CONTENT_ORDER")
+    order     Int      @map("PROBLEM_CONTENT_ORDER")
     problemNo Int?     @map("PROBLEM_NO")
     Problem   Problem? @relation("ProblemToProblemContent", fields: [problemNo], references: [no])
 
     @@index([problemNo])
+    @@map("PROBLEM_CONTENT")
 }
 
 model ProblemType {
-    no        Int     @id @default(autoincrement()) @map("PROBLEM_TYPE_ID")
+    no        Int     @id @default(autoincrement()) @map("PROBLEM_TYPE_NO")
     name      String  @map("PROBLEM_TYPE_NAME")
     problemId Int     @map("PROBLEM_ID")
     problem   Problem @relation("ProblemToProblemType", fields: [problemId], references: [no])
 
     @@index([problemId])
+    @@map("PROBLEM_TYPE")
 }
 
 model ProblemInputOutput {
-    no        Int      @map("PROBLEM_INPUT_OUTPUT_NO")
+    no        Int      @id @default(autoincrement()) @map("PROBLEM_INPUT_OUTPUT_NO")
     input     String   @map("PROBLEM_INPUT")
     output    String   @map("PROBLEM_OUTPUT")
     Problem   Problem? @relation("ProblemToProblemInputOutput", fields: [problemNo], references: [no])
-    problemNo Int
+    problemNo Int      @map("PROBLEM_NO")
 
     @@unique([no, problemNo])
     @@index([problemNo])
+    @@map("PROBLEM_INPUT_OUTPUT")
 }
