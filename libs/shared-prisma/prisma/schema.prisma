@@ -1,3 +1,7 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
 datasource db {
     provider = "mysql"
     url      = env("DATABASE_URL")
@@ -18,7 +22,6 @@ model User {
     oauthList        UserOAuth[]        @relation("UserToUserOauth")
     problemStateList UserProblemState[] @relation("UserToUserProblemState")
 
-    @@index([uuid])
     @@map("USER")
 }
 
@@ -66,11 +69,11 @@ model Problem {
 }
 
 model ProblemContent {
-    content   String   @map("PROBLEM_CONTENT")
-    type      String   @map("PROBLEM_CONTENT_TYPE")
-    order     Int      @map("PROBLEM_CONTENT_ORDER")
-    problemNo Int      @map("PROBLEM_NO")
-    Problem   Problem? @relation("ProblemToProblemContent", fields: [problemNo], references: [no], onUpdate: Cascade, onDelete: Cascade)
+    content   String  @map("PROBLEM_CONTENT")
+    type      String  @map("PROBLEM_CONTENT_TYPE")
+    order     Int     @map("PROBLEM_CONTENT_ORDER")
+    problemNo Int     @map("PROBLEM_NO")
+    Problem   Problem @relation("ProblemToProblemContent", fields: [problemNo], references: [no], onUpdate: Cascade, onDelete: Cascade)
 
     @@unique([problemNo, order])
     @@index([problemNo, order])
@@ -88,11 +91,11 @@ model ProblemType {
 }
 
 model ProblemInputOutput {
-    no        Int      @id @default(autoincrement()) @map("PROBLEM_INPUT_OUTPUT_NO")
-    input     String   @map("PROBLEM_INPUT")
-    output    String   @map("PROBLEM_OUTPUT")
-    Problem   Problem? @relation("ProblemToProblemInputOutput", fields: [problemNo], references: [no], onUpdate: Cascade, onDelete: Cascade)
-    problemNo Int      @map("PROBLEM_NO")
+    no        Int     @id @default(autoincrement()) @map("PROBLEM_INPUT_OUTPUT_NO")
+    input     String  @map("PROBLEM_INPUT")
+    output    String  @map("PROBLEM_OUTPUT")
+    Problem   Problem @relation("ProblemToProblemInputOutput", fields: [problemNo], references: [no], onUpdate: Cascade, onDelete: Cascade)
+    problemNo Int     @map("PROBLEM_NO")
 
     @@unique([no, problemNo])
     @@index([problemNo])
