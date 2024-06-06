@@ -4,8 +4,9 @@
   "sourceRoot": "apps/algogo/src",
   "compilerOptions": {
     "deleteOutDir": true,
-    "webpack": true,
-    "tsConfigPath": "apps/algogo/tsconfig.app.json"
+    "webpack": false,
+    "tsConfigPath": "apps/algogo/tsconfig.app.json",
+    "watchAssets": true
   },
   "monorepo": true,
   "root": "apps/algogo",
@@ -16,7 +17,14 @@
       "entryFile": "main",
       "sourceRoot": "apps/algogo/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/algogo/tsconfig.app.json"
+        "tsConfigPath": "apps/algogo/tsconfig.app.json",
+        "assets": [
+          {
+            "include": "../src/config/env/*.env",
+            "outDir": "./dist/apps/algogo"
+          }
+        ],
+        "watchAssets": true
       }
     },
     "crawler": {
