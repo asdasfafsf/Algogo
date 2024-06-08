@@ -1,8 +1,16 @@
 export class ResponseProblemDto {
   title: string;
-  contents?: string[];
+  contentList?: string[];
   level: string;
-  type: string[];
+  typeList: string[];
   answerRate: number;
   submitCount: number;
+  timeout: number;
+  memoryLimit: number;
+  answerCount: number;
+  answerPeopleCount: number;
+  input: string;
+  output: string;
+  limit: string;
+  inputOutputList: { input: string; output: string }[];
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ProblemCralwer } from './problem-crawler.interface';
 import { CralwerCookieDto } from '@libs/common/dto/CrawlerCookieDto';
@@ -40,7 +41,7 @@ export class AcmicpcService implements ProblemCralwer {
       'User-Agent':
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0',
     };
-    console.log('방가방가');
+
     const response = await firstValueFrom(
       this.httpService
         .get(requestUrl, {
@@ -54,19 +55,104 @@ export class AcmicpcService implements ProblemCralwer {
         ),
     );
 
-    console.log('이거 원래 안보임?');
-    console.log(response);
     const data = response.data;
-
-    console.log(data);
     const responseProblemDto = this.parseProblem(data);
     return responseProblemDto;
   }
 
   parseProblem(data: string): ResponseProblemDto {
-    parse(data);
+    const document = parse(data);
+    const title = document.querySelector('#problem_title').text;
+    console.log(`title: ${title}`);
+
+    const contentList = document
+      .querySelector('#problem_description')
+      .childNodes.map((elem) => elem.innerText.trim())
+      .filter((elem) => elem);
+
+    const input = document
+      .querySelector('#problem_input')
+      .childNodes.map((elem) => elem.innerText.trim())
+      .filter((elem) => elem)
+      .join('\n');
+
+    console.log(`입력 : ${input}`);
+
+    const output = document
+      .querySelector('#problem_output')
+      .childNodes.map((elem) => elem.innerText.trim())
+      .filter((elem) => elem)
+      .join('\n');
+
+    console.log(`출력 : ${output}`);
+
+    const problemInfoList = document
+      .querySelector('#problem-info')
+      .querySelector('tbody')
+      .querySelector('tr')
+      .querySelectorAll('td')
+      .map((elem) => elem.innerHTML);
+    console.log(problemInfoList);
+
+    const timeout = +problemInfoList[0].split(' ')[0].replace(/[^0-9]/g, '');
+    const memoryLimit = +problemInfoList[1].replace(/[^0-9]/g, '');
+    const submitCount = +problemInfoList[2];
+    const answerCount = +problemInfoList[3];
+    const answerPeopleCount = +problemInfoList[4];
+    const answerRate = +problemInfoList[5].replace('%', '');
+
+    const limit =
+      document
+        .querySelector('#problem_limit')
+        ?.childNodes?.map((elem) => elem.innerText.trim())
+        ?.filter((elem) => elem)
+        ?.join('\n') ?? '';
+
+    console.log(`제한 : ${limit}`);
+
+    const inputOutputList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+      .map((elem) => {
+        const input =
+          document
+            .querySelector(`#sample-input-${elem}`)
+            ?.innerText?.trim()
+            .split('\n')
+            .map((elem) => elem.trim())
+            .join('\n') ?? '';
+
+        const output =
+          document
+            .querySelector(`#sample-output-${elem}`)
+            ?.innerText?.trim()
+            .split('\n')
+            .map((elem) => elem.trim())
+            .join('\n') ?? '';
+
+        return { input, output };
+      })
+      .filter((elem) => elem.input && elem.output);
+
+    // console.log(inputOutputNodeList);
+    console.log(contentList);
 
     const responseProblemDto = new ResponseProblemDto();
-    return responseProblemDto;
+    responseProblemDto.title = title;
+
+    return {
+      title,
+      contentList,
+      level: '',
+      typeList: [],
+      answerRate,
+      submitCount,
+      timeout,
+      memoryLimit,
+      answerCount,
+      answerPeopleCount,
+      limit,
+      input,
+      output,
+      inputOutputList,
+    } as ResponseProblemDto;
   }
 }
