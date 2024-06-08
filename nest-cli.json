@@ -33,7 +33,13 @@
       "entryFile": "main",
       "sourceRoot": "apps/crawler/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/crawler/tsconfig.app.json"
+        "tsConfigPath": "apps/crawler/tsconfig.app.json",
+        "assets": [
+          {
+            "include": "../src/config/env/*.env",
+            "outDir": "./dist/apps/crawler"
+          }
+        ]
       }
     },
     "compiler": {
