@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { CrawlerModule } from './../src/crawler.module';
+import { CrawlerModule } from '../src/app.module';
 
 describe('CrawlerController (e2e)', () => {
   let app: INestApplication;
