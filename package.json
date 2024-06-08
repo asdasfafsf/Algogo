@@ -16,7 +16,7 @@
     "build:algogo": "pnpm prebuild:algogo && nest build algogo",
     "dev:algogo": "pnpm prebuild:algogo && NODE_ENV=development nest start algogo --watch",
     "dev:compiler": "pnpm prebuild:compiler && NODE_ENV=development nest start compiler --watch",
-    "dev:crawler": "pnpm prebuild:compiler && NODE_ENV=development nest start crawler --watch",
+    "dev:crawler": "pnpm prebuild:crawler && NODE_ENV=development nest start crawler --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/apps/algogo/main",
     "prisma:generate": "npx prisma generate --schema=./libs/shared-prisma/prisma/schema.prisma",
