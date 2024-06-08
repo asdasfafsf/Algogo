@@ -17,7 +17,11 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
-    "paths": {},
-  }
+    "paths": {
+      "@libs/*": ["libs/*"]
+    }
+  },
+  "include": ["apps/**/*", "libs/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
 
