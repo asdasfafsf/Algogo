@@ -1,13 +1,10 @@
-import {
-  HttpException,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ProblemCralwer } from './problem-crawler.interface';
 import { CralwerCookieDto } from '@libs/common/dto/CrawlerCookieDto';
 import { HttpService } from '@nestjs/axios';
 import { ResponseProblemDto } from '@libs/common/dto/ResponseProblemDto';
 import { catchError, firstValueFrom } from 'rxjs';
+import { parse } from 'node-html-parser';
 
 @Injectable()
 export class AcmicpcService implements ProblemCralwer {
@@ -67,6 +64,8 @@ export class AcmicpcService implements ProblemCralwer {
   }
 
   parseProblem(data: string): ResponseProblemDto {
+    parse(data);
+
     const responseProblemDto = new ResponseProblemDto();
     return responseProblemDto;
   }

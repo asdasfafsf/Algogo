@@ -1,0 +1,1 @@
+type CrawlerSite = 'BOJ';
