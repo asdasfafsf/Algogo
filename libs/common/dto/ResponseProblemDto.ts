@@ -1,4 +1,5 @@
 export class ResponseProblemDto {
+  key: string;
   title: string;
   contentList?: string[];
   level: string;
