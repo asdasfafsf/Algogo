@@ -1,7 +1,9 @@
+import { ResponseProblemContent } from './ResponseProblemContent';
+
 export class ResponseProblemDto {
   key: string;
   title: string;
-  contentList?: string[];
+  contentList?: ResponseProblemContent[];
   level: string;
   typeList: string[];
   answerRate: number;

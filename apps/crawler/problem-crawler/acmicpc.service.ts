@@ -192,8 +192,21 @@ export class AcmicpcService implements ProblemCralwer {
 
     const contentList = document
       .querySelector('#problem_description')
-      .childNodes.map((elem) => elem.innerText.trim())
-      .filter((elem) => elem);
+      .querySelectorAll('p')
+      .map((elem) => elem.innerHTML)
+      .map((elem) => {
+        if (elem.indexOf('<img') > -1) {
+          return {
+            type: 'image',
+            value: elem.split('src="')[1].split('"')[0],
+          };
+        }
+
+        return {
+          type: 'text',
+          value: elem,
+        };
+      });
 
     const input = document
       .querySelector('#problem_input')
