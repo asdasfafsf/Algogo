@@ -43,8 +43,6 @@ export class AppController {
     @Param('key') key: string,
     @Body() cookies: RequestCralwerCookieDto[],
   ) {
-    console.log('방가');
-    console.log(cookies);
     const problem = await this.problemCrawlerService.getProblem(
       site,
       key,
