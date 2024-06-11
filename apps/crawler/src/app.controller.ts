@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   HttpCode,
@@ -9,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { ProblemCrawlerService } from '../problem-crawler/problem-crawler.service';
 import { ResponseDto } from '@libs/common/dto/ResponseDto';
+import { RequestCralwerCookieDto } from '@libs/common/dto/RequestCrawlerCookieDto';
 
 @Controller()
 export class AppController {
@@ -21,7 +23,7 @@ export class AppController {
     @Query('startPage') startPage: number,
     @Query('endPage') endPage: number,
   ) {
-    const problemList = this.problemCrawlerService.getProblemList(
+    const problemList = await this.problemCrawlerService.getProblemList(
       site,
       startPage,
       endPage,
@@ -36,11 +38,29 @@ export class AppController {
 
   @Post('problem/:site/:key')
   @HttpCode(HttpStatus.OK)
-  async getProblemWithCookie() {}
+  async getProblemWithCookie(
+    @Param('site') site: string,
+    @Param('key') key: string,
+    @Body() cookies: RequestCralwerCookieDto[],
+  ) {
+    console.log('방가');
+    console.log(cookies);
+    const problem = await this.problemCrawlerService.getProblem(
+      site,
+      key,
+      cookies,
+    );
+    return ResponseDto.Builder.setStatusCode(HttpStatus.OK)
+      .setErrorCode('0000')
+      .setErrorMessage('정상')
+      .setData(problem)
+      .build();
+  }
+
   @Get('problem/:site/:key')
   @HttpCode(HttpStatus.OK)
   async getProblem(@Param('site') site: string, @Param('key') key: string) {
-    const problem = this.problemCrawlerService.getProblem(site, key);
+    const problem = await this.problemCrawlerService.getProblem(site, key);
 
     return ResponseDto.Builder.setStatusCode(HttpStatus.OK)
       .setErrorCode('0000')

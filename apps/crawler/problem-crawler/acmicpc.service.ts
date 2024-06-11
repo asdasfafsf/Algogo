@@ -125,7 +125,6 @@ export class AcmicpcService implements ProblemCralwer {
       const tierImage = elem.querySelectorAll('td')[1].querySelector('img')
         ?.attributes['src'];
 
-      console.log(tierImage);
       return {
         title,
         key,
@@ -137,6 +136,7 @@ export class AcmicpcService implements ProblemCralwer {
     const requestCookies = cookies ?? [];
     const requestUrl = `https://www.acmicpc.net/problem/${key}`;
     const headers = { ...this.requestHeaders };
+
     const response = await firstValueFrom(
       this.httpService
         .get(requestUrl, {
@@ -160,6 +160,28 @@ export class AcmicpcService implements ProblemCralwer {
     const data = response.data;
     const responseProblemDto = this.parseProblem(data);
     responseProblemDto.key = key;
+
+    const tierResponse = await firstValueFrom(
+      this.httpService
+        .get(`https://solved.ac/search?query=${key}`, { headers })
+        .pipe(
+          catchError((error) => {
+            const status = Number(error.response.status);
+
+            if (status == HttpStatus.NOT_FOUND) {
+              throw new NotFoundException('can not find tier');
+            }
+
+            console.error(error);
+
+            throw new InternalServerErrorException(error.message);
+          }),
+        ),
+    );
+    const tierData = tierResponse.data;
+    const { level, typeList } = this.parseProblemInfo(tierData, key);
+    responseProblemDto.level = level;
+    responseProblemDto.typeList = typeList;
     return responseProblemDto;
   }
 
@@ -258,5 +280,38 @@ export class AcmicpcService implements ProblemCralwer {
       output,
       inputOutputList,
     } as ResponseProblemDto;
+  }
+
+  parseProblemInfo(data: string, key: string) {
+    const document = parse(data);
+    const propsText = document.querySelector('#__NEXT_DATA__')?.innerText;
+
+    if (!propsText) {
+      return {
+        typeList: [],
+        level: '',
+      };
+    }
+
+    const props = JSON.parse(propsText);
+    const problems = props.props.pageProps.problems.items;
+    const problem = problems.find((elem) => elem.problemId === Number(key));
+
+    if (!problem) {
+      return {
+        typeList: [],
+        level: '',
+      };
+    }
+
+    const level = this.tierToTextMap[problem.level + ''] ?? '알 수 없음';
+    const typeList = problem.tags.map(
+      (tag) => tag.displayNames.find((name) => name.language === 'ko').name,
+    );
+
+    return {
+      level: this.tierToTextMap[problem.level + ''],
+      typeList: typeList ?? [],
+    };
   }
 }
