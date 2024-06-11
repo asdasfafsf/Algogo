@@ -310,7 +310,7 @@ export class AcmicpcService implements ProblemCralwer {
     );
 
     return {
-      level: this.tierToTextMap[problem.level + ''],
+      level: level,
       typeList: typeList ?? [],
     };
   }
