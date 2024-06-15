@@ -1,6 +1,6 @@
-import { CralwerCookieDto } from '@libs/common/dto/CrawlerCookieDto';
-import { ResponseProblemDto } from '@libs/common/dto/ResponseProblemDto';
-import { ResponseProblemSummaryDto } from '@libs/common/dto/ResponseProblemSummaryDto';
+import { CralwerCookieDto } from '@libs/core/dto/CrawlerCookieDto';
+import { ResponseProblemDto } from '@libs/core/dto/ResponseProblemDto';
+import { ResponseProblemSummaryDto } from '@libs/core/dto/ResponseProblemSummaryDto';
 
 export interface ProblemCralwer {
   getProblemList(

@@ -9,8 +9,8 @@ import {
   Query,
 } from '@nestjs/common';
 import { ProblemCrawlerService } from '../problem-crawler/problem-crawler.service';
-import { ResponseDto } from '@libs/common/dto/ResponseDto';
-import { RequestCralwerCookieDto } from '@libs/common/dto/RequestCrawlerCookieDto';
+import { ResponseDto } from '@libs/core/dto/ResponseDto';
+import { RequestCralwerCookieDto } from '@libs/core/dto/RequestCrawlerCookieDto';
 
 @Controller()
 export class AppController {

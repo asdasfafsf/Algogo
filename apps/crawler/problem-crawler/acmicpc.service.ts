@@ -6,12 +6,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ProblemCralwer } from './problem-crawler.interface';
-import { CralwerCookieDto } from '@libs/common/dto/CrawlerCookieDto';
+import { CralwerCookieDto } from '@libs/core/dto/CrawlerCookieDto';
 import { HttpService } from '@nestjs/axios';
-import { ResponseProblemDto } from '@libs/common/dto/ResponseProblemDto';
+import { ResponseProblemDto } from '@libs/core/dto/ResponseProblemDto';
 import { catchError, firstValueFrom } from 'rxjs';
 import { parse } from 'node-html-parser';
-import { ResponseProblemSummaryDto } from '@libs/common/dto/ResponseProblemSummaryDto';
+import { ResponseProblemSummaryDto } from '@libs/core/dto/ResponseProblemSummaryDto';
 
 @Injectable()
 export class AcmicpcService implements ProblemCralwer {
