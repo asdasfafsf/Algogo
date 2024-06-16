@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AcmicpcService } from '../problem-crawler/acmicpc.service';
+import { AcmicpcService } from '../src/problem-crawler/acmicpc.service';
 
 describe('AcmicpcService', () => {
   let service: AcmicpcService;
