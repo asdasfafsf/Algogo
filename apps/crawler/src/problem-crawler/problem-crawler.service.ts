@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ProblemCralwerFactory } from './problem-crawler-factory';
-import { CralwerCookieDto } from '@libs/common/dto/CrawlerCookieDto';
+import { CralwerCookieDto } from '@libs/core/dto/CrawlerCookieDto';
 
 @Injectable()
 export class ProblemCrawlerService {
