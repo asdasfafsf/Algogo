@@ -1,0 +1,41 @@
+import { HttpService } from '@nestjs/axios';
+import { Inject, Injectable } from '@nestjs/common';
+import crawlerConfig from '../config/crawlerConfig';
+import { ConfigType } from '@nestjs/config';
+import { catchError, firstValueFrom, of } from 'rxjs';
+
+@Injectable()
+export class CrawlerService {
+  constructor(
+    @Inject(crawlerConfig.KEY)
+    private crawerConfig: ConfigType<typeof crawlerConfig>,
+    private readonly httpService: HttpService,
+  ) {}
+
+  async getProblem(site: string, key: string) {
+    const siteName =
+      {
+        BOJ: 'BOJ',
+      }[site] ?? 'BOJ';
+
+    const response = await firstValueFrom(
+      this.httpService
+        .get(`${this.crawerConfig.url}/problem/${siteName}/${key}`, {})
+        .pipe(
+          catchError((error) => {
+            const status = Number(error.response.status);
+
+            return of({
+              statusCode: status,
+              errorCode: '9999',
+              errorMessage: '크롤링 오류',
+              data: {},
+            });
+          }),
+        ),
+    );
+
+    const data = response.data;
+    return data;
+  }
+}
