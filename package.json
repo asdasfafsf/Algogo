@@ -87,7 +87,15 @@
     "coverageDirectory": "./coverage",
     "testEnvironment": "node",
     "roots": [
-      "<rootDir>/apps/"
-    ]
+      "<rootDir>/apps/",
+      "<rootDir>/libs/"
+    ],
+    "moduleNameMapper": {
+      "^@app/exception-filter(|/.*)$": "<rootDir>/libs/exception-filter/src/$1",
+      "^@apps/lib/mobules/exception-filter(|/.*)$": "<rootDir>/libs/exception-filter/src/$1",
+      "^@app/filter(|/.*)$": "<rootDir>/libs/filter/src/$1",
+      "^@app/module(|/.*)$": "<rootDir>/libs/module/src/$1",
+      "^@app/interceptor(|/.*)$": "<rootDir>/libs/interceptor/src/$1"
+    }
   }
 }
