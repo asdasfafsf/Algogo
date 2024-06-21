@@ -18,10 +18,49 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@libs/*": ["libs/*"]
+      "@libs/*": [
+        "libs/*"
+      ],
+      "@app/exception-filter": [
+        "libs/exception-filter/src"
+      ],
+      "@app/exception-filter/*": [
+        "libs/exception-filter/src/*"
+      ],
+      "@apps/lib/mobules/exception-filter": [
+        "libs/exception-filter/src"
+      ],
+      "@apps/lib/mobules/exception-filter/*": [
+        "libs/exception-filter/src/*"
+      ],
+      "@app/filter": [
+        "libs/filter/src",
+        "libs/filter/src"
+      ],
+      "@app/filter/*": [
+        "libs/filter/src/*",
+        "libs/filter/src/*"
+      ],
+      "@app/module": [
+        "libs/module/src"
+      ],
+      "@app/module/*": [
+        "libs/module/src/*"
+      ],
+      "@app/interceptor": [
+        "libs/interceptor/src"
+      ],
+      "@app/interceptor/*": [
+        "libs/interceptor/src/*"
+      ]
     }
   },
-  "include": ["apps/**/*", "libs/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "apps/**/*",
+    "libs/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }
-
