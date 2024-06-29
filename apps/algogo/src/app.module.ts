@@ -5,6 +5,8 @@ import { ConfigModule } from '@nestjs/config';
 import { validationSchema } from './config/validationSchema';
 import { CrawlerModule } from './crawler/crawler.module';
 import crawlerConfig from './config/crawlerConfig';
+import { ProblemsModule } from './problems/problems.module';
+import { S3Module } from './s3/s3.module';
 
 @Module({
   imports: [
@@ -15,6 +17,8 @@ import crawlerConfig from './config/crawlerConfig';
       validationSchema,
     }),
     CrawlerModule,
+    ProblemsModule,
+    S3Module,
   ],
 
   controllers: [AppController],
