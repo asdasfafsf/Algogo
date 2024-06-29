@@ -7,6 +7,7 @@ import { CrawlerModule } from './crawler/crawler.module';
 import crawlerConfig from './config/crawlerConfig';
 import { ProblemsModule } from './problems/problems.module';
 import { S3Module } from './s3/s3.module';
+import { ImageModule } from './image/image.module';
 import s3Config from './config/s3Config';
 
 @Module({
@@ -20,6 +21,7 @@ import s3Config from './config/s3Config';
     CrawlerModule,
     ProblemsModule,
     S3Module,
+    ImageModule,
   ],
 
   controllers: [AppController],

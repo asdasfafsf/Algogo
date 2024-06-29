@@ -1,0 +1,2 @@
+npx jest s3.service.spec.ts
+npx jest image.service.spec.ts
