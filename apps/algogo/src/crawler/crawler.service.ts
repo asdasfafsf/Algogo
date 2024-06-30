@@ -46,7 +46,7 @@ export class CrawlerService {
     return data;
   }
 
-  async getResousrce(url: string): Promise<ResponseDto<Buffer>> {
+  async getResource(url: string): Promise<ResponseDto<Buffer>> {
     const response = await firstValueFrom(
       this.httpService
         .get(url, {

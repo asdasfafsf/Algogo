@@ -29,7 +29,7 @@ describe('CrawlerService', () => {
   });
 
   it('resource', async () => {
-    const response = await service.getResousrce(
+    const response = await service.getResource(
       'https://onlinejudgeimages.s3-ap-northeast-1.amazonaws.com/upload/images/sticker.png',
     );
 

@@ -1,12 +1,28 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { CrawlerService } from '../crawler/crawler.service';
+import { ImageService } from '../image/image.service';
+import { S3Service } from '../s3/s3.service';
+import S3Config from '../config/s3Config';
+import { ConfigType } from '@nestjs/config';
+import { ResponseProblemContent } from '@libs/core/dto/ResponseProblemContent';
 
 @Injectable()
 export class ProblemsService {
-  constructor(private readonly cralwerService: CrawlerService) {}
+  constructor(
+    private readonly imageService: ImageService,
+    private readonly crawlerService: CrawlerService,
+    private readonly s3Service: S3Service,
+    @Inject(S3Config.KEY)
+    private readonly s3Config: ConfigType<typeof S3Config>,
+  ) {}
 
   async collectProblem(site: string, key: string) {
-    const result = await this.cralwerService.getProblem(site, key);
+    const result = await this.crawlerService.getProblem(site, key);
 
     if (result.errorCode !== '0000') {
       throw new BadRequestException('크롤링 수집 오류');
@@ -14,17 +30,49 @@ export class ProblemsService {
 
     const data = result.data;
     const { contentList } = data;
-    const newContentList = contentList.map(async (elem) => {
-      const { type, value } = elem;
+    const newContentList = await this.postProcess(contentList, site, key);
 
-      if (type === 'image') {
-      }
-
-      return elem;
-    });
-
-    return result;
+    return {
+      ...result,
+      contentList: newContentList,
+    };
   }
 
-  async postProcess() {}
+  async postProcess(
+    contentList: ResponseProblemContent[],
+    site: string,
+    key: string,
+  ) {
+    return Promise.all(
+      contentList.map(async (elem, index) => {
+        const { type, value } = elem;
+
+        if (type === 'image') {
+          const response = await this.crawlerService.getResource(value);
+          const { statusCode, data } = response;
+
+          if (statusCode !== HttpStatus.OK) {
+            throw new BadRequestException('크롤링 리소스 수집 오류');
+          }
+
+          const webp = await this.imageService.toWebp(data);
+          const s3Result = await this.s3Service.upload(
+            `problems/${site}/${key}_${index}.webp`,
+            webp,
+          );
+
+          if (!s3Result) {
+            throw new BadRequestException('이미지 업로드 오류');
+          }
+
+          return {
+            type: 'image',
+            value: `https://${this.s3Config.bucketName}.s3.${this.s3Config.region}.amazonaws.com/problems/${site}/${key}_${index}.webp`,
+          };
+        }
+
+        return elem;
+      }),
+    );
+  }
 }
