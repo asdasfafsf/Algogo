@@ -1,10 +1,10 @@
 import { HttpStatus } from '@nestjs/common';
 
 export class ResponseDto<T> {
-  private statusCode: HttpStatus;
-  private errorCode: string;
-  private errorMessage: string;
-  private data: T;
+  statusCode: HttpStatus;
+  errorCode: string;
+  errorMessage: string;
+  data: T;
 
   constructor(builder: ResponseDtoBuilder<T>) {
     this.statusCode = builder.statusCode;

@@ -3,6 +3,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import crawlerConfig from '../config/crawlerConfig';
 import { ConfigType } from '@nestjs/config';
 import { catchError, firstValueFrom, of } from 'rxjs';
+import { ResponseDto } from '@libs/core/dto/ResponseDto';
+import { ResponseProblemDto } from '@libs/core/dto/ResponseProblemDto';
 
 @Injectable()
 export class CrawlerService {
@@ -12,7 +14,10 @@ export class CrawlerService {
     private readonly httpService: HttpService,
   ) {}
 
-  async getProblem(site: string, key: string) {
+  async getProblem(
+    site: string,
+    key: string,
+  ): Promise<ResponseDto<ResponseProblemDto>> {
     const siteName =
       {
         BOJ: 'BOJ',
