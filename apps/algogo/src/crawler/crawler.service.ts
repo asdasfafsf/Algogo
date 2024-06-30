@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import crawlerConfig from '../config/crawlerConfig';
 import { ConfigType } from '@nestjs/config';
 import { catchError, firstValueFrom, of } from 'rxjs';
@@ -31,10 +31,12 @@ export class CrawlerService {
             const status = Number(error.response.status);
 
             return of({
-              statusCode: status,
-              errorCode: '9999',
-              errorMessage: '크롤링 오류',
-              data: {},
+              data: {
+                statusCode: status,
+                errorCode: '9999',
+                errorMessage: '크롤링 오류',
+                data: {},
+              },
             });
           }),
         ),
@@ -42,5 +44,37 @@ export class CrawlerService {
 
     const data = response.data;
     return data;
+  }
+
+  async getResousrce(url: string): Promise<ResponseDto<Buffer>> {
+    const response = await firstValueFrom(
+      this.httpService
+        .get(url, {
+          responseType: 'arraybuffer',
+        })
+        .pipe(
+          catchError((error) => {
+            const status = Number(error.response.status);
+
+            return of({
+              data: {
+                statusCode: status,
+                errorCode: '9999',
+                errorMessage: '크롤링 오류',
+                data: new ArrayBuffer(0),
+              },
+            });
+          }),
+        ),
+    );
+
+    const { data } = response;
+
+    return {
+      statusCode: HttpStatus.OK,
+      errorCode: '0000',
+      errorMessage: '크롤링 오류',
+      data,
+    };
   }
 }
