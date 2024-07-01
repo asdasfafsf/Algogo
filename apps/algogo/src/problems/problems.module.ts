@@ -4,10 +4,11 @@ import { ProblemsController } from './problems.controller';
 import { CrawlerModule } from '../crawler/crawler.module';
 import { ImageModule } from '../image/image.module';
 import { S3Module } from '../s3/s3.module';
+import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
   controllers: [ProblemsController],
   providers: [ProblemsService],
-  imports: [CrawlerModule, ImageModule, S3Module],
+  imports: [CrawlerModule, ImageModule, S3Module, PrismaModule],
 })
 export class ProblemsModule {}
