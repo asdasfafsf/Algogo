@@ -181,14 +181,13 @@ export class AcmicpcService implements ProblemCralwer {
     const tierData = tierResponse.data;
     const levelData = this.parseProblemInfo(tierData, key);
 
-    console.log(tierData);
     return {
       ...responseProblemDto,
       ...levelData,
       sourceUrl: requestUrl,
       sourceId: key,
       source: 'BOJ',
-    } as ResponseProblemDto;
+    };
   }
 
   parseProblem(data: string): ResponseProblemDto {
@@ -203,8 +202,9 @@ export class AcmicpcService implements ProblemCralwer {
       .map((elem, index) => {
         if (elem.indexOf('<img') > -1) {
           return {
+            order: index,
             type: 'image',
-            value: elem.split('src="')[1].split('"')[0],
+            content: elem.split('src="')[1].split('"')[0],
           };
         }
 
@@ -309,7 +309,8 @@ export class AcmicpcService implements ProblemCralwer {
     if (!propsText) {
       return {
         typeList: [],
-        level: '',
+        level: 0,
+        levelText: '',
       };
     }
 
@@ -320,7 +321,8 @@ export class AcmicpcService implements ProblemCralwer {
     if (!problem) {
       return {
         typeList: [],
-        level: '',
+        level: 0,
+        levelText: '',
       };
     }
 

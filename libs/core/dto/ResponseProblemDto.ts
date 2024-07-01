@@ -20,5 +20,5 @@ export class ResponseProblemDto {
   sourceId: string;
   source: string;
   hint: string;
-  inputOutputList: { input: string; output: string }[];
+  inputOutputList: { order: number; input: string; output: string }[];
 }
