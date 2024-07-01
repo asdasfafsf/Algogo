@@ -10,6 +10,7 @@ import { S3Module } from './s3/s3.module';
 import { ImageModule } from './image/image.module';
 import { WinstonModule } from 'nest-winston';
 import s3Config from './config/s3Config';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import s3Config from './config/s3Config';
     ProblemsModule,
     S3Module,
     ImageModule,
+    PrismaModule,
   ],
 
   controllers: [AppController],

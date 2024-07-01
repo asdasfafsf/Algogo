@@ -66,8 +66,8 @@ model Problem {
     answerCount       Int      @map("PROBLEM_ANSWER_COUNT")
     answerPeopleCount Int      @map("PROBLEM_ANSWER_PEOPLE_COUNT")
     submitCount       Int      @map("PROBLEM_SUBMIT_COUNT")
-    timeout           String   @map("PROBLEM_TIMEOUT")
-    memoryLimit       String   @map("PROBLEM_MEMORY_LIMIT")
+    timeout           Int      @map("PROBLEM_TIMEOUT")
+    memoryLimit       Int      @map("PROBLEM_MEMORY_LIMIT")
 
     typeList        ProblemType[]        @relation("ProblemToProblemType")
     contentList     ProblemContent[]     @relation("ProblemToProblemContent")
