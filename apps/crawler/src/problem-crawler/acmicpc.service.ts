@@ -197,7 +197,7 @@ export class AcmicpcService implements ProblemCralwer {
       .querySelector('#problem_description')
       .querySelectorAll('p')
       .map((elem) => elem.innerHTML)
-      .map((elem) => {
+      .map((elem, index) => {
         if (elem.indexOf('<img') > -1) {
           return {
             type: 'image',
@@ -206,8 +206,9 @@ export class AcmicpcService implements ProblemCralwer {
         }
 
         return {
+          order: index,
           type: 'text',
-          value: elem,
+          content: elem,
         };
       });
 

@@ -1,4 +1,5 @@
 export class ResponseProblemContent {
   type: string;
-  value: string;
+  content: string;
+  order: number;
 }
