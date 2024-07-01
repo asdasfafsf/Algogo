@@ -15,5 +15,8 @@ export class ResponseProblemDto {
   input: string;
   output: string;
   limit: string;
+  sourceUrl: string;
+  sourceId: string;
+  source: string;
   inputOutputList: { input: string; output: string }[];
 }

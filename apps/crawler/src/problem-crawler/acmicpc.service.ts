@@ -182,6 +182,9 @@ export class AcmicpcService implements ProblemCralwer {
     const { level, typeList } = this.parseProblemInfo(tierData, key);
     responseProblemDto.level = level;
     responseProblemDto.typeList = typeList;
+    responseProblemDto.sourceUrl = requestUrl;
+    responseProblemDto.sourceId = key;
+    responseProblemDto.source = key;
     return responseProblemDto;
   }
 
@@ -272,9 +275,6 @@ export class AcmicpcService implements ProblemCralwer {
 
     // console.log(inputOutputNodeList);
     // console.log(contentList);
-
-    const responseProblemDto = new ResponseProblemDto();
-    responseProblemDto.title = title;
 
     return {
       key: '',
