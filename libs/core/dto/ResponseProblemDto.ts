@@ -4,7 +4,8 @@ export class ResponseProblemDto {
   key: string;
   title: string;
   contentList?: ResponseProblemContent[];
-  level: string;
+  level: number;
+  levelText: string;
   typeList: string[];
   answerRate: number;
   submitCount: number;
@@ -18,5 +19,6 @@ export class ResponseProblemDto {
   sourceUrl: string;
   sourceId: string;
   source: string;
+  hint: string;
   inputOutputList: { input: string; output: string }[];
 }

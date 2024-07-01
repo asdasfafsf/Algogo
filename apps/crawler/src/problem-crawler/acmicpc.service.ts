@@ -179,13 +179,16 @@ export class AcmicpcService implements ProblemCralwer {
         ),
     );
     const tierData = tierResponse.data;
-    const { level, typeList } = this.parseProblemInfo(tierData, key);
-    responseProblemDto.level = level;
-    responseProblemDto.typeList = typeList;
-    responseProblemDto.sourceUrl = requestUrl;
-    responseProblemDto.sourceId = key;
-    responseProblemDto.source = key;
-    return responseProblemDto;
+    const levelData = this.parseProblemInfo(tierData, key);
+
+    console.log(tierData);
+    return {
+      ...responseProblemDto,
+      ...levelData,
+      sourceUrl: requestUrl,
+      sourceId: key,
+      source: 'BOJ',
+    } as ResponseProblemDto;
   }
 
   parseProblem(data: string): ResponseProblemDto {
@@ -236,7 +239,8 @@ export class AcmicpcService implements ProblemCralwer {
       .map((elem) => elem.innerHTML);
     // console.log(problemInfoList);
 
-    const timeout = +problemInfoList[0].split(' ')[0].replace(/[^0-9]/g, '');
+    const timeout =
+      +problemInfoList[0].split(' ')[0].replace(/[^0-9]/g, '') * 1000;
     const memoryLimit = +problemInfoList[1].replace(/[^0-9]/g, '');
     const submitCount = +problemInfoList[2];
     const answerCount = +problemInfoList[3];
@@ -281,7 +285,9 @@ export class AcmicpcService implements ProblemCralwer {
       key: '',
       title,
       contentList,
-      level: '',
+      level: 0,
+      levelText: '',
+      hint: '',
       typeList: [],
       answerRate,
       submitCount,
@@ -318,13 +324,15 @@ export class AcmicpcService implements ProblemCralwer {
       };
     }
 
-    const level = this.tierToTextMap[problem.level + ''] ?? '알 수 없음';
+    const { level } = problem;
+    const levelText = this.tierToTextMap[level + ''] ?? '알 수 없음';
     const typeList = problem.tags.map(
       (tag) => tag.displayNames.find((name) => name.language === 'ko').name,
     );
 
     return {
-      level: level,
+      level,
+      levelText,
       typeList: typeList ?? [],
     };
   }
