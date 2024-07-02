@@ -148,8 +148,6 @@ export class AcmicpcService implements ProblemCralwer {
               throw new NotFoundException('can not find problem');
             }
 
-            console.error(error);
-
             throw new InternalServerErrorException(error.message);
           }),
         ),
@@ -259,7 +257,7 @@ export class AcmicpcService implements ProblemCralwer {
     // console.log(`제한 : ${limit}`);
 
     const inputOutputList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-      .map((elem) => {
+      .map((elem, order) => {
         const input =
           document
             .querySelector(`#sample-input-${elem}`)
@@ -276,7 +274,7 @@ export class AcmicpcService implements ProblemCralwer {
             .map((elem) => elem.trim())
             .join('\n') ?? '';
 
-        return { input, output };
+        return { order, input, output };
       })
       .filter((elem) => elem.input && elem.output);
 
