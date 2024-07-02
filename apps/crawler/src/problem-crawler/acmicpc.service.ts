@@ -204,7 +204,7 @@ export class AcmicpcService implements ProblemCralwer {
           return {
             order: index,
             type: 'image',
-            content: elem.split('src="')[1].split('"')[0],
+            content: `https://www.acmicpc.net${elem.split('src="')[1].split('"')[0]}`,
           };
         }
 
