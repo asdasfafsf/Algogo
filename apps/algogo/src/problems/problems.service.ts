@@ -3,6 +3,7 @@ import {
   HttpStatus,
   Inject,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { CrawlerService } from '../crawler/crawler.service';
 import { ImageService } from '../image/image.service';
@@ -25,6 +26,73 @@ export class ProblemsService {
     private readonly s3Config: ConfigType<typeof S3Config>,
     private readonly prismaService: PrismaService,
   ) {}
+
+  async getProblemSummaryList() {
+    try {
+    } catch (e) {}
+  }
+  async getProblem(uuid: string) {
+    try {
+      const problem = await this.prismaService.problem.findFirst({
+        select: {
+          no: false,
+          uuid: true,
+          title: true,
+          level: true,
+          levelText: true,
+          input: true,
+          output: true,
+          answerCount: true,
+          answerPeopleCount: true,
+          submitCount: true,
+          timeout: true,
+          memoryLimit: true,
+          contentList: {
+            select: {
+              order: true,
+              type: true,
+              content: true,
+            },
+            orderBy: {
+              order: 'asc',
+            },
+          },
+          inputOutputList: {
+            select: {
+              order: true,
+              input: true,
+              output: true,
+            },
+            orderBy: {
+              order: 'asc',
+            },
+          },
+          typeList: {
+            select: {
+              name: true,
+            },
+          },
+        },
+        where: {
+          uuid,
+        },
+      });
+
+      if (!problem) {
+        throw new NotFoundException('문제를 찾을 수 없습니다.');
+      }
+
+      return {
+        ...problem,
+      };
+    } catch (e) {
+      this.logger.error(`${ProblemsService.name} getProblem uuid`, {
+        message: e.message,
+      });
+
+      throw e;
+    }
+  }
 
   async collectProblem(site: string, key: string) {
     const result = await this.crawlerService.getProblem(site, key);
