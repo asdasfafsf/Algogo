@@ -60,8 +60,8 @@ model Problem {
     levelText         String   @map("PROBLEM_LEVEL_TEXT")
     registeredDate    DateTime @default(now()) @map("PROBLEM_REGISTERED_DATE")
     updatedDate       DateTime @map("PROBLEM_UPDATED_DATE")
-    input             String   @map("PROBLEM_INPUT")
-    output            String   @map("PROBLEM_OUTPUT")
+    input             String   @map("PROBLEM_INPUT") @db.VarChar(600)
+    output            String   @map("PROBLEM_OUTPUT") @db.VarChar(600)
     limit             String   @map("PROBLEM_LIMIT")
     answerCount       Int      @map("PROBLEM_ANSWER_COUNT")
     answerPeopleCount Int      @map("PROBLEM_ANSWER_PEOPLE_COUNT")
@@ -101,8 +101,8 @@ model ProblemType {
 
 model ProblemInputOutput {
     no        Int     @id @default(autoincrement()) @map("PROBLEM_INPUT_OUTPUT_NO")
-    input     String  @map("PROBLEM_INPUT")
-    output    String  @map("PROBLEM_OUTPUT")
+    input     String  @map("PROBLEM_INPUT") @db.VarChar(600)
+    output    String  @map("PROBLEM_OUTPUT") @db.VarChar(600)
     Problem   Problem @relation("ProblemToProblemInputOutput", fields: [problemNo], references: [no], onUpdate: Cascade, onDelete: Cascade)
     problemNo Int     @map("PROBLEM_NO")
 
