@@ -11,10 +11,13 @@ import S3Config from '../config/s3Config';
 import { ConfigType } from '@nestjs/config';
 import { ResponseProblemContent } from '@libs/core/dto/ResponseProblemContent';
 import { PrismaService } from '../prisma/prisma.service';
+import { Logger } from 'winston';
 
 @Injectable()
 export class ProblemsService {
   constructor(
+    @Inject('winston')
+    private readonly logger: Logger,
     private readonly imageService: ImageService,
     private readonly crawlerService: CrawlerService,
     private readonly s3Service: S3Service,
@@ -26,12 +29,21 @@ export class ProblemsService {
   async collectProblem(site: string, key: string) {
     const result = await this.crawlerService.getProblem(site, key);
 
+    this.logger.silly(`${ProblemsService.name} collectProblem`, {});
+
     if (result.errorCode !== '0000') {
       throw new BadRequestException('크롤링 수집 오류');
     }
 
     const data = result.data;
+    try {
+      await this.postProcess(data.contentList, site, key);
+    } catch (e) {
+      console.error(e);
+    }
     const contentList = await this.postProcess(data.contentList, site, key);
+
+    this.logger.info(`${ProblemsService.name} postprocess`, {});
 
     const res = await this.prismaService.$transaction(async (tx) => {
       const inserted = await tx.problem.create({
@@ -74,7 +86,7 @@ export class ProblemsService {
     site: string,
     key: string,
   ) {
-    return Promise.all(
+    return await Promise.all(
       contentList.map(async (elem, index) => {
         const { type, content } = elem;
 
@@ -83,6 +95,9 @@ export class ProblemsService {
           const { statusCode, data } = response;
 
           if (statusCode !== HttpStatus.OK) {
+            this.logger.error(`${ProblemsService.name} getResource_${index}`, {
+              requestUrl: content,
+            });
             throw new BadRequestException('크롤링 리소스 수집 오류');
           }
 
@@ -93,6 +108,9 @@ export class ProblemsService {
           );
 
           if (!s3Result) {
+            this.logger.error(`${ProblemsService.name} s3Upload_${index}`, {
+              requestUrl: content,
+            });
             throw new BadRequestException('이미지 업로드 오류');
           }
 
