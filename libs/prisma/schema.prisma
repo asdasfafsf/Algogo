@@ -78,7 +78,7 @@ model Problem {
 }
 
 model ProblemContent {
-    content   String  @map("PROBLEM_CONTENT")
+    content   String  @map("PROBLEM_CONTENT") @db.VarChar(1000)
     type      String  @map("PROBLEM_CONTENT_TYPE")
     order     Int     @map("PROBLEM_CONTENT_ORDER")
     problemNo Int     @map("PROBLEM_NO")
