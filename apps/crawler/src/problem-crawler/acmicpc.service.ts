@@ -96,8 +96,6 @@ export class AcmicpcService implements ProblemCralwer {
                 throw new NotFoundException('can not find problem');
               }
 
-              console.error(error);
-
               throw new InternalServerErrorException(error.message);
             }),
           ),
@@ -201,10 +199,14 @@ export class AcmicpcService implements ProblemCralwer {
       .map((elem) => elem.innerHTML)
       .map((elem, index) => {
         if (elem.indexOf('<img') > -1) {
+          const content = elem.split('src="')[1].split('"')[0];
           return {
             order: index,
             type: 'image',
-            content: `https://www.acmicpc.net${elem.split('src="')[1].split('"')[0]}`,
+            content:
+              content.indexOf('https') === -1
+                ? `https://www.acmicpc.net${elem.split('src="')[1].split('"')[0]}`
+                : content,
           };
         }
 
