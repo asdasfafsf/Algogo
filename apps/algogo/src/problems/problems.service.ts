@@ -36,49 +36,54 @@ export class ProblemsService {
     }
 
     const data = result.data;
-    try {
-      await this.postProcess(data.contentList, site, key);
-    } catch (e) {
-      console.error(e);
-    }
     const contentList = await this.postProcess(data.contentList, site, key);
 
-    this.logger.info(`${ProblemsService.name} postprocess`, {});
+    this.logger.silly(`${ProblemsService.name} postprocess`, contentList);
 
-    const res = await this.prismaService.$transaction(async (tx) => {
-      const inserted = await tx.problem.create({
-        data: {
-          title: data.title,
-          level: data.level,
-          levelText: data.levelText,
-          updatedDate: new Date(),
-          input: data.input,
-          output: data.output,
-          limit: data.limit,
-          answerCount: data.answerCount,
-          answerPeopleCount: data.answerPeopleCount,
-          submitCount: data.submitCount,
-          timeout: data.timeout,
-          memoryLimit: data.memoryLimit,
-          source: data.source,
-          sourceId: data.sourceId,
-          sourceUrl: data.sourceUrl,
-          contentList: {
-            create: contentList,
+    try {
+      const res = await this.prismaService.$transaction(async (tx) => {
+        const inserted = await tx.problem.create({
+          data: {
+            title: data.title,
+            level: data.level,
+            levelText: data.levelText,
+            updatedDate: new Date(),
+            input: data.input,
+            output: data.output,
+            limit: data.limit,
+            answerCount: data.answerCount,
+            answerPeopleCount: data.answerPeopleCount,
+            submitCount: data.submitCount,
+            timeout: data.timeout,
+            memoryLimit: data.memoryLimit,
+            source: data.source,
+            sourceId: data.sourceId,
+            sourceUrl: data.sourceUrl,
+            contentList: {
+              create: contentList,
+            },
+            typeList: {
+              create: data.typeList.map((name) => ({ name })),
+            },
+            inputOutputList: {
+              create: data.inputOutputList,
+            },
           },
-          typeList: {
-            create: data.typeList.map((name) => ({ name })),
-          },
-          inputOutputList: {
-            create: data.inputOutputList,
-          },
-        },
+        });
+
+        return inserted;
       });
 
-      return inserted;
-    });
-
-    return res;
+      return res;
+    } catch (e) {
+      this.logger.error(
+        `${ProblemsService.name} PrismaClientInitializationError`,
+        {
+          message: e.message,
+        },
+      );
+      throw new BadRequestException('데이터 삽입 에러');
+    }
   }
 
   async postProcess(
@@ -105,6 +110,11 @@ export class ProblemsService {
           const s3Result = await this.s3Service.upload(
             `problems/${site}/${key}_${index}.webp`,
             webp,
+          );
+
+          this.logger.silly(
+            `${ProblemsService.name} s3Upload_${index}`,
+            s3Result,
           );
 
           if (!s3Result) {
