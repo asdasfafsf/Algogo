@@ -74,6 +74,7 @@ model Problem {
     inputOutputList ProblemInputOutput[] @relation("ProblemToProblemInputOutput")
     userList        UserProblemState[]   @relation("ProblemToUserProblemState")
 
+    @@unique([source, sourceId])
     @@map("PROBLEM")
 }
 
@@ -100,13 +101,13 @@ model ProblemType {
 }
 
 model ProblemInputOutput {
-    no        Int     @id @default(autoincrement()) @map("PROBLEM_INPUT_OUTPUT_NO")
+    order     Int     @map("PROBLEM_INPUT_OUTPUT_ORDER")
     input     String  @map("PROBLEM_INPUT") @db.VarChar(600)
     output    String  @map("PROBLEM_OUTPUT") @db.VarChar(600)
     Problem   Problem @relation("ProblemToProblemInputOutput", fields: [problemNo], references: [no], onUpdate: Cascade, onDelete: Cascade)
     problemNo Int     @map("PROBLEM_NO")
 
-    @@unique([no, problemNo])
+    @@unique([problemNo])
     @@index([problemNo])
     @@map("PROBLEM_INPUT_OUTPUT")
 }
