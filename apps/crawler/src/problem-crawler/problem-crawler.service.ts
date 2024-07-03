@@ -36,7 +36,7 @@ export class ProblemCrawlerService {
     const cralwer = this.problemCrawlerFactory.getInstance(crawlerSite);
     const problem = await cralwer.getProblem(key, cookies);
     const contentList = await Promise.all(
-      problem.contentList.map(async ({ content, type }) => {
+      problem.contentList.map(async ({ content, type }, order) => {
         if (type === 'image') {
           const response = await this.getResource(
             content,
@@ -45,11 +45,16 @@ export class ProblemCrawlerService {
 
           const { data } = response;
           return {
+            order,
             type: 'image',
             content: data.toString('hex'),
           };
         }
-        return content;
+        return {
+          order,
+          type,
+          content,
+        };
       }),
     ).catch((error) => {
       this.logger.error(`${ProblemCrawlerService.name} image to Hex`, {
