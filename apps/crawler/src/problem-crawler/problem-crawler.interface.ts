@@ -3,6 +3,7 @@ import { ResponseProblemDto } from '@libs/core/dto/ResponseProblemDto';
 import { ResponseProblemSummaryDto } from '@libs/core/dto/ResponseProblemSummaryDto';
 
 export interface ProblemCralwer {
+  requestHeaders: any;
   getProblemList(
     startPage: number,
     endPage: number,
