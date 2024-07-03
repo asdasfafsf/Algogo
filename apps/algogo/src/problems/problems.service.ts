@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  HttpStatus,
   Inject,
   Injectable,
   NotFoundException,
@@ -205,17 +204,9 @@ export class ProblemsService {
         const { type, content } = elem;
 
         if (type === 'image') {
-          const response = await this.crawlerService.getResource(content);
-          const { statusCode, data } = response;
-
-          if (statusCode !== HttpStatus.OK) {
-            this.logger.error(`${ProblemsService.name} getResource_${index}`, {
-              requestUrl: content,
-            });
-            throw new BadRequestException('크롤링 리소스 수집 오류');
-          }
-
-          const webp = await this.imageService.toWebp(data);
+          const webp = await this.imageService.toWebp(
+            Buffer.from(content, 'hex'),
+          );
           const s3Result = await this.s3Service.upload(
             `problems/${site}/${key}_${index}.webp`,
             webp,

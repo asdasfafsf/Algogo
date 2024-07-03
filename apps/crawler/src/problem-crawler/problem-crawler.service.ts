@@ -1,5 +1,4 @@
 import {
-  HttpStatus,
   Inject,
   Injectable,
   InternalServerErrorException,
@@ -8,7 +7,7 @@ import { ProblemCralwerFactory } from './problem-crawler-factory';
 import { CralwerCookieDto } from '@libs/core/dto/CrawlerCookieDto';
 import { HttpService } from '@nestjs/axios';
 import { ResponseDto } from '@libs/core/dto/ResponseDto';
-import { catchError, firstValueFrom, of } from 'rxjs';
+import { catchError, firstValueFrom } from 'rxjs';
 import { Logger } from 'winston';
 
 @Injectable()
@@ -37,32 +36,28 @@ export class ProblemCrawlerService {
     const cralwer = this.problemCrawlerFactory.getInstance(crawlerSite);
     const problem = await cralwer.getProblem(key, cookies);
     const contentList = await Promise.all(
-      problem.contentList.map(async (content, index) => {
-        if (content.type === 'image') {
+      problem.contentList.map(async ({ content, type }) => {
+        if (type === 'image') {
           const response = await this.getResource(
-            content.content,
+            content,
             cralwer.requestHeaders,
           );
 
-          if (response.statusCode !== HttpStatus.OK) {
-            this.logger.error(`${ProblemCrawlerService.name} convert Image`, {
-              crawlerSite,
-              key,
-              index,
-            });
-            throw new InternalServerErrorException(
-              '이미지 수집 중 오류가 발생하였습니다.',
-            );
-          }
-
+          const { data } = response;
           return {
             type: 'image',
-            content: response.data,
+            content: data.toString('hex'),
           };
         }
         return content;
       }),
-    );
+    ).catch((error) => {
+      this.logger.error(`${ProblemCrawlerService.name} image to Hex`, {
+        ...error,
+      });
+
+      throw new InternalServerErrorException('이미지 변환 오류');
+    });
 
     return {
       ...problem,
@@ -73,7 +68,7 @@ export class ProblemCrawlerService {
   async getResource(
     url: string,
     requestHeaders: any,
-  ): Promise<ResponseDto<string>> {
+  ): Promise<ResponseDto<Buffer>> {
     const response = await firstValueFrom(
       this.httpService
         .get(url, {
@@ -84,28 +79,23 @@ export class ProblemCrawlerService {
           catchError((error) => {
             const status = Number(error?.response?.status);
 
-            if (!status) {
-              this.logger.error(
-                `${ProblemCrawlerService.name} getResource`,
-                error,
-              );
-            }
-
-            return of({
-              data: Buffer.alloc(0),
-              statusCode: status,
-              errorCode: '9999',
-              errorMessage: '크롤링 오류',
-            } as ResponseDto<Buffer>);
+            this.logger.error(`${ProblemCrawlerService.name} getResource`, {
+              status,
+              requestUrl: url,
+              error,
+            });
+            throw new InternalServerErrorException(
+              '이미지 수집 중 오류가 발생하였습니다.',
+            );
           }),
         ),
     );
 
     return {
-      data: Buffer.from(response.data).toString('hex'),
-      statusCode: response.data.statusCode,
-      errorCode: response.data.errorCode,
-      errorMessage: response.data.errorMessage,
+      data: Buffer.from(response.data),
+      statusCode: response.status,
+      errorCode: '0000',
+      errorMessage: '',
     };
   }
 }
