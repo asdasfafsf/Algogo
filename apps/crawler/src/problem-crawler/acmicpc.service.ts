@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   HttpStatus,
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -9,9 +10,9 @@ import { ProblemCralwer } from './problem-crawler.interface';
 import { CralwerCookieDto } from '@libs/core/dto/CrawlerCookieDto';
 import { HttpService } from '@nestjs/axios';
 import { ResponseProblemDto } from '@libs/core/dto/ResponseProblemDto';
-import { catchError, firstValueFrom } from 'rxjs';
+import { catchError, firstValueFrom, of } from 'rxjs';
 import { parse } from 'node-html-parser';
-import { ResponseProblemSummaryDto } from '@libs/core/dto/ResponseProblemSummaryDto';
+import { Logger } from 'winston';
 
 @Injectable()
 export class AcmicpcService implements ProblemCralwer {
@@ -47,7 +48,7 @@ export class AcmicpcService implements ProblemCralwer {
     '29': '루비 2',
     '30': '루비 1',
   };
-  private readonly requestHeaders = {
+  readonly requestHeaders = {
     accept:
       'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
     'accept-language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
@@ -68,7 +69,11 @@ export class AcmicpcService implements ProblemCralwer {
     'User-Agent':
       'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0',
   };
-  constructor(private readonly httpService: HttpService) {}
+  constructor(
+    @Inject('winston')
+    private readonly logger: Logger,
+    private readonly httpService: HttpService,
+  ) {}
 
   async getProblemList(
     startPageNo: number,
@@ -167,8 +172,6 @@ export class AcmicpcService implements ProblemCralwer {
             if (status == HttpStatus.NOT_FOUND) {
               throw new NotFoundException('can not find tier');
             }
-
-            console.error(error);
 
             throw new InternalServerErrorException(error.message);
           }),
