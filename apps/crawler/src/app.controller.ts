@@ -8,9 +8,8 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ProblemCrawlerService } from '../problem-crawler/problem-crawler.service';
-import { ResponseDto } from '@libs/common/dto/ResponseDto';
-import { RequestCralwerCookieDto } from '@libs/common/dto/RequestCrawlerCookieDto';
+import { ProblemCrawlerService } from './problem-crawler/problem-crawler.service';
+import { RequestCralwerCookieDto } from '@libs/core/dto/RequestCrawlerCookieDto';
 
 @Controller()
 export class AppController {
@@ -29,11 +28,7 @@ export class AppController {
       endPage,
     );
 
-    return ResponseDto.Builder.setStatusCode(HttpStatus.OK)
-      .setErrorCode('0000')
-      .setErrorMessage('정상')
-      .setData(problemList)
-      .build();
+    return problemList;
   }
 
   @Post('problem/:site/:key')
@@ -48,11 +43,7 @@ export class AppController {
       key,
       cookies,
     );
-    return ResponseDto.Builder.setStatusCode(HttpStatus.OK)
-      .setErrorCode('0000')
-      .setErrorMessage('정상')
-      .setData(problem)
-      .build();
+    return problem;
   }
 
   @Get('problem/:site/:key')
@@ -60,10 +51,6 @@ export class AppController {
   async getProblem(@Param('site') site: string, @Param('key') key: string) {
     const problem = await this.problemCrawlerService.getProblem(site, key);
 
-    return ResponseDto.Builder.setStatusCode(HttpStatus.OK)
-      .setErrorCode('0000')
-      .setErrorMessage('정상')
-      .setData(problem)
-      .build();
+    return problem;
   }
 }

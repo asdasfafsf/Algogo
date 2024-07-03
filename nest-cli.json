@@ -6,7 +6,13 @@
     "deleteOutDir": true,
     "webpack": false,
     "tsConfigPath": "apps/algogo/tsconfig.app.json",
-    "watchAssets": true
+    "watchAssets": true,
+    "assets": [
+      {
+        "include": "../src/config/env/*.env",
+        "outDir": "./dist/apps/algogo/src"
+      }
+    ]
   },
   "monorepo": true,
   "root": "apps/algogo",
@@ -21,7 +27,7 @@
         "assets": [
           {
             "include": "../src/config/env/*.env",
-            "outDir": "./dist/apps/algogo"
+            "outDir": "./dist/apps/algogo/src"
           }
         ],
         "watchAssets": true
@@ -49,6 +55,24 @@
       "sourceRoot": "apps/compiler/src",
       "compilerOptions": {
         "tsConfigPath": "apps/compiler/tsconfig.app.json"
+      }
+    },
+    "filter": {
+      "type": "library",
+      "root": "libs/filter",
+      "entryFile": "index",
+      "sourceRoot": "libs/filter/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/filter/tsconfig.lib.json"
+      }
+    },
+    "interceptor": {
+      "type": "library",
+      "root": "libs/interceptor",
+      "entryFile": "index",
+      "sourceRoot": "libs/interceptor/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/interceptor/tsconfig.lib.json"
       }
     }
   }

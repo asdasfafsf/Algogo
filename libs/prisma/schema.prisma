@@ -1,0 +1,131 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mysql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    no             Int       @id @default(autoincrement()) @map("USER_NO")
+    uuid           String    @unique @default(uuid()) @map("USER_UUID")
+    email          String    @unique @map("USER_EMAIL")
+    name           String    @map("USER_NAME")
+    profilePhoto   String    @map("USER_PROFILE_PHOTO")
+    registeredDate DateTime  @default(now()) @map("USER_REGISTERED_DATE")
+    lastLoginDate  DateTime  @map("USER_LAST_LOGIN_DATE")
+    state          UserState @default(ACTIVE) @map("USER_STATE")
+    emailVerified  Boolean   @default(false) @map("USER_EMAIL_VERIFIED")
+
+    socialList       UserSocial[]       @relation("UserToUserSocial")
+    oauthList        UserOAuth[]        @relation("UserToUserOauth")
+    problemStateList UserProblemState[] @relation("UserToUserProblemState")
+
+    @@map("USER")
+}
+
+model UserOAuth {
+    userNo   Int    @map("USER_NO")
+    provider String @map("USER_OAUTH_PROVIDER")
+    token    String @map("USER_OAUTH_TOKEN")
+
+    User User @relation("UserToUserOauth", fields: [userNo], references: [no])
+
+    @@unique([provider, userNo])
+    @@index([userNo])
+    @@index([provider, token])
+    @@map("USER_OAUTH")
+}
+
+model UserSocial {
+    type    String @map("USER_SOCIAL_TYPE")
+    User    User   @relation("UserToUserSocial", fields: [userNo], references: [no])
+    userNo  Int    @map("USER_NO")
+    content String @map("USER_SOCIAL_CONTENT")
+
+    @@unique([type, userNo])
+    @@index([userNo, type])
+    @@map("USER_SOCIAL")
+}
+
+model Problem {
+    no                Int      @id @default(autoincrement()) @map("PROBLEM_NO")
+    uuid              String   @unique @default(uuid()) @map("PROBLEM_UUID")
+    source            String   @map("PROBLEM_SOURCE")
+    sourceId          String   @map("PROBLEM_SOURCE_ID")
+    sourceUrl         String   @map("PROBLEM_SOURCE_URL")
+    title             String   @map("PROBLEM_TITLE")
+    level             Int      @map("PROBLEM_LEVEL")
+    levelText         String   @map("PROBLEM_LEVEL_TEXT")
+    registeredDate    DateTime @default(now()) @map("PROBLEM_REGISTERED_DATE")
+    updatedDate       DateTime @map("PROBLEM_UPDATED_DATE")
+    input             String   @map("PROBLEM_INPUT") @db.VarChar(600)
+    output            String   @map("PROBLEM_OUTPUT") @db.VarChar(600)
+    hint              String   @default("") @map("PROBLEM_HINT") @db.VarChar(600)
+    limit             String   @map("PROBLEM_LIMIT")
+    answerCount       Int      @map("PROBLEM_ANSWER_COUNT")
+    answerPeopleCount Int      @map("PROBLEM_ANSWER_PEOPLE_COUNT")
+    submitCount       Int      @map("PROBLEM_SUBMIT_COUNT")
+    timeout           Int      @map("PROBLEM_TIMEOUT")
+    memoryLimit       Int      @map("PROBLEM_MEMORY_LIMIT")
+
+    typeList        ProblemType[]        @relation("ProblemToProblemType")
+    contentList     ProblemContent[]     @relation("ProblemToProblemContent")
+    inputOutputList ProblemInputOutput[] @relation("ProblemToProblemInputOutput")
+    userList        UserProblemState[]   @relation("ProblemToUserProblemState")
+
+    @@unique([source, sourceId])
+    @@map("PROBLEM")
+}
+
+model ProblemContent {
+    content   String  @map("PROBLEM_CONTENT") @db.VarChar(1000)
+    type      String  @map("PROBLEM_CONTENT_TYPE")
+    order     Int     @map("PROBLEM_CONTENT_ORDER")
+    problemNo Int     @map("PROBLEM_NO")
+    Problem   Problem @relation("ProblemToProblemContent", fields: [problemNo], references: [no], onUpdate: Cascade, onDelete: Cascade)
+
+    @@unique([problemNo, order])
+    @@index([problemNo, order])
+    @@map("PROBLEM_CONTENT")
+}
+
+model ProblemType {
+    name      String  @map("PROBLEM_TYPE_NAME")
+    problemNo Int     @map("PROBLEM_NO")
+    problem   Problem @relation("ProblemToProblemType", fields: [problemNo], references: [no], onUpdate: Cascade, onDelete: Cascade)
+
+    @@unique([problemNo, name])
+    @@index([problemNo, name])
+    @@map("PROBLEM_TYPE")
+}
+
+model ProblemInputOutput {
+    order     Int     @map("PROBLEM_INPUT_OUTPUT_ORDER")
+    input     String  @map("PROBLEM_INPUT") @db.VarChar(600)
+    output    String  @map("PROBLEM_OUTPUT") @db.VarChar(600)
+    Problem   Problem @relation("ProblemToProblemInputOutput", fields: [problemNo], references: [no], onUpdate: Cascade, onDelete: Cascade)
+    problemNo Int     @map("PROBLEM_NO")
+
+    @@unique([problemNo])
+    @@index([problemNo])
+    @@map("PROBLEM_INPUT_OUTPUT")
+}
+
+model UserProblemState {
+    userNo    Int
+    problemNo Int
+    state     Int
+    User      User    @relation("UserToUserProblemState", fields: [userNo], references: [no])
+    Problem   Problem @relation("ProblemToUserProblemState", fields: [problemNo], references: [no])
+
+    @@unique([userNo, problemNo])
+    @@map("USER_PROBLEM_STATE")
+}
+
+enum UserState {
+    DORMANT // 휴면
+    ACTIVE // 활동
+    SUSPENDED // 정지
+}
