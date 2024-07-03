@@ -5,6 +5,11 @@ import { ProblemsService } from './problems.service';
 export class ProblemsController {
   constructor(private readonly problemsService: ProblemsService) {}
 
+  @Get('/')
+  async getProblemSummary() {
+    return await this.problemsService.getProblemSummaryList();
+  }
+
   @Get('/:problemUuid')
   async getProblem(@Param('problemUuid') uuid: string) {
     return await this.problemsService.getProblem(uuid);

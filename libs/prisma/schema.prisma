@@ -62,6 +62,7 @@ model Problem {
     updatedDate       DateTime @map("PROBLEM_UPDATED_DATE")
     input             String   @map("PROBLEM_INPUT") @db.VarChar(600)
     output            String   @map("PROBLEM_OUTPUT") @db.VarChar(600)
+    hint              String   @default("") @map("PROBLEM_HINT") @db.VarChar(600)
     limit             String   @map("PROBLEM_LIMIT")
     answerCount       Int      @map("PROBLEM_ANSWER_COUNT")
     answerPeopleCount Int      @map("PROBLEM_ANSWER_PEOPLE_COUNT")

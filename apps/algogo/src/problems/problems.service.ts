@@ -29,11 +29,48 @@ export class ProblemsService {
 
   async getProblemSummaryList() {
     try {
-    } catch (e) {}
+      const problemSummaryList = await this.prismaService.problem.findMany({
+        select: {
+          no: false,
+          uuid: true,
+          title: true,
+          level: true,
+          levelText: true,
+          answerCount: true,
+          submitCount: true,
+          answerPeopleCount: true,
+          source: true,
+          sourceId: true,
+          sourceUrl: true,
+          typeList: {
+            select: {
+              name: true,
+            },
+          },
+        },
+        where: {},
+        skip: 0,
+        take: 10,
+      });
+
+      return problemSummaryList.map((summary) => {
+        return {
+          ...summary,
+          key: summary.source,
+        };
+      });
+    } catch (e) {
+      this.logger.error(`${ProblemsService.name} getProblemSummaryList`, {
+        message: e.message,
+      });
+
+      throw e;
+    }
   }
+
   async getProblem(uuid: string) {
     try {
-      const problem = await this.prismaService.problem.findFirst({
+      const problem = await this.prismaService.problem.findUnique({
         select: {
           no: false,
           uuid: true,
@@ -42,11 +79,15 @@ export class ProblemsService {
           levelText: true,
           input: true,
           output: true,
+          hint: true,
           answerCount: true,
           answerPeopleCount: true,
           submitCount: true,
           timeout: true,
           memoryLimit: true,
+          source: true,
+          sourceId: true,
+          sourceUrl: true,
           contentList: {
             select: {
               order: true,
