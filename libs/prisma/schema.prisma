@@ -8,15 +8,15 @@ datasource db {
 }
 
 model User {
-    no             Int      @id @default(autoincrement()) @map("USER_NO")
-    uuid           String   @unique @default(uuid()) @map("USER_UUID")
-    email          String   @unique @map("USER_EMAIL")
-    name           String   @map("USER_NAME")
-    profilePhoto   String   @map("USER_PROFILE_PHOTO")
-    registeredDate DateTime @default(now()) @map("USER_REGISTERED_DATE")
-    lastLoginDate  DateTime @map("USER_LAST_LOGIN_DATE")
-    state          Int      @default(1) @map("USER_STATE")
-    emailVerified  Boolean  @default(false) @map("USER_EMAIL_VERIFIED")
+    no             Int       @id @default(autoincrement()) @map("USER_NO")
+    uuid           String    @unique @default(uuid()) @map("USER_UUID")
+    email          String    @unique @map("USER_EMAIL")
+    name           String    @map("USER_NAME")
+    profilePhoto   String    @map("USER_PROFILE_PHOTO")
+    registeredDate DateTime  @default(now()) @map("USER_REGISTERED_DATE")
+    lastLoginDate  DateTime  @map("USER_LAST_LOGIN_DATE")
+    state          UserState @default(ACTIVE) @map("USER_STATE")
+    emailVerified  Boolean   @default(false) @map("USER_EMAIL_VERIFIED")
 
     socialList       UserSocial[]       @relation("UserToUserSocial")
     oauthList        UserOAuth[]        @relation("UserToUserOauth")
@@ -50,26 +50,37 @@ model UserSocial {
 }
 
 model Problem {
-    no             Int      @id @default(autoincrement()) @map("PROBLEM_NO")
-    uuid           String   @unique @default(uuid()) @map("PROBLEM_UUID")
-    source         String   @map("PROBLEM_SOURCE")
-    sourceId       String   @map("PROBLEM_SOURCE_ID")
-    sourceUrl      String   @map("PROBLEM_SOURCE_URL")
-    title          String   @map("PROBLEM_TITLE")
-    level          Int      @map("PROBLEM_LEVEL")
-    registeredDate DateTime @default(now()) @map("PROBLEM_REGISTERED_DATE")
-    updatedDate    DateTime @map("PROBLEM_UPDATED_DATE")
+    no                Int      @id @default(autoincrement()) @map("PROBLEM_NO")
+    uuid              String   @unique @default(uuid()) @map("PROBLEM_UUID")
+    source            String   @map("PROBLEM_SOURCE")
+    sourceId          String   @map("PROBLEM_SOURCE_ID")
+    sourceUrl         String   @map("PROBLEM_SOURCE_URL")
+    title             String   @map("PROBLEM_TITLE")
+    level             Int      @map("PROBLEM_LEVEL")
+    levelText         String   @map("PROBLEM_LEVEL_TEXT")
+    registeredDate    DateTime @default(now()) @map("PROBLEM_REGISTERED_DATE")
+    updatedDate       DateTime @map("PROBLEM_UPDATED_DATE")
+    input             String   @map("PROBLEM_INPUT") @db.VarChar(600)
+    output            String   @map("PROBLEM_OUTPUT") @db.VarChar(600)
+    hint              String   @default("") @map("PROBLEM_HINT") @db.VarChar(600)
+    limit             String   @map("PROBLEM_LIMIT")
+    answerCount       Int      @map("PROBLEM_ANSWER_COUNT")
+    answerPeopleCount Int      @map("PROBLEM_ANSWER_PEOPLE_COUNT")
+    submitCount       Int      @map("PROBLEM_SUBMIT_COUNT")
+    timeout           Int      @map("PROBLEM_TIMEOUT")
+    memoryLimit       Int      @map("PROBLEM_MEMORY_LIMIT")
 
     typeList        ProblemType[]        @relation("ProblemToProblemType")
     contentList     ProblemContent[]     @relation("ProblemToProblemContent")
     inputOutputList ProblemInputOutput[] @relation("ProblemToProblemInputOutput")
     userList        UserProblemState[]   @relation("ProblemToUserProblemState")
 
+    @@unique([source, sourceId])
     @@map("PROBLEM")
 }
 
 model ProblemContent {
-    content   String  @map("PROBLEM_CONTENT")
+    content   String  @map("PROBLEM_CONTENT") @db.VarChar(1000)
     type      String  @map("PROBLEM_CONTENT_TYPE")
     order     Int     @map("PROBLEM_CONTENT_ORDER")
     problemNo Int     @map("PROBLEM_NO")
@@ -91,13 +102,13 @@ model ProblemType {
 }
 
 model ProblemInputOutput {
-    no        Int     @id @default(autoincrement()) @map("PROBLEM_INPUT_OUTPUT_NO")
-    input     String  @map("PROBLEM_INPUT")
-    output    String  @map("PROBLEM_OUTPUT")
+    order     Int     @map("PROBLEM_INPUT_OUTPUT_ORDER")
+    input     String  @map("PROBLEM_INPUT") @db.VarChar(600)
+    output    String  @map("PROBLEM_OUTPUT") @db.VarChar(600)
     Problem   Problem @relation("ProblemToProblemInputOutput", fields: [problemNo], references: [no], onUpdate: Cascade, onDelete: Cascade)
     problemNo Int     @map("PROBLEM_NO")
 
-    @@unique([no, problemNo])
+    @@unique([problemNo])
     @@index([problemNo])
     @@map("PROBLEM_INPUT_OUTPUT")
 }
@@ -111,4 +122,10 @@ model UserProblemState {
 
     @@unique([userNo, problemNo])
     @@map("USER_PROBLEM_STATE")
+}
+
+enum UserState {
+    DORMANT // 휴면
+    ACTIVE // 활동
+    SUSPENDED // 정지
 }

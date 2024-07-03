@@ -31,6 +31,7 @@
     "test:crawler:e2e": "jest --config ./apps/crawler/test/jest-e2e.json"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.606.0",
     "@nestjs/axios": "^3.0.2",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.2.2",
@@ -39,10 +40,14 @@
     "@nestjs/platform-express": "^10.0.0",
     "@prisma/client": "^5.14.0",
     "joi": "^17.13.2",
+    "nest-winston": "^1.10.0",
     "node-html-parser": "^6.1.13",
     "prisma": "^5.14.0",
     "reflect-metadata": "^0.2.0",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "sharp": "^0.33.4",
+    "winston": "^3.13.0",
+    "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
@@ -52,7 +57,9 @@
     "@types/express": "^4.17.17",
     "@types/jest": "^29.5.2",
     "@types/node": "^20.3.1",
+    "@types/sharp": "^0.32.0",
     "@types/supertest": "^6.0.0",
+    "@types/winston": "^2.4.4",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "axios": "link:@types/@nestjs/axios",

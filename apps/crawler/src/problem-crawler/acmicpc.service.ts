@@ -96,8 +96,6 @@ export class AcmicpcService implements ProblemCralwer {
                 throw new NotFoundException('can not find problem');
               }
 
-              console.error(error);
-
               throw new InternalServerErrorException(error.message);
             }),
           ),
@@ -150,8 +148,6 @@ export class AcmicpcService implements ProblemCralwer {
               throw new NotFoundException('can not find problem');
             }
 
-            console.error(error);
-
             throw new InternalServerErrorException(error.message);
           }),
         ),
@@ -179,10 +175,15 @@ export class AcmicpcService implements ProblemCralwer {
         ),
     );
     const tierData = tierResponse.data;
-    const { level, typeList } = this.parseProblemInfo(tierData, key);
-    responseProblemDto.level = level;
-    responseProblemDto.typeList = typeList;
-    return responseProblemDto;
+    const levelData = this.parseProblemInfo(tierData, key);
+
+    return {
+      ...responseProblemDto,
+      ...levelData,
+      sourceUrl: requestUrl,
+      sourceId: key,
+      source: 'BOJ',
+    };
   }
 
   parseProblem(data: string): ResponseProblemDto {
@@ -194,17 +195,23 @@ export class AcmicpcService implements ProblemCralwer {
       .querySelector('#problem_description')
       .querySelectorAll('p')
       .map((elem) => elem.innerHTML)
-      .map((elem) => {
+      .map((elem, index) => {
         if (elem.indexOf('<img') > -1) {
+          const content = elem.split('src="')[1].split('"')[0];
           return {
+            order: index,
             type: 'image',
-            value: elem.split('src="')[1].split('"')[0],
+            content:
+              content.indexOf('https') === -1
+                ? `https://www.acmicpc.net${elem.split('src="')[1].split('"')[0]}`
+                : content,
           };
         }
 
         return {
+          order: index,
           type: 'text',
-          value: elem,
+          content: elem,
         };
       });
 
@@ -232,7 +239,8 @@ export class AcmicpcService implements ProblemCralwer {
       .map((elem) => elem.innerHTML);
     // console.log(problemInfoList);
 
-    const timeout = +problemInfoList[0].split(' ')[0].replace(/[^0-9]/g, '');
+    const timeout =
+      +problemInfoList[0].split(' ')[0].replace(/[^0-9]/g, '') * 1000;
     const memoryLimit = +problemInfoList[1].replace(/[^0-9]/g, '');
     const submitCount = +problemInfoList[2];
     const answerCount = +problemInfoList[3];
@@ -249,7 +257,7 @@ export class AcmicpcService implements ProblemCralwer {
     // console.log(`제한 : ${limit}`);
 
     const inputOutputList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-      .map((elem) => {
+      .map((elem, order) => {
         const input =
           document
             .querySelector(`#sample-input-${elem}`)
@@ -266,21 +274,20 @@ export class AcmicpcService implements ProblemCralwer {
             .map((elem) => elem.trim())
             .join('\n') ?? '';
 
-        return { input, output };
+        return { order, input, output };
       })
       .filter((elem) => elem.input && elem.output);
 
     // console.log(inputOutputNodeList);
     // console.log(contentList);
 
-    const responseProblemDto = new ResponseProblemDto();
-    responseProblemDto.title = title;
-
     return {
       key: '',
       title,
       contentList,
-      level: '',
+      level: 0,
+      levelText: '',
+      hint: '',
       typeList: [],
       answerRate,
       submitCount,
@@ -302,7 +309,8 @@ export class AcmicpcService implements ProblemCralwer {
     if (!propsText) {
       return {
         typeList: [],
-        level: '',
+        level: 0,
+        levelText: '',
       };
     }
 
@@ -313,17 +321,20 @@ export class AcmicpcService implements ProblemCralwer {
     if (!problem) {
       return {
         typeList: [],
-        level: '',
+        level: 0,
+        levelText: '',
       };
     }
 
-    const level = this.tierToTextMap[problem.level + ''] ?? '알 수 없음';
+    const { level } = problem;
+    const levelText = this.tierToTextMap[level + ''] ?? '알 수 없음';
     const typeList = problem.tags.map(
       (tag) => tag.displayNames.find((name) => name.language === 'ko').name,
     );
 
     return {
-      level: level,
+      level,
+      levelText,
       typeList: typeList ?? [],
     };
   }

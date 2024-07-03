@@ -33,14 +33,6 @@
       "@apps/lib/mobules/exception-filter/*": [
         "libs/exception-filter/src/*"
       ],
-      "@app/filter": [
-        "libs/filter/src",
-        "libs/filter/src"
-      ],
-      "@app/filter/*": [
-        "libs/filter/src/*",
-        "libs/filter/src/*"
-      ],
       "@app/module": [
         "libs/module/src"
       ],
