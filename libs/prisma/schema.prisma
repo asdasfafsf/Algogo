@@ -108,7 +108,7 @@ model ProblemInputOutput {
     Problem   Problem @relation("ProblemToProblemInputOutput", fields: [problemNo], references: [no], onUpdate: Cascade, onDelete: Cascade)
     problemNo Int     @map("PROBLEM_NO")
 
-    @@unique([problemNo])
+    @@unique([problemNo, order])
     @@index([problemNo])
     @@map("PROBLEM_INPUT_OUTPUT")
 }
