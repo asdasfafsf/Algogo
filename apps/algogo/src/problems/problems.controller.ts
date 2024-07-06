@@ -1,6 +1,7 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ProblemsService } from './problems.service';
 import { ProblemsCollectService } from './problems-collect.service';
+import { RequestProblemSummaryDto } from '@libs/core/dto/RequestProblemSummaryDto';
 
 @Controller('problems')
 export class ProblemsController {
@@ -11,12 +12,11 @@ export class ProblemsController {
 
   @Get('/')
   async getProblemSummary(
-    @Query('typeList') typeList: string[],
-    @Query('levelList') levelList: number[],
-    @Query('pageNo') pageNo: number,
-    @Query('pageSize') pageSize: number,
+    @Query() requestProblemSummaryDto: RequestProblemSummaryDto,
   ) {
-    return await this.problemsService.getProblemSummaryList();
+    return await this.problemsService.getProblemSummaryList(
+      requestProblemSummaryDto,
+    );
   }
 
   @Get('/:problemUuid')

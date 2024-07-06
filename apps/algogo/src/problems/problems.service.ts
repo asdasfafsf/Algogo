@@ -1,33 +1,28 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { CrawlerService } from '../crawler/crawler.service';
-import { ImageService } from '../image/image.service';
-import { S3Service } from '../s3/s3.service';
-import S3Config from '../config/s3Config';
-import { ConfigType } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { Logger } from 'winston';
+import { RequestProblemSummaryDto } from '@libs/core/dto/RequestProblemSummaryDto';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 @Injectable()
 export class ProblemsService {
   constructor(
-    @Inject('winston')
+    @Inject(WINSTON_MODULE_NEST_PROVIDER)
     private readonly logger: Logger,
-    private readonly imageService: ImageService,
-    private readonly crawlerService: CrawlerService,
-    private readonly s3Service: S3Service,
-    @Inject(S3Config.KEY)
-    private readonly s3Config: ConfigType<typeof S3Config>,
     private readonly prismaService: PrismaService,
   ) {}
 
-  async getProblemSummaryList() {
+  async getProblemSummaryList(
+    requestProblemSummaryDto: RequestProblemSummaryDto,
+  ) {
+    const { pageNo, pageSize, typeList, levelList } = requestProblemSummaryDto;
+
     try {
       const problemSummaryList = await this.prismaService.problem.findMany({
         select: {
           no: false,
           uuid: true,
           title: true,
-          level: true,
           levelText: true,
           answerCount: true,
           submitCount: true,
@@ -35,15 +30,19 @@ export class ProblemsService {
           source: true,
           sourceId: true,
           sourceUrl: true,
-          typeList: {
-            select: {
-              name: true,
-            },
-          },
+          level: true,
+          typeList: true,
         },
-        where: {},
-        skip: 0,
-        take: 10,
+        where: {
+          ...(typeList && typeList.length > 0
+            ? { typeList: { some: { name: { in: typeList } } } }
+            : {}),
+          ...(levelList && levelList.length > 0
+            ? { level: { in: levelList } }
+            : {}),
+        },
+        skip: (pageNo - 1) * pageSize,
+        take: pageSize,
       });
 
       return problemSummaryList.map((summary) => {
