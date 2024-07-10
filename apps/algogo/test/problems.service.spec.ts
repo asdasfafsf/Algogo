@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigModule } from '@nestjs/config';
 import { join } from 'path';
 import { ProblemsService } from '../src/problems/problems.service';
-import { RequestProblemSummaryDto } from '../../../libs/core/dto/RequestProblemSummaryDto';
 import {
   WinstonModule,
   utilities as nestWinstonModuleUtilities,

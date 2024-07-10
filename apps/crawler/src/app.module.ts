@@ -6,7 +6,7 @@ import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 import { utilities as nestWinstonModuleUtilities } from 'nest-winston';
 import { APP_FILTER } from '@nestjs/core';
-import { AllExceptionsFilter } from '@libs/filter/src';
+import { AllExceptionsFilter } from 'libs/filter/src';
 
 @Module({
   imports: [

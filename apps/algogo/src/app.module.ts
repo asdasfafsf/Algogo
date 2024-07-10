@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, ValidationPipe } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
@@ -17,8 +17,9 @@ import s3Config from './config/s3Config';
 
 import { PrismaModule } from './prisma/prisma.module';
 import * as winston from 'winston';
-import { APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { AllExceptionsFilter } from '@libs/filter/src';
+import { ResponseInterceptor } from '@libs/interceptor/src';
 
 @Module({
   imports: [
@@ -53,6 +54,10 @@ import { AllExceptionsFilter } from '@libs/filter/src';
     {
       provide: APP_FILTER,
       useClass: AllExceptionsFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseInterceptor,
     },
     AppService,
   ],

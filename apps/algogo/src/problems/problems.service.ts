@@ -1,7 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Logger } from 'winston';
-import { RequestProblemSummaryDto } from '@libs/core/dto/RequestProblemSummaryDto';
+import { RequestProblemSummaryListDto } from '@libs/core/dto/RequestProblemSummaryListDto';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 @Injectable()
@@ -13,7 +13,7 @@ export class ProblemsService {
   ) {}
 
   async getProblemSummaryList(
-    requestProblemSummaryDto: RequestProblemSummaryDto,
+    requestProblemSummaryDto: RequestProblemSummaryListDto,
   ) {
     const { pageNo, pageSize, typeList, levelList } = requestProblemSummaryDto;
 

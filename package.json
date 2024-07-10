@@ -100,6 +100,7 @@
       "<rootDir>/libs/"
     ],
     "moduleNameMapper": {
+      "^@libs/(.*)$": "<rootDir>/libs/$1",
       "^@app/exception-filter(|/.*)$": "<rootDir>/libs/exception-filter/src/$1",
       "^@apps/lib/mobules/exception-filter(|/.*)$": "<rootDir>/libs/exception-filter/src/$1",
       "^@app/filter(|/.*)$": "<rootDir>/libs/filter/src/$1",
