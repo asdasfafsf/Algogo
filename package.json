@@ -45,6 +45,7 @@
     "joi": "^17.13.2",
     "nest-winston": "^1.10.0",
     "node-html-parser": "^6.1.13",
+    "passport-oauth2": "^1.8.0",
     "prisma": "^5.14.0",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
