@@ -20,6 +20,9 @@ import * as winston from 'winston';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { AllExceptionsFilter } from '@libs/filter/src';
 import { ResponseInterceptor } from '@libs/interceptor/src';
+import { UsersModule } from './users/users.module';
+import { AuthController } from './auth/auth.controller';
+import { OauthModule } from './oauth/oauth.module';
 
 @Module({
   imports: [
@@ -47,9 +50,11 @@ import { ResponseInterceptor } from '@libs/interceptor/src';
     S3Module,
     ImageModule,
     PrismaModule,
+    UsersModule,
+    OauthModule,
   ],
 
-  controllers: [AppController],
+  controllers: [AppController, AuthController],
   providers: [
     {
       provide: APP_FILTER,
