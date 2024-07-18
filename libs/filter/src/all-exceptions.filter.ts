@@ -52,6 +52,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       this.logger.error(`INTERNAL_SERVER_ERROR`, {
         ip: request.ip,
         url: request.url,
+        exception: exception.toString(),
         errorMessage,
         headers: request.headers,
       });

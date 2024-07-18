@@ -23,6 +23,9 @@ import { ResponseInterceptor } from '@libs/interceptor/src';
 import { UsersModule } from './users/users.module';
 import { AuthController } from './auth/auth.controller';
 import { OauthModule } from './oauth/oauth.module';
+import googleOAuthConfig from './config/googleOAuthConfig';
+import kakaoOAuthConfig from './config/kakaoOAuthConfig';
+import githubOAuthConfig from './config/githubOAuthConfig';
 
 @Module({
   imports: [
@@ -41,7 +44,13 @@ import { OauthModule } from './oauth/oauth.module';
     }),
     ConfigModule.forRoot({
       envFilePath: [`${__dirname}/config/env/.${process.env.NODE_ENV}.env`],
-      load: [crawlerConfig, s3Config],
+      load: [
+        crawlerConfig,
+        s3Config,
+        googleOAuthConfig,
+        kakaoOAuthConfig,
+        githubOAuthConfig,
+      ],
       isGlobal: true,
       validationSchema,
     }),
