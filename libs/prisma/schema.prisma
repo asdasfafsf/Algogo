@@ -28,13 +28,13 @@ model User {
 model UserOAuth {
     userNo   Int    @map("USER_NO")
     provider String @map("USER_OAUTH_PROVIDER")
-    token    String @map("USER_OAUTH_TOKEN")
+    id       String @map("USER_OAUTH_ID")
 
     User User @relation("UserToUserOauth", fields: [userNo], references: [no])
 
-    @@unique([provider, userNo])
+    @@unique([id, provider])
     @@index([userNo])
-    @@index([provider, token])
+    @@index([id, provider])
     @@map("USER_OAUTH")
 }
 

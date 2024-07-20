@@ -4,6 +4,7 @@ import { RequestOAuthCallbackDto } from '@libs/core/dto/RequestOAuthCallbackDto'
 import { Logger } from 'winston';
 import { Inject } from '@nestjs/common';
 import { DynamicOAuthGuard } from './dynamic-oauth.guard';
+import { RequestOAuthDto } from '@libs/core/dto/RequestOAuthDto';
 
 @Controller('oauth')
 export class OauthController {
@@ -32,6 +33,8 @@ export class OauthController {
     @Query() requestOAuthCallbackDto: any,
     @Req() req: any,
   ) {
-    this.logger.silly(`${provider}/callback`, req);
+    this.logger.silly(`${provider}/callback`, req.user);
+    const requestOAuthDto = req.user as RequestOAuthDto;
+    const userInfo = await this.oauthService.registerOrLogin(requestOAuthDto);
   }
 }
