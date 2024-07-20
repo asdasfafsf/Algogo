@@ -30,6 +30,7 @@ export class GithubOAuthStrategy extends PassportStrategy(Strategy, 'github') {
       refreshToken,
       profile,
     });
+
     return {
       accessToken,
       refreshToken,
