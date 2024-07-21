@@ -26,4 +26,6 @@ export class RequestOAuthDto {
   @IsString()
   @IsNotEmpty()
   accessToken: string;
+
+  ip?: string;
 }

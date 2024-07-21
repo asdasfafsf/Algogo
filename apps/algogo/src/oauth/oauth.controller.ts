@@ -1,10 +1,19 @@
-import { Controller, Get, Param, Query, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Query,
+  UseGuards,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { OauthService } from './oauth.service';
 import { RequestOAuthCallbackDto } from '@libs/core/dto/RequestOAuthCallbackDto';
 import { Logger } from 'winston';
 import { Inject } from '@nestjs/common';
 import { DynamicOAuthGuard } from './dynamic-oauth.guard';
 import { RequestOAuthDto } from '@libs/core/dto/RequestOAuthDto';
+import { Request, Response } from 'express';
 
 @Controller('oauth')
 export class OauthController {
@@ -18,7 +27,7 @@ export class OauthController {
   @UseGuards(DynamicOAuthGuard)
   async oauth(
     @Param('provider') provider: string,
-    @Query() requestOAuthCallbackDto: any,
+    @Query() requestOAuthCallbackDto: RequestOAuthCallbackDto,
   ) {
     this.logger.silly('OAuth callback reached', {
       provider,
@@ -30,11 +39,16 @@ export class OauthController {
   @UseGuards(DynamicOAuthGuard)
   async callback(
     @Param('provider') provider: string,
-    @Query() requestOAuthCallbackDto: any,
-    @Req() req: any,
+    @Query() requestOAuthCallbackDto: RequestOAuthCallbackDto,
+    @Req() req: Request,
+    @Res() res: Response,
   ) {
     this.logger.silly(`${provider}/callback`, req.user);
-    const requestOAuthDto = req.user as RequestOAuthDto;
-    const userInfo = await this.oauthService.registerOrLogin(requestOAuthDto);
+    const ip = req.clientIp ?? 'error';
+    this.logger.silly(`${provider}/callback ip`, {
+      ip
+    });
+    const requestOAuthDto = {... req.user as RequestOAuthDto, ip};
+    const user = await this.oauthService.registerOrLogin(requestOAuthDto);
   }
 }

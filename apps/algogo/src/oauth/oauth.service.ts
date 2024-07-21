@@ -11,7 +11,7 @@ export class OauthService {
     private readonly logger: Logger,
   ) {}
   async registerOrLogin(requestOAuthDto: RequestOAuthDto) {
-    const { id, email, provider, accessToken, name } = requestOAuthDto;
+    const { id, email, provider, name } = requestOAuthDto;
 
     try {
       const userOAuth = await this.prismaService.userOAuth.findUnique({
@@ -27,22 +27,56 @@ export class OauthService {
       });
 
       if (userOAuth) {
-        return {};
+        const { userNo } = userOAuth;
+        const user = await this.prismaService.user.findUnique({
+          select: {
+            no: true,
+          },
+          where: {
+            no: userNo,
+          },
+        });
+
+        this.logger.silly('OauthService Login', user);
+        return user;
       }
 
-      //   this.prismaService.$transaction(async (prisma) => {
+      const user = await this.prismaService.$transaction(async (prisma) => {
+        const user = await prisma.user.create({
+          select: {
+            no: true,
+          },
+          data: {
+            name,
+            email,
+            emailVerified: false,
+            profilePhoto: '',
+            lastLoginDate: new Date(),
+          },
+        });
 
-      //     await this.prismaService.user.create({
-      //         data: {
-      //             name,
-      //             email,
-      //         }
-      //     })
-      //     await this.prismaService.userOAuth.create(),
+        const { no } = user;
 
-      //   });
+        await prisma.userOAuth.create({
+          data: {
+            id,
+            userNo: no,
+            provider,
+          },
+        });
 
-      this.logger.silly('OauthService registerOrLogin #1', userOAuth);
-    } catch (e) {}
+        return user;
+      });
+
+      this.logger.silly('Oauth registeted user', user);
+
+      return user;
+    } catch (e) {
+      this.logger.error('OauthService registerOrLogin', {
+        error: e,
+      });
+
+      throw e;
+    }
   }
 }

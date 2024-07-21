@@ -17,12 +17,12 @@ import s3Config from './config/s3Config';
 
 import { PrismaModule } from './prisma/prisma.module';
 import * as winston from 'winston';
-import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { AllExceptionsFilter } from '@libs/filter/src';
 import { ResponseInterceptor } from '@libs/interceptor/src';
 import { UsersModule } from './users/users.module';
-import { AuthController } from './auth/auth.controller';
 import { OauthModule } from './oauth/oauth.module';
+import { AuthModule } from './auth/auth.module';
 import googleOAuthConfig from './config/googleOAuthConfig';
 import kakaoOAuthConfig from './config/kakaoOAuthConfig';
 import githubOAuthConfig from './config/githubOAuthConfig';
@@ -61,9 +61,10 @@ import githubOAuthConfig from './config/githubOAuthConfig';
     PrismaModule,
     UsersModule,
     OauthModule,
+    AuthModule,
   ],
 
-  controllers: [AppController, AuthController],
+  controllers: [AppController],
   providers: [
     {
       provide: APP_FILTER,
