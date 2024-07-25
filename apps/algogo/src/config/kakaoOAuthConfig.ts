@@ -1,6 +1,6 @@
 import { registerAs } from '@nestjs/config';
 
-export default registerAs('kakaoOAuth', () => ({
+export default registerAs('kakaoOAuthConfig', () => ({
   clientID: process.env.KAKAO_OAUTH_CLIENT_ID,
   clientSecret: process.env.KAKAO_OAUTH_CLIENT_SECRET,
   callbackURL: process.env.KAKAO_OAUTH_CALLBACK_URL,

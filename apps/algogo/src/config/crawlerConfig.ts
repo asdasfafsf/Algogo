@@ -1,5 +1,5 @@
 import { registerAs } from '@nestjs/config';
 
-export default registerAs('crawler', () => ({
+export default registerAs('crawlerConfig', () => ({
   url: process.env.CRAWLER_URL,
 }));
