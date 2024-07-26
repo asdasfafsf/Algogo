@@ -7,15 +7,16 @@ import { KakaoOAuthStrategy } from './kakao-oauth.strategy';
 import { GithubOAuthStrategy } from './github-oauth.strategy';
 import { HttpModule } from '@nestjs/axios';
 import { PrismaModule } from '../prisma/prisma.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [PassportModule.register({}), HttpModule, PrismaModule],
+  imports: [PassportModule.register({}), HttpModule, PrismaModule, AuthModule],
   controllers: [OauthController],
   providers: [
     OauthService,
     GoogleOauthStrategy,
-    KakaoOAuthStrategy,
     GithubOAuthStrategy,
+    KakaoOAuthStrategy,
   ],
 })
 export class OauthModule {}

@@ -23,9 +23,11 @@ import { ResponseInterceptor } from '@libs/interceptor/src';
 import { UsersModule } from './users/users.module';
 import { OauthModule } from './oauth/oauth.module';
 import { AuthModule } from './auth/auth.module';
+import { RedisModule } from './redis/redis.module';
 import googleOAuthConfig from './config/googleOAuthConfig';
 import kakaoOAuthConfig from './config/kakaoOAuthConfig';
 import githubOAuthConfig from './config/githubOAuthConfig';
+import redisConfig from './config/redisConfig';
 
 @Module({
   imports: [
@@ -50,6 +52,7 @@ import githubOAuthConfig from './config/githubOAuthConfig';
         googleOAuthConfig,
         kakaoOAuthConfig,
         githubOAuthConfig,
+        redisConfig,
       ],
       isGlobal: true,
       validationSchema,
@@ -62,6 +65,11 @@ import githubOAuthConfig from './config/githubOAuthConfig';
     UsersModule,
     OauthModule,
     AuthModule,
+    RedisModule.forRootAsync({
+      host: process.env.REDIS_HOST,
+      port: Number(process.env.REDIS_PORT),
+      password: process.env.REDIS_PASSWORD,
+    }),
   ],
 
   controllers: [AppController],

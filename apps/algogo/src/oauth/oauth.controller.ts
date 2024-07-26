@@ -43,12 +43,21 @@ export class OauthController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    this.logger.silly(`${provider}/callback`, req.user);
     const ip = req.clientIp ?? 'error';
     this.logger.silly(`${provider}/callback ip`, {
-      ip
+      ip,
     });
-    const requestOAuthDto = {... req.user as RequestOAuthDto, ip};
-    const user = await this.oauthService.registerOrLogin(requestOAuthDto);
+    const requestOAuthDto = { ...(req.user as RequestOAuthDto), ip };
+    const uuid = await this.oauthService.login(requestOAuthDto);
+    res.cookie('token', uuid, {
+      httpOnly: process.env.NODE_ENV === 'development' ? undefined : true,
+      secure: process.env.NODE_ENV === 'development' ? false : true,
+      sameSite: process.env.NODE_ENV === 'development' ? 'lax' : undefined,
+    });
+    res.redirect(
+      process.env.NODE_ENV === 'development'
+        ? 'http://localhost:5173/oauth/token/'
+        : '/oauth/token',
+    );
   }
 }

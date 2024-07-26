@@ -1,7 +1,12 @@
 import { RequestOAuthDto } from '@libs/core/dto/RequestOAuthDto';
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Logger } from 'winston';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class OauthService {
@@ -9,9 +14,10 @@ export class OauthService {
     private readonly prismaService: PrismaService,
     @Inject('winston')
     private readonly logger: Logger,
+    private readonly authService: AuthService,
   ) {}
-  async registerOrLogin(requestOAuthDto: RequestOAuthDto) {
-    const { id, email, provider, name } = requestOAuthDto;
+  async login(requestOAuthDto: RequestOAuthDto) {
+    const { id, provider } = requestOAuthDto;
 
     try {
       const userOAuth = await this.prismaService.userOAuth.findUnique({
@@ -26,21 +32,33 @@ export class OauthService {
         },
       });
 
+      let userNo = -1;
       if (userOAuth) {
-        const { userNo } = userOAuth;
-        const user = await this.prismaService.user.findUnique({
-          select: {
-            no: true,
-          },
-          where: {
-            no: userNo,
-          },
-        });
-
-        this.logger.silly('OauthService Login', user);
-        return user;
+        const user = await this.register(requestOAuthDto);
+        userNo = user.no;
       }
 
+      if (!userNo) {
+        throw new InternalServerErrorException('oauth error');
+      }
+
+      const uuid = await this.authService.generateLoginToken(userNo);
+
+      this.logger.silly('OauthService Login', {});
+
+      return uuid;
+    } catch (e) {
+      this.logger.error('OauthService registerOrLogin', {
+        error: e,
+      });
+
+      throw e;
+    }
+  }
+
+  async register(requestOAuthDto: RequestOAuthDto) {
+    const { id, email, provider, name } = requestOAuthDto;
+    try {
       const user = await this.prismaService.$transaction(async (prisma) => {
         const user = await prisma.user.create({
           select: {
@@ -68,15 +86,11 @@ export class OauthService {
         return user;
       });
 
-      this.logger.silly('Oauth registeted user', user);
-
       return user;
     } catch (e) {
-      this.logger.error('OauthService registerOrLogin', {
+      this.logger.error('oauth register', {
         error: e,
       });
-
-      throw e;
     }
   }
 }

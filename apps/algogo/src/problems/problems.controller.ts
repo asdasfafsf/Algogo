@@ -3,7 +3,7 @@ import { ProblemsService } from './problems.service';
 import { ProblemsCollectService } from './problems-collect.service';
 import { RequestProblemSummaryListDto } from '@libs/core/dto/RequestProblemSummaryListDto';
 
-@Controller('problems')
+@Controller('api/v1/problems')
 export class ProblemsController {
   constructor(
     private readonly problemsCollectService: ProblemsCollectService,
