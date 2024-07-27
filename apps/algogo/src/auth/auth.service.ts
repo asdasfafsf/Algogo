@@ -1,4 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { RedisService } from '../redis/redis.service';
 import { JwtService } from '../jwt/jwt.service';
 import EncryptConfig from '../config/encryptConfig';
@@ -20,6 +24,15 @@ export class AuthService {
     const accessToken = await this.redisService.get(`login_${uuid}_access`);
     const refreshToken = await this.redisService.get(`login_${uuid}_refresh`);
 
+    if (!accessToken || !refreshToken) {
+      await this.redisService.del(`login_${uuid}_access`);
+      await this.redisService.del(`login_${uuid}_refresh`);
+
+      throw new InternalServerErrorException(
+        '토큰 발급 중 오류가 발생하였습니다.',
+      );
+    }
+
     await this.redisService.del(`login_${uuid}_access`);
     await this.redisService.del(`login_${uuid}_refresh`);
 
@@ -31,8 +44,8 @@ export class AuthService {
 
   async generateLoginToken(userNo: number) {
     let uuid = await this.generateRandom(userNo.toString());
-    const accessToken = await this.jwtService.sign({ userNo });
-    const refreshToken = await this.jwtService.sign({ userNo });
+    const accessToken = await this.jwtService.sign({ userNo, uuid });
+    const refreshToken = await this.jwtService.sign({ uuid, userNo });
 
     const encryptedAccessToken = this.cryptoService.encryptAES(
       this.encryptConfig.key,
@@ -43,7 +56,7 @@ export class AuthService {
     const encryptedRefreshToken = this.cryptoService.encryptAES(
       this.encryptConfig.key,
       this.encryptConfig.iv,
-      `${this.encryptConfig.tag}_${refreshToken}`,
+      `${refreshToken}_${this.encryptConfig.tag}`,
     );
 
     while (true) {
