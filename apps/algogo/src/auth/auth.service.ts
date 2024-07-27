@@ -9,6 +9,8 @@ import EncryptConfig from '../config/encryptConfig';
 import { ConfigType } from '@nestjs/config';
 import { CryptoService } from '../crypto/crypto.service';
 import * as crypto from 'crypto';
+import { Logger } from 'winston';
+import ResponseTokenDto from '@libs/core/dto/ResponseTokenDto';
 
 @Injectable()
 export class AuthService {
@@ -18,9 +20,11 @@ export class AuthService {
     private readonly cryptoService: CryptoService,
     @Inject(EncryptConfig.KEY)
     private readonly encryptConfig: ConfigType<typeof EncryptConfig>,
+    @Inject('winston')
+    private readonly logger: Logger,
   ) {}
 
-  async getLoginToken(uuid: string) {
+  async getLoginToken(uuid: string): Promise<ResponseTokenDto> {
     const accessToken = await this.redisService.get(`login_${uuid}_access`);
     const refreshToken = await this.redisService.get(`login_${uuid}_refresh`);
 
@@ -33,8 +37,11 @@ export class AuthService {
       );
     }
 
+    this.logger.silly('OAuthService getLoginToken #1', {});
     await this.redisService.del(`login_${uuid}_access`);
     await this.redisService.del(`login_${uuid}_refresh`);
+
+    this.logger.silly('OAuthService getLoginToken Complete from redis', {});
 
     return {
       accessToken,

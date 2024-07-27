@@ -6,7 +6,7 @@ import { Request, Response } from 'express';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
   @Get('/token')
-  async token(@Req() req: Request, @Res() res: Response) {
+  async token(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const token = req?.cookies?.token;
 
     if (!token) {
