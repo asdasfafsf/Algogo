@@ -1,4 +1,4 @@
-import { Module, ValidationPipe } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
@@ -24,10 +24,13 @@ import { UsersModule } from './users/users.module';
 import { OauthModule } from './oauth/oauth.module';
 import { AuthModule } from './auth/auth.module';
 import { RedisModule } from './redis/redis.module';
+import { JwtModule } from './jwt/jwt.module';
 import googleOAuthConfig from './config/googleOAuthConfig';
 import kakaoOAuthConfig from './config/kakaoOAuthConfig';
 import githubOAuthConfig from './config/githubOAuthConfig';
 import redisConfig from './config/redisConfig';
+import jwtConfig from './config/jwtConfig';
+import encryptConfig from './config/encryptConfig';
 
 @Module({
   imports: [
@@ -53,6 +56,8 @@ import redisConfig from './config/redisConfig';
         kakaoOAuthConfig,
         githubOAuthConfig,
         redisConfig,
+        jwtConfig,
+        encryptConfig,
       ],
       isGlobal: true,
       validationSchema,
@@ -70,6 +75,7 @@ import redisConfig from './config/redisConfig';
       port: Number(process.env.REDIS_PORT),
       password: process.env.REDIS_PASSWORD,
     }),
+    JwtModule,
   ],
 
   controllers: [AppController],

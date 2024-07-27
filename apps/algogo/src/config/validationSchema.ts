@@ -18,4 +18,12 @@ export const validationSchema = Joi.object({
   KAKAO_OAUTH_CALLBACK_URL: Joi.string().required(),
   KAKAO_OAUTH_AUTHORIZATION_URL: Joi.string().required(),
   KAKAO_OAUTH_TOKEN_URL: Joi.string().required(),
+  ENCRYPT_KEY: Joi.string().required(),
+  ENCRYPT_IV: Joi.string().required(),
+  ENCRYPT_TAG: Joi.string().required(),
+  PREV_ENCRYPT_KEY: Joi.string().required(),
+  PREV_ENCRYPT_IV: Joi.string().required(),
+  PREV_ENCRYPT_TAG: Joi.string().required(),
+  JWT_SECRET: Joi.string().required(),
+  PREV_JWT_SECRET: Joi.string().required(),
 });

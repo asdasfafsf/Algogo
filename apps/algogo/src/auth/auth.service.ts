@@ -15,6 +15,9 @@ export class AuthService {
     const accessToken = await this.redisService.get(`login_${uuid}_access`);
     const refreshToken = await this.redisService.get(`login_${uuid}_refresh`);
 
+    await this.redisService.del(`login_${uuid}_access`);
+    await this.redisService.del(`login_${uuid}_refresh`);
+
     return {
       accessToken,
       refreshToken,
