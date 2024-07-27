@@ -25,6 +25,7 @@ import { OauthModule } from './oauth/oauth.module';
 import { AuthModule } from './auth/auth.module';
 import { RedisModule } from './redis/redis.module';
 import { JwtModule } from './jwt/jwt.module';
+import { CryptoModule } from './crypto/crypto.module';
 import googleOAuthConfig from './config/googleOAuthConfig';
 import kakaoOAuthConfig from './config/kakaoOAuthConfig';
 import githubOAuthConfig from './config/githubOAuthConfig';
@@ -76,6 +77,7 @@ import encryptConfig from './config/encryptConfig';
       password: process.env.REDIS_PASSWORD,
     }),
     JwtModule,
+    CryptoModule,
   ],
 
   controllers: [AppController],

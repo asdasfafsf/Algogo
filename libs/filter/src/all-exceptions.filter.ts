@@ -48,11 +48,14 @@ export class AllExceptionsFilter implements ExceptionFilter {
       }
     }
 
+    const stackTrace = (exception as any)?.stack || 'No stack trace available';
+
     if (statusCode === HttpStatus.INTERNAL_SERVER_ERROR) {
       this.logger.error(`INTERNAL_SERVER_ERROR`, {
         ip: request.ip,
         url: request.url,
         exception: exception.toString(),
+        stackTrace: process.env.NODE_ENV === 'development' ? stackTrace : '',
         errorMessage,
         headers: request.headers,
       });
