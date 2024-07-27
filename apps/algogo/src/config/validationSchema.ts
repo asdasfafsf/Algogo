@@ -26,4 +26,7 @@ export const validationSchema = Joi.object({
   PREV_ENCRYPT_TAG: Joi.string().required(),
   JWT_SECRET: Joi.string().required(),
   PREV_JWT_SECRET: Joi.string().required(),
+  REDIS_HOST: Joi.string().required(),
+  REDIS_PORT: Joi.number().required(),
+  // REDIS_PASSWORD: Joi.string().required(),
 });
