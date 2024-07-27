@@ -50,4 +50,15 @@ export class JwtService {
       }
     }
   }
+
+  async decode(token: string) {
+    try {
+      return this.nestJwtService.decode(token);
+    } catch (e) {
+      throw {
+        ...new UnauthorizedException('유효하지 않은 토큰입니다.'),
+        errorCode: '9999',
+      };
+    }
+  }
 }

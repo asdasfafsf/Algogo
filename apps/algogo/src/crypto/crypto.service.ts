@@ -38,4 +38,14 @@ export class CryptoService {
 
     return decrypted;
   }
+
+  SHA256(data: string, count: number = 1): string {
+    let hash = crypto.createHash('sha256');
+
+    for (let i = 0; i < count; i++) {
+      hash = hash.update(data);
+    }
+
+    return hash.digest('base64');
+  }
 }
