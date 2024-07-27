@@ -14,7 +14,6 @@ import { ConfigType } from '@nestjs/config';
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
-    @Inject('winton')
     private readonly jwtService: JwtService,
     private readonly redisService: RedisService,
     private readonly cryptoService: CryptoService,
