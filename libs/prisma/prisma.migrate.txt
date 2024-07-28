@@ -1,0 +1,1 @@
+npx prisma generate --schema=./libs/prisma/schema.prisma

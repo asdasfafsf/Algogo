@@ -1,0 +1,4 @@
+npx jest s3.service.spec.ts
+npx jest image.service.spec.ts
+npx jest crawler.service.spec.ts
+npx jest problems.service.spec.ts
