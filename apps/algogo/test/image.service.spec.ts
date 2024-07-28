@@ -25,16 +25,11 @@ describe('ImageService', () => {
   it('should fetch and convert image to WebP format', async () => {
     const imageUrl =
       'https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png';
-
-    // Fetch the image using HttpModule
     const response: AxiosResponse<ArrayBuffer> = await lastValueFrom(
       httpService.get(imageUrl, { responseType: 'arraybuffer' }),
     );
 
-    // Convert the response data (image) to Buffer
     const imageBuffer = Buffer.from(response.data);
-
-    // Convert image to WebP format
     const webpBuffer = await service.toWebp(imageBuffer);
 
     // Check if the converted buffer has WebP format header

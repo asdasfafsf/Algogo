@@ -1,6 +1,5 @@
 export class ResponseProblemSummaryDto {
-  key: string;
-  title: string;
-  level: string;
+  pageNo: number;
+  levelList: number[];
   typeList: string[];
 }

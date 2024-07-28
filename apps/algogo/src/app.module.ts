@@ -17,8 +17,21 @@ import s3Config from './config/s3Config';
 
 import { PrismaModule } from './prisma/prisma.module';
 import * as winston from 'winston';
-import { APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { AllExceptionsFilter } from '@libs/filter/src';
+import { ResponseInterceptor } from '@libs/interceptor/src';
+import { UsersModule } from './users/users.module';
+import { OauthModule } from './oauth/oauth.module';
+import { AuthModule } from './auth/auth.module';
+import { RedisModule } from './redis/redis.module';
+import { JwtModule } from './jwt/jwt.module';
+import { CryptoModule } from './crypto/crypto.module';
+import googleOAuthConfig from './config/googleOAuthConfig';
+import kakaoOAuthConfig from './config/kakaoOAuthConfig';
+import githubOAuthConfig from './config/githubOAuthConfig';
+import redisConfig from './config/redisConfig';
+import jwtConfig from './config/jwtConfig';
+import encryptConfig from './config/encryptConfig';
 
 @Module({
   imports: [
@@ -37,7 +50,16 @@ import { AllExceptionsFilter } from '@libs/filter/src';
     }),
     ConfigModule.forRoot({
       envFilePath: [`${__dirname}/config/env/.${process.env.NODE_ENV}.env`],
-      load: [crawlerConfig, s3Config],
+      load: [
+        crawlerConfig,
+        s3Config,
+        googleOAuthConfig,
+        kakaoOAuthConfig,
+        githubOAuthConfig,
+        redisConfig,
+        jwtConfig,
+        encryptConfig,
+      ],
       isGlobal: true,
       validationSchema,
     }),
@@ -46,6 +68,16 @@ import { AllExceptionsFilter } from '@libs/filter/src';
     S3Module,
     ImageModule,
     PrismaModule,
+    UsersModule,
+    OauthModule,
+    AuthModule,
+    RedisModule.forRootAsync({
+      host: process.env.REDIS_HOST,
+      port: Number(process.env.REDIS_PORT),
+      password: process.env.REDIS_PASSWORD,
+    }),
+    JwtModule,
+    CryptoModule,
   ],
 
   controllers: [AppController],
@@ -53,6 +85,10 @@ import { AllExceptionsFilter } from '@libs/filter/src';
     {
       provide: APP_FILTER,
       useClass: AllExceptionsFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseInterceptor,
     },
     AppService,
   ],
