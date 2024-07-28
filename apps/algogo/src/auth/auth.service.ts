@@ -11,6 +11,7 @@ import { CryptoService } from '../crypto/crypto.service';
 import * as crypto from 'crypto';
 import { Logger } from 'winston';
 import ResponseTokenDto from '@libs/core/dto/ResponseTokenDto';
+import JwtConfig from '../config/jwtConfig';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +21,8 @@ export class AuthService {
     private readonly cryptoService: CryptoService,
     @Inject(EncryptConfig.KEY)
     private readonly encryptConfig: ConfigType<typeof EncryptConfig>,
+    @Inject(JwtConfig.KEY)
+    private readonly jwtConfig: ConfigType<typeof JwtConfig>,
     @Inject('winston')
     private readonly logger: Logger,
   ) {}
@@ -51,8 +54,14 @@ export class AuthService {
 
   async generateLoginToken(userNo: number) {
     let uuid = await this.generateRandom(userNo.toString());
-    const accessToken = await this.jwtService.sign({ userNo, uuid });
-    const refreshToken = await this.jwtService.sign({ uuid, userNo });
+    const accessToken = await this.jwtService.sign(
+      { userNo, uuid },
+      this.jwtConfig.jwtAccessTokenExpiresIn,
+    );
+    const refreshToken = await this.jwtService.sign(
+      { uuid, userNo },
+      this.jwtConfig.jwtRefreshTokenExpiresIn,
+    );
 
     const encryptedAccessToken = this.cryptoService.encryptAES(
       this.encryptConfig.key,

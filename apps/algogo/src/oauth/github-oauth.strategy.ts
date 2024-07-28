@@ -35,16 +35,19 @@ export class GithubOAuthStrategy extends PassportStrategy(Strategy, 'github') {
     });
 
     const userInfo = await this.getUserInfo(accessToken);
+    const { id, name, email } = userInfo;
 
     return {
+      provider: 'github',
+      name,
+      id: id.toString(),
+      email,
       accessToken,
-      refreshToken,
-      profile: userInfo,
     };
   }
 
   async getUserInfo(accessToken: string): Promise<any> {
-    this.logger.silly('Getting user info with access token', { accessToken });
+    this.logger.silly('Getting user info with access token', {});
 
     const url = 'https://api.github.com/user';
     const headers = {
@@ -56,6 +59,10 @@ export class GithubOAuthStrategy extends PassportStrategy(Strategy, 'github') {
       const response = await lastValueFrom(
         this.httpService.get(url, { headers }),
       );
+
+      this.logger.silly('github getUserInfo', {
+        data: response.data,
+      });
       return response.data;
     } catch (error) {
       this.logger.error('Error fetching user info', { error });
