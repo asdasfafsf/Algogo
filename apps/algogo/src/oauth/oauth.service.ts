@@ -43,7 +43,7 @@ export class OauthService {
         userNo = userOAuth.userNo;
       }
 
-      if (userNo === -1) {
+      if (userNo === -1 || !userNo) {
         throw new InternalServerErrorException('oauth error');
       }
 
