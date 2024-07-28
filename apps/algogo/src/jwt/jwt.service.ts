@@ -1,5 +1,9 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService as NestJwtService } from '@nestjs/jwt';
+import {
+  JsonWebTokenError,
+  JwtService as NestJwtService,
+  TokenExpiredError,
+} from '@nestjs/jwt';
 import jwtConfig from '../config/jwtConfig';
 import { ConfigType } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
@@ -24,8 +28,10 @@ export class JwtService {
       await this.nestJwtService.verifyAsync(token, {
         secret: this.config.jwtSecret,
       });
+
+      return;
     } catch (error) {
-      if (error instanceof jwt.TokenExpiredError) {
+      if (error instanceof TokenExpiredError) {
         throw {
           ...new UnauthorizedException('토큰이 만료되었습니다.'),
           errorCode: '9999',
@@ -38,12 +44,12 @@ export class JwtService {
         secret: this.config.prevJwtSecret,
       });
     } catch (error) {
-      if (error instanceof jwt.TokenExpiredError) {
+      if (error instanceof TokenExpiredError) {
         throw {
           ...new UnauthorizedException('토큰이 만료되었습니다.'),
           errorCode: '9999',
         };
-      } else if (error instanceof jwt.JsonWebTokenError) {
+      } else if (error instanceof JsonWebTokenError) {
         throw {
           ...new UnauthorizedException('유효하지 않은 토큰입니다.'),
           errorCode: '9999',

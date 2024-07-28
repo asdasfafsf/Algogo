@@ -6,6 +6,7 @@ import {
   UseGuards,
   Req,
   Res,
+  UseFilters,
 } from '@nestjs/common';
 import { OauthService } from './oauth.service';
 import { RequestOAuthCallbackDto } from '@libs/core/dto/RequestOAuthCallbackDto';
@@ -14,8 +15,9 @@ import { Inject } from '@nestjs/common';
 import { DynamicOAuthGuard } from './dynamic-oauth.guard';
 import { RequestOAuthDto } from '@libs/core/dto/RequestOAuthDto';
 import { Request, Response } from 'express';
+import { OAuthExceptionFilter } from './oauth-exception.filter';
 
-@Controller('oauth')
+@Controller('v1/oauth')
 export class OauthController {
   constructor(
     private readonly oauthService: OauthService,
@@ -25,6 +27,7 @@ export class OauthController {
 
   @Get(':provider')
   @UseGuards(DynamicOAuthGuard)
+  @UseFilters(OAuthExceptionFilter)
   async oauth(
     @Param('provider') provider: string,
     @Query() requestOAuthCallbackDto: RequestOAuthCallbackDto,
@@ -37,6 +40,7 @@ export class OauthController {
 
   @Get(':provider/callback')
   @UseGuards(DynamicOAuthGuard)
+  @UseFilters(OAuthExceptionFilter)
   async callback(
     @Param('provider') provider: string,
     @Query() requestOAuthCallbackDto: RequestOAuthCallbackDto,

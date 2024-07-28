@@ -33,12 +33,17 @@ export class OauthService {
       });
 
       let userNo = -1;
-      if (userOAuth) {
+      if (!userOAuth) {
         const user = await this.register(requestOAuthDto);
+        this.logger.silly('OauthService register', {
+          user: user ?? {},
+        });
         userNo = user.no;
+      } else {
+        userNo = userOAuth.userNo;
       }
 
-      if (!userNo) {
+      if (userNo === -1) {
         throw new InternalServerErrorException('oauth error');
       }
 

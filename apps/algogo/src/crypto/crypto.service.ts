@@ -39,13 +39,13 @@ export class CryptoService {
     return decrypted;
   }
 
-  SHA256(data: string, count: number = 1): string {
-    let hash = crypto.createHash('sha256');
-
+  SHA256(data: string, count: number = 1) {
     for (let i = 0; i < count; i++) {
-      hash = hash.update(data);
+      const hash = crypto.createHash('sha256');
+      hash.update(data);
+      data = hash.digest('base64');
     }
 
-    return hash.digest('base64');
+    return data;
   }
 }
