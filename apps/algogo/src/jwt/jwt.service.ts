@@ -12,9 +12,10 @@ export class JwtService {
     private readonly config: ConfigType<typeof jwtConfig>,
   ) {}
 
-  async sign(payload: any) {
+  async sign(payload: any, expiresIn?: string) {
     return await this.nestJwtService.signAsync(payload, {
       secret: this.config.jwtSecret,
+      expiresIn,
     });
   }
 

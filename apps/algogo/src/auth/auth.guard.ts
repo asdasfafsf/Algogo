@@ -23,6 +23,11 @@ export class AuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
     const encryptedToken = this.extractTokenFromHeader(request);
+
+    if (!encryptedToken) {
+      throw new UnauthorizedException('유효한 토큰이 아닙니다.');
+    }
+
     const hashedToken = this.cryptoService.SHA256(encryptedToken, 5);
 
     const prePayload = await this.redisService.get(hashedToken);
