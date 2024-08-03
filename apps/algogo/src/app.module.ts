@@ -26,12 +26,14 @@ import { AuthModule } from './auth/auth.module';
 import { RedisModule } from './redis/redis.module';
 import { JwtModule } from './jwt/jwt.module';
 import { CryptoModule } from './crypto/crypto.module';
+import { ExecuteModule } from './execute/execute.module';
 import googleOAuthConfig from './config/googleOAuthConfig';
 import kakaoOAuthConfig from './config/kakaoOAuthConfig';
 import githubOAuthConfig from './config/githubOAuthConfig';
 import redisConfig from './config/redisConfig';
 import jwtConfig from './config/jwtConfig';
 import encryptConfig from './config/encryptConfig';
+import bullmqConfig from './config/bullmqConfig';
 
 @Module({
   imports: [
@@ -59,6 +61,7 @@ import encryptConfig from './config/encryptConfig';
         redisConfig,
         jwtConfig,
         encryptConfig,
+        bullmqConfig,
       ],
       isGlobal: true,
       validationSchema,
@@ -78,6 +81,7 @@ import encryptConfig from './config/encryptConfig';
     }),
     JwtModule,
     CryptoModule,
+    ExecuteModule,
   ],
 
   controllers: [AppController],
