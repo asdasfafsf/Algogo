@@ -10,6 +10,6 @@ import { AuthGuard } from './auth.guard';
   imports: [RedisModule, JwtModule, CryptoModule],
   controllers: [AuthController],
   providers: [AuthService, AuthGuard],
-  exports: [AuthService],
+  exports: [AuthService, AuthGuard],
 })
 export class AuthModule {}
