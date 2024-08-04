@@ -10,6 +10,5 @@ export class RequestExecuteDto {
   code: string;
 
   @IsString()
-  @IsNotEmpty()
-  input: string;
+  input?: string = '';
 }

@@ -1,9 +1,14 @@
 import { RequestExecuteDto } from '@libs/core/dto/RequestExecuteDto';
 import { InjectQueue } from '@nestjs/bullmq';
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { Queue, QueueEvents } from 'bullmq';
 import bullmqConfig from '../config/bullmqConfig';
 import { ConfigType } from '@nestjs/config';
+import { Logger } from 'winston';
 
 @Injectable()
 export class ExecuteService {
@@ -12,6 +17,8 @@ export class ExecuteService {
     private readonly queue: Queue,
     @Inject(bullmqConfig.KEY)
     private readonly config: ConfigType<typeof bullmqConfig>,
+    @Inject('winston')
+    private readonly logger: Logger,
   ) {}
 
   async generateJobId(provider: string) {
@@ -27,16 +34,35 @@ export class ExecuteService {
         ...this.config,
       },
     });
-    const job = await this.queue.add('execute', requestExecuteDto, {
-      attempts: 3,
-      backoff: { type: 'exponential', delay: 1000 },
-      jobId,
-      removeOnComplete: true,
-      removeOnFail: true,
-      priority: 1,
-    });
 
-    const result = await job.waitUntilFinished(event, 3000);
-    return result;
+    try {
+      const job = await this.queue.add('execute', requestExecuteDto, {
+        attempts: 3,
+        backoff: { type: 'exponential', delay: 1000 },
+        jobId,
+        removeOnComplete: true,
+        removeOnFail: true,
+        priority: 1,
+      });
+
+      this.logger.silly(`job`, {
+        queueName: job.queueName,
+        name: job.name,
+        data: job.data,
+      });
+
+      const result = await job.waitUntilFinished(event, 3000);
+      return result;
+    } catch (e) {
+      this.logger.error('execute error', {
+        error: e,
+        obj: 'ee',
+        message: e.message,
+        type: typeof e,
+      });
+      throw new InternalServerErrorException('실행 오류');
+    } finally {
+      event.close();
+    }
   }
 }
