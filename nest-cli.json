@@ -54,7 +54,11 @@
       "entryFile": "main",
       "sourceRoot": "apps/compiler/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/compiler/tsconfig.app.json"
+        "tsConfigPath": "apps/compiler/tsconfig.app.json",
+        "assets": [{
+          "include": "../src/config/env/*.env",
+          "outDir": "./dist/apps/compiler/src"
+        }]
       }
     },
     "filter": {
