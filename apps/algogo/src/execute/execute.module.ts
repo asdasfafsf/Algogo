@@ -9,23 +9,26 @@ import bullmqConfig from '../config/bullmqConfig';
 @Module({
   imports: [
     BullModule.forRootAsync({
-      useFactory: async () => ({
-        connection: {
-          host: process.env.BULLMQ_HOST,
-          port: Number(process.env.BULLMQ_PORT),
-          password: process.env.BULLMQ_PASSWORD,
-        },
-      }),
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => {
+        const config: ConfigType<typeof bullmqConfig> =
+          configService.get('bullmqConfig');
+        return {
+          connection: {
+            host: config.host,
+            port: config.port,
+            password: config.password,
+          },
+        };
+      },
     }),
     BullModule.registerQueueAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
-        const config: ConfigType<typeof bullmqConfig> = configService.get(
-          bullmqConfig.KEY,
-        );
-        console.log('dddd');
-        console.log(config);
+        const config: ConfigType<typeof bullmqConfig> =
+          configService.get('bullmqConfig');
         return {
           name: config.queueName,
           connection: {

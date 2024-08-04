@@ -1,4 +1,11 @@
-import { Body, Controller, Inject, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Inject,
+  Post,
+} from '@nestjs/common';
 import { ExecuteService } from './execute.service';
 import { RequestExecuteDto } from '@libs/core/dto/RequestExecuteDto';
 import { Logger } from 'winston';
@@ -12,6 +19,7 @@ export class ExecuteController {
   ) {}
 
   @Post('/')
+  @HttpCode(HttpStatus.OK)
   async execute(@Body() requestExecuteDto: RequestExecuteDto) {
     this.logger.silly('api/v1/execute', {
       data: requestExecuteDto,

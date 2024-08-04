@@ -33,6 +33,6 @@ export const validationSchema = Joi.object({
   JWT_REFRESH_TOKEN_EXPIRES_IN: Joi.number().required(),
   BULLMQ_HOST: Joi.string().required(),
   BULLMQ_PORT: Joi.number().required(),
-  BULLMQ_PASSWORD: Joi.string().required(),
+  // BULLMQ_PASSWORD: Joi.string().required(),
   BULLMQ_QUEUE_NAME: Joi.string().required(),
 });

@@ -1,6 +1,7 @@
 import { RequestExecuteDto } from '@libs/core/dto/RequestExecuteDto';
 import { InjectQueue } from '@nestjs/bullmq';
 import {
+  BadRequestException,
   Inject,
   Injectable,
   InternalServerErrorException,
@@ -9,6 +10,7 @@ import { Queue, QueueEvents } from 'bullmq';
 import bullmqConfig from '../config/bullmqConfig';
 import { ConfigType } from '@nestjs/config';
 import { Logger } from 'winston';
+import { uuidv7 } from 'uuidv7';
 
 @Injectable()
 export class ExecuteService {
@@ -22,7 +24,7 @@ export class ExecuteService {
   ) {}
 
   async generateJobId(provider: string) {
-    return `${provider}_${Math.floor(new Date().getTime() / 1000)}`;
+    return `${provider}_${Math.floor(new Date().getTime() / 1000)}_${uuidv7()}`;
   }
 
   async execute(requestExecuteDto: RequestExecuteDto) {
@@ -45,23 +47,23 @@ export class ExecuteService {
         priority: 1,
       });
 
-      this.logger.silly(`job`, {
-        queueName: job.queueName,
-        name: job.name,
-        data: job.data,
-      });
+      const result = await job.waitUntilFinished(event, 0.1);
 
-      const result = await job.waitUntilFinished(event, 3000);
       return result;
-    } catch (e) {
-      this.logger.error('execute error', {
-        error: e,
-        obj: 'ee',
-        message: e.message,
-        type: typeof e,
-      });
+    } catch (error) {
+      this.logger.error('execute error');
+
+      if (error?.message?.includes('timed out before finishing') > -1) {
+        throw {
+          ...new BadRequestException('시간 초과'),
+          errorCode: '9000',
+        };
+      }
       throw new InternalServerErrorException('실행 오류');
     } finally {
+      if (await this.queue.getJob(jobId)) {
+        this.queue.remove(jobId);
+      }
       event.close();
     }
   }
