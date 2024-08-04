@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import fs from 'fs/promises';
-import path from 'path';
+import { promises as fs } from 'fs';
+
+import * as path from 'path';
 import internal from 'stream';
 
 type FileData =

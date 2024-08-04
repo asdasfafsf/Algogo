@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import path from 'path';
+import * as path from 'path';
 import { ProcessService } from '../process/process.service';
 import { Execute } from './execute.interface';
 import { Injectable } from '@nestjs/common';

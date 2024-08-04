@@ -13,9 +13,13 @@ export class RunService {
   ) {}
 
   async execute(provider: ExecuteProvider, code: string, input: string) {
-    const executor = await this.executorFactory.get(provider);
-    const result = await executor.execute(code, input);
+    try {
+      const executor = await this.executorFactory.get(provider);
+      const result = await executor.execute(code, input);
 
-    return result;
+      return result;
+    } catch (e) {
+      return 'error';
+    }
   }
 }

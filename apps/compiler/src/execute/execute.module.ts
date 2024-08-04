@@ -48,6 +48,7 @@ import { ExecuteConsumer } from './execute.consumer';
     Java17ExecuteService,
     RunService,
     executeProvider,
+    ExecuteConsumer,
   ],
   exports: [RunService],
 })
