@@ -6,6 +6,8 @@ import { Execute } from './execute.interface';
 import { Injectable } from '@nestjs/common';
 import { FileService } from '../file/file.service';
 import { ResponseExecuteDto } from '@libs/core/dto/ResponseExecuteDto';
+import CompileError from './error/compile-error';
+import ExecuteError from './error/execute-error';
 
 @Injectable()
 export class ExecuteService implements Execute {
@@ -82,7 +84,7 @@ export class ExecuteService implements Execute {
       return compiledFilePath;
     } catch (e) {
       this.fileService.removeDir(tmpDir);
-      throw new Error('컴파일 에러');
+      throw new CompileError(e.message);
     } finally {
     }
   }
@@ -114,7 +116,7 @@ export class ExecuteService implements Execute {
       );
       return result;
     } catch (e) {
-      throw new Error('실행 중 오류가 발생하였습니다.');
+      throw new ExecuteError(e.message);
     } finally {
       this.fileService.removeDir(tmpPath);
     }

@@ -8,6 +8,7 @@ import { ResponseExecuteDto } from '@libs/core/dto/ResponseExecuteDto';
 import { Logger } from 'winston';
 import Config from '../config/config';
 import { ConfigType } from '@nestjs/config';
+import PreprocessError from './error/preprocess-error';
 
 @Injectable()
 export class InterpretService implements Execute {
@@ -48,31 +49,20 @@ export class InterpretService implements Execute {
   }
 
   async compile(code: string) {
-    this.logger.silly('interpreter compile start', {
-      dir: this.config.tmpDir,
-    });
     try {
       const tmpDir = await this.fileService.tmpDir(this.config.tmpDir);
-      this.logger.silly('interpreter compile start', {
-        dir: this.config.tmpDir,
-      });
       const fileExtension = this.getFileExtension()
         ? `.${this.getFileExtension()}`
         : '';
       const codePath = path.resolve(tmpDir, `main${fileExtension}`);
-      this.logger.silly('interpreter compile codePath', {
-        codePath: codePath + '',
-      });
       await this.fileService.writeFile(codePath, '', code);
-
-      this.logger.silly('interpreter compile end');
       return codePath;
     } catch (e) {
       this.logger.error('interpreter error', {
         error: e,
         message: e.message,
       });
-      throw e;
+      throw new PreprocessError(e.message);
     } finally {
     }
   }
@@ -103,8 +93,9 @@ export class InterpretService implements Execute {
       });
       throw new Error('Unexpected Error');
     } finally {
-      this.fileService.removeDir(tmpPath);
-      this.logger.silly('interpreter execute end');
+      if (tmpPath) {
+        this.fileService.removeDir(tmpPath);
+      }
     }
   }
 }
