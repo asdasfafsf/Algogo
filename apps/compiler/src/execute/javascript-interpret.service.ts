@@ -4,7 +4,7 @@ import { InterpretService } from './interpret.service';
 @Injectable()
 export class JavascriptInterpretService extends InterpretService {
   getFileExtension(): string {
-    return 'js';
+    return 'cjs';
   }
 
   getExecuteCommand() {

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   ChildProcessWithoutNullStreams,
   SpawnOptionsWithoutStdio,
@@ -7,6 +7,9 @@ import {
 import { ProcessManagementService } from './process-management.service';
 import { ResponseExecuteDto } from '@libs/core/dto/ResponseExecuteDto';
 import { uuidv7 } from 'uuidv7';
+import { Logger } from 'winston';
+import Config from '../config/config';
+import { ConfigType } from '@nestjs/config';
 
 @Injectable()
 export class ProcessService {
@@ -14,6 +17,10 @@ export class ProcessService {
 
   constructor(
     private readonly processManagementService: ProcessManagementService,
+    @Inject('winston')
+    private readonly logger: Logger,
+    @Inject(Config.KEY)
+    private readonly config: ConfigType<typeof Config>,
   ) {
     this.tasks = new Map();
   }
@@ -21,20 +28,24 @@ export class ProcessService {
   async execute(
     command: string,
     commandArgs: string[],
-    option?: SpawnOptionsWithoutStdio,
+    option: SpawnOptionsWithoutStdio = {},
     input?: string,
   ): Promise<ResponseExecuteDto> {
     if (this.tasks.size > 2) {
       throw new Error('MAX SIZE Process Pool');
     }
     option.timeout = option.timeout ?? 5000;
+    option.cwd = this.config.tmpDir;
 
     const uuid = uuidv7();
     const startTime = performance.now();
-    const process = spawn(command, commandArgs, option);
-    this.tasks.set(uuid, process);
 
-    if (!process) {
+    this.logger.info(`Executing command: ${command} ${commandArgs.join(' ')}`);
+
+    const childProcess = spawn(command, commandArgs, option);
+    this.tasks.set(uuid, childProcess);
+
+    if (!childProcess) {
       throw new Error('Unknown process');
     }
     let currentMemory = 0;
@@ -42,7 +53,7 @@ export class ProcessService {
     const checkProcessUsageInterval = setInterval(async () => {
       try {
         const processUsage =
-          await this.processManagementService.getProcessUsage(process.pid);
+          await this.processManagementService.getProcessUsage(childProcess.pid);
         const { memory } = processUsage;
         currentMemory = Math.max(memory, currentMemory);
       } catch (e) {
@@ -54,18 +65,18 @@ export class ProcessService {
       const result = [];
 
       if (input) {
-        process.stdin.write(input);
-        process.stdin.end();
+        childProcess.stdin.write(input);
+        childProcess.stdin.end();
       }
-      process.stdout.on('data', (e) => {
+      childProcess.stdout.on('data', (e) => {
         result.push(e.toString());
       });
 
-      process.on('exit', async () => {
+      childProcess.on('exit', async () => {
         clearInterval(checkProcessUsageInterval);
       });
 
-      process.on('close', async (closeCode) => {
+      childProcess.on('close', async (closeCode) => {
         if (closeCode === 0) {
           resolve({
             processTime: Number((performance.now() - startTime).toFixed(1)),
@@ -77,19 +88,18 @@ export class ProcessService {
         }
       });
 
-      process.on('error', () => {
-        reject(new Error('Unexpected Error'));
+      childProcess.on('error', (error) => {
+        reject(error);
       });
 
-      process.stderr.on('data', (e) => {
-        const stderr = e.toString();
-        reject(new Error(stderr));
+      childProcess.stderr.on('data', (error) => {
+        reject(error);
       });
     })
       .then((responseExecute) => responseExecute)
       .finally(() => {
         clearInterval(checkProcessUsageInterval);
-        process.kill();
+        childProcess.kill();
         this.tasks.delete(uuid);
       });
   }

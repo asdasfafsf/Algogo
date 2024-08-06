@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import path from 'path';
+import * as path from 'path';
 import { ExecuteService } from './execute.service';
 
 @Injectable()

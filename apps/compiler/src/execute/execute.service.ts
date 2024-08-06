@@ -3,17 +3,20 @@
 import * as path from 'path';
 import { ProcessService } from '../process/process.service';
 import { Execute } from './execute.interface';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { FileService } from '../file/file.service';
 import { ResponseExecuteDto } from '@libs/core/dto/ResponseExecuteDto';
 import CompileError from './error/compile-error';
 import ExecuteError from './error/execute-error';
+import { Logger } from 'winston';
 
 @Injectable()
 export class ExecuteService implements Execute {
   constructor(
     private readonly processService: ProcessService,
     private readonly fileService: FileService,
+    @Inject('winston')
+    private readonly logger: Logger,
   ) {}
   getFileExtension(): string {
     return '';
@@ -91,6 +94,7 @@ export class ExecuteService implements Execute {
 
   async execute(code: string, input: string): Promise<ResponseExecuteDto> {
     const compiledFilePath = await this.compile(code);
+    this.logger.silly(`end compile`);
     const tmpPath = path.dirname(compiledFilePath);
 
     const fileExtension = this.getFileExtension()
@@ -99,15 +103,16 @@ export class ExecuteService implements Execute {
     const filePath = path.resolve(tmpPath, `Main${fileExtension}`);
 
     try {
+      this.logger.silly(`start process`);
       const command = this.getExecuteCommand(filePath, compiledFilePath, code);
       const commandArgs = this.getExecuteCommandArgs(
         filePath,
         compiledFilePath,
         code,
       );
-      const options = {
-        cwd: process.env.TMP_DIR,
-      };
+      const options = {};
+
+      this.logger.silly(`start execute`);
       const result = await this.processService.execute(
         command,
         commandArgs,
@@ -116,6 +121,7 @@ export class ExecuteService implements Execute {
       );
       return result;
     } catch (e) {
+      this.logger.error(e.message);
       throw new ExecuteError(e.message);
     } finally {
       this.fileService.removeDir(tmpPath);

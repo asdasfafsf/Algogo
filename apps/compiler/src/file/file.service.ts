@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { promises as fs } from 'fs';
-
 import * as path from 'path';
 import internal from 'stream';
 
@@ -21,7 +20,8 @@ export class FileService {
 
   async writeFile(basePath: string, filePath: string, data: FileData) {
     const fullPath = path.resolve(basePath, filePath);
-    await fs.writeFile(fullPath, data);
+    // 파일을 쓰면서 읽기 권한 부여 (0o644)
+    await fs.writeFile(fullPath, data, { mode: 0o644 });
 
     return fullPath;
   }

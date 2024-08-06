@@ -4,12 +4,15 @@ import {
   ExecuteProvider,
   ExecuteServiceFactory,
 } from './execute.provider';
+import { Logger } from 'winston';
 
 @Injectable()
 export class RunService {
   constructor(
     @Inject(EXECUTE_SERVICE_FACTORY_NAME)
     private readonly executorFactory: ExecuteServiceFactory,
+    @Inject('winston')
+    private readonly logger: Logger,
   ) {}
 
   async execute(provider: ExecuteProvider, code: string, input: string) {
@@ -19,7 +22,8 @@ export class RunService {
 
       return result;
     } catch (e) {
-      return 'error';
+      this.logger.error(e.message);
+      throw e;
     }
   }
 }

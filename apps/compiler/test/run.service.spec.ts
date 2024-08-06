@@ -25,9 +25,10 @@ import { ClangExecuteService } from '../src/execute/clang-execute.service';
 
 describe('RunService', () => {
   let runService: RunService;
+  let module: TestingModule;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
+    module = await Test.createTestingModule({
       providers: [
         ExecuteService,
         InterpretService,
@@ -68,9 +69,11 @@ describe('RunService', () => {
     runService = module.get<RunService>(RunService);
   });
 
+  afterEach(async () => {
+    await module.close();
+  });
+
   it('should be defined', () => {
-    console.log('하이하이');
-    console.log(runService);
     expect(runService).toBeDefined();
   });
 
@@ -136,13 +139,14 @@ rl.on('line', (input) => {
 print(input_string)`,
   };
 
-  providers.forEach(async (provider) => {
+  for (const provider of providers) {
     it(`should execute code for provider: ${provider}`, async () => {
       const code = successCodes[provider];
       const input = `hello ${provider}`;
 
-      const result = await runService.execute(provider, code, input);
+      const executeResult = await runService.execute(provider, code, input);
+      const { result } = executeResult;
       expect(result).toContain(`hello ${provider}`);
     });
-  });
+  }
 });
