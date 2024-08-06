@@ -9,6 +9,8 @@ import { Logger } from 'winston';
 import Config from '../config/config';
 import { ConfigType } from '@nestjs/config';
 import PreprocessError from './error/preprocess-error';
+import RuntimeError from './error/runtime-error';
+import TimeoutError from './error/timeout-error';
 
 @Injectable()
 export class InterpretService implements Execute {
@@ -91,7 +93,10 @@ export class InterpretService implements Execute {
         error: e,
         message: e.message,
       });
-      throw new Error('Unexpected Error');
+      if (e instanceof TimeoutError) {
+        throw e;
+      }
+      throw new RuntimeError(e.message);
     } finally {
       if (tmpPath) {
         this.fileService.removeDir(tmpPath);

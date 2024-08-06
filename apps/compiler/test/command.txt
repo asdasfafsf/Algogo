@@ -1,0 +1,2 @@
+npx jest test/run.fail.spec.ts
+npx jest test/run.success.spec.ts

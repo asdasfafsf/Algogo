@@ -22,12 +22,13 @@ import { JavaExecuteService } from '../src/execute/java-execute.service';
 import { CppExecuteService } from '../src/execute/cpp-execute.service';
 import { Java17ExecuteService } from '../src/execute/java17-execute.service';
 import { ClangExecuteService } from '../src/execute/clang-execute.service';
+import { runtimeErrorCode } from './code/runtime.error';
 
 describe('RunService', () => {
   let runService: RunService;
   let module: TestingModule;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     module = await Test.createTestingModule({
       providers: [
         ExecuteService,
@@ -50,7 +51,7 @@ describe('RunService', () => {
         WinstonModule.forRoot({
           transports: [
             new winston.transports.Console({
-              level: 'silly',
+              level: 'info',
               format: winston.format.combine(
                 winston.format.timestamp(),
                 nestWinstonModuleUtilities.format.nestLike('MyApp', {
@@ -69,7 +70,7 @@ describe('RunService', () => {
     runService = module.get<RunService>(RunService);
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     await module.close();
   });
 
@@ -85,68 +86,14 @@ describe('RunService', () => {
     'javascript',
     'python',
   ];
-  const successCodes: { [key in ExecuteProvider]: string } = {
-    java: `import java.util.Scanner;
-
-public class Main {
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        String input = scanner.nextLine();
-        System.out.println(input);
-        scanner.close();
-    }
-}`,
-    cpp: `#include <iostream>
-#include <string>
-
-int main() {
-    std::string input;
-    std::getline(std::cin, input);
-    std::cout << input << std::endl;
-    return 0;
-}`,
-    clang: `#include <iostream>
-#include <string>
-
-int main() {
-    std::string input;
-    std::getline(std::cin, input);
-    std::cout << input << std::endl;
-    return 0;
-}`,
-    java17: `import java.util.Scanner;
-
-public class Main {
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        String input = scanner.nextLine();
-        System.out.println(input);
-        scanner.close();
-    }
-}`,
-    javascript: `const readline = require('readline');
-
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
-
-rl.on('line', (input) => {
-  console.log(input);
-  rl.close();
-});`,
-    python: `input_string = input()
-print(input_string)`,
-  };
 
   for (const provider of providers) {
-    it(`should execute code for provider: ${provider}`, async () => {
-      const code = successCodes[provider];
+    it(`runtime error : ${provider}`, async () => {
+      const code = runtimeErrorCode[provider];
       const input = `hello ${provider}`;
-
       const executeResult = await runService.execute(provider, code, input);
       const { result } = executeResult;
-      expect(result).toContain(`hello ${provider}`);
+      expect(result).toBe(`hello ${provider}`);
     });
   }
 });

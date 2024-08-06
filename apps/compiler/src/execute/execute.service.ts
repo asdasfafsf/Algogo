@@ -7,8 +7,9 @@ import { Inject, Injectable } from '@nestjs/common';
 import { FileService } from '../file/file.service';
 import { ResponseExecuteDto } from '@libs/core/dto/ResponseExecuteDto';
 import CompileError from './error/compile-error';
-import ExecuteError from './error/execute-error';
+import RuntimeError from './error/runtime-error';
 import { Logger } from 'winston';
+import TimeoutError from './error/timeout-error';
 
 @Injectable()
 export class ExecuteService implements Execute {
@@ -87,6 +88,7 @@ export class ExecuteService implements Execute {
       return compiledFilePath;
     } catch (e) {
       this.fileService.removeDir(tmpDir);
+      this.logger.error(e);
       throw new CompileError(e.message);
     } finally {
     }
@@ -121,8 +123,13 @@ export class ExecuteService implements Execute {
       );
       return result;
     } catch (e) {
-      this.logger.error(e.message);
-      throw new ExecuteError(e.message);
+      this.logger.error(`Execute Error occurred: ${e.message}`);
+      this.logger.error(`Execute Error name: ${e.name}`);
+      this.logger.error(`Execute Stack trace: ${e.stack}`);
+      if (e instanceof TimeoutError) {
+        throw e;
+      }
+      throw new RuntimeError(e.message);
     } finally {
       this.fileService.removeDir(tmpPath);
     }

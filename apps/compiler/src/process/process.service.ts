@@ -10,6 +10,7 @@ import { uuidv7 } from 'uuidv7';
 import { Logger } from 'winston';
 import Config from '../config/config';
 import { ConfigType } from '@nestjs/config';
+import TimeoutError from '../execute/error/timeout-error';
 
 @Injectable()
 export class ProcessService {
@@ -84,7 +85,7 @@ export class ProcessService {
             result: result.join('\n').trim(),
           });
         } else {
-          reject(new Error('시간 초과'));
+          reject(new TimeoutError('시간 초과'));
         }
       });
 
@@ -93,6 +94,17 @@ export class ProcessService {
       });
 
       childProcess.stderr.on('data', (error) => {
+        const errorMessage = error.toString();
+        this.logger.error(`Process stderr: ${errorMessage}`);
+        if (error.message) {
+          this.logger.error(`Process Error message: ${error.message}`);
+        }
+        if (error.stack) {
+          this.logger.error(`Process Error stack: ${error.stack}`);
+        }
+        if (error.name) {
+          this.logger.error(`Process Error name: ${error.name}`);
+        }
         reject(error);
       });
     })
