@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RunService } from '../src/execute/run.service';
-import { ExecuteModule } from '../src/execute/execute.module';
 import executeProvider, {
   ExecuteProvider,
 } from '../src/execute/execute.provider';
@@ -63,7 +62,6 @@ describe('RunService', () => {
         }),
         ProcessModule,
         FileModule,
-        ExecuteModule,
       ],
     }).compile();
 
@@ -89,11 +87,15 @@ describe('RunService', () => {
 
   for (const provider of providers) {
     it(`runtime error : ${provider}`, async () => {
-      const code = runtimeErrorCode[provider];
+      const sourceCode = runtimeErrorCode[provider];
       const input = `hello ${provider}`;
-      const executeResult = await runService.execute(provider, code, input);
-      const { result } = executeResult;
-      expect(result).toBe(`hello ${provider}`);
+      const executeResult = await runService.execute(
+        provider,
+        sourceCode,
+        input,
+      );
+      const { code } = executeResult;
+      expect(code).toBe('9001');
     });
   }
 });

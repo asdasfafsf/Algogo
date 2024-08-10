@@ -60,10 +60,6 @@ export class InterpretService implements Execute {
       await this.fileService.writeFile(codePath, '', code);
       return codePath;
     } catch (e) {
-      this.logger.error('interpreter error', {
-        error: e,
-        message: e.message,
-      });
       throw new PreprocessError(e.message);
     } finally {
     }
@@ -89,14 +85,13 @@ export class InterpretService implements Execute {
       );
       return result;
     } catch (e) {
-      this.logger.error('interpreter execute error', {
-        error: e,
-        message: e.message,
+      this.logger.error('제발 왜ㅔ그러세요', {
+        e,
       });
       if (e instanceof TimeoutError) {
         throw e;
       }
-      throw new RuntimeError(e.message);
+      throw new RuntimeError(e?.data?.toString() ?? e.message);
     } finally {
       if (tmpPath) {
         this.fileService.removeDir(tmpPath);

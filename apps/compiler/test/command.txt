@@ -1,2 +1,4 @@
 npx jest test/run.fail.spec.ts
 npx jest test/run.success.spec.ts
+npx jest test/run.time.spec.ts
+npx jest test/javascript.spec.ts

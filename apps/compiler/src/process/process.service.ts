@@ -10,6 +10,7 @@ import { uuidv7 } from 'uuidv7';
 import { Logger } from 'winston';
 import Config from '../config/config';
 import { ConfigType } from '@nestjs/config';
+import RuntimeError from '../execute/error/runtime-error';
 import TimeoutError from '../execute/error/timeout-error';
 
 @Injectable()
@@ -32,9 +33,6 @@ export class ProcessService {
     option: SpawnOptionsWithoutStdio = {},
     input?: string,
   ): Promise<ResponseExecuteDto> {
-    if (this.tasks.size > 2) {
-      throw new Error('MAX SIZE Process Pool');
-    }
     option.timeout = option.timeout ?? 5000;
     option.cwd = this.config.tmpDir;
 
@@ -46,9 +44,6 @@ export class ProcessService {
     const childProcess = spawn(command, commandArgs, option);
     this.tasks.set(uuid, childProcess);
 
-    if (!childProcess) {
-      throw new Error('Unknown process');
-    }
     let currentMemory = 0;
 
     const checkProcessUsageInterval = setInterval(async () => {
@@ -64,7 +59,10 @@ export class ProcessService {
 
     return new Promise<ResponseExecuteDto>((resolve, reject) => {
       const result = [];
-
+      const stdError = [];
+      this.logger.silly('process input', {
+        input: input + '',
+      });
       if (input) {
         childProcess.stdin.write(input);
         childProcess.stdin.end();
@@ -77,15 +75,29 @@ export class ProcessService {
         clearInterval(checkProcessUsageInterval);
       });
 
-      childProcess.on('close', async (closeCode) => {
+      childProcess.on('close', async (closeCode, closeResult) => {
         if (closeCode === 0) {
           resolve({
             processTime: Number((performance.now() - startTime).toFixed(1)),
             memory: Number((currentMemory / Math.pow(1024, 1)).toFixed(1)),
             result: result.join('\n').trim(),
           });
-        } else {
-          reject(new TimeoutError('시간 초과'));
+        }
+
+        this.logger.info('closeCode', {
+          closeCode,
+          closeResult,
+        });
+
+        switch (closeResult) {
+          case 'SIGSEGV':
+            reject(new RuntimeError('Segmentation fault'));
+            break;
+          case 'SIGTERM':
+            reject(new TimeoutError('시간 초과'));
+            break;
+          default:
+            reject(new RuntimeError(''));
         }
       });
 
@@ -94,18 +106,15 @@ export class ProcessService {
       });
 
       childProcess.stderr.on('data', (error) => {
-        const errorMessage = error.toString();
-        this.logger.error(`Process stderr: ${errorMessage}`);
-        if (error.message) {
-          this.logger.error(`Process Error message: ${error.message}`);
-        }
-        if (error.stack) {
-          this.logger.error(`Process Error stack: ${error.stack}`);
-        }
-        if (error.name) {
-          this.logger.error(`Process Error name: ${error.name}`);
-        }
-        reject(error);
+        const tmpDirPattern = new RegExp(
+          `${this.config.tmpDir}|${process.cwd()}`,
+          'g',
+        );
+        const message = error.toString().replace(tmpDirPattern, '');
+        stdError.push(message);
+        this.logger.error('도데체 왜그러세요..', {
+          error: message,
+        });
       });
     })
       .then((responseExecute) => responseExecute)

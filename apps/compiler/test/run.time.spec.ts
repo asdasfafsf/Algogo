@@ -21,14 +21,14 @@ import { JavaExecuteService } from '../src/execute/java-execute.service';
 import { CppExecuteService } from '../src/execute/cpp-execute.service';
 import { Java17ExecuteService } from '../src/execute/java17-execute.service';
 import { ClangExecuteService } from '../src/execute/clang-execute.service';
-import { successCodes } from './code/success';
-import { cppCode } from './code/cpp.success';
+import { timeoutErrorCodes } from './code/timeout.error';
 
 describe('RunService', () => {
   let runService: RunService;
   let module: TestingModule;
 
   beforeAll(async () => {
+    jest.setTimeout(50000);
     module = await Test.createTestingModule({
       providers: [
         ExecuteService,
@@ -86,37 +86,17 @@ describe('RunService', () => {
     'python',
   ];
 
-  const testExecution = (
-    provider: ExecuteProvider,
-    code: string,
-    input: string,
-    expected: string,
-  ) => {
-    it(`should execute code for provider: ${provider}`, async () => {
-      const executeResult = await runService.execute(provider, code, input);
-      const { result } = executeResult;
-      expect(result).toContain(expected);
-    });
-  };
-
   for (const provider of providers) {
-    testExecution(
-      provider,
-      successCodes[provider],
-      `hello ${provider}`,
-      `hello ${provider}`,
-    );
+    it(`runtime error : ${provider}`, async () => {
+      const sourceCode = timeoutErrorCodes[provider];
+      const input = `hello ${provider}`;
+      const executeResult = await runService.execute(
+        provider,
+        sourceCode,
+        input,
+      );
+      const { code } = executeResult;
+      expect(code).toBe(`9000`);
+    }, 10000);
   }
-
-  it('test of cpp', async () => {
-    const input = `2\nGCF\nACDEB`;
-    const responseCpp = await runService.execute('cpp', cppCode, input);
-    expect(responseCpp.result).toBe('99437');
-  });
-
-  it('test of clang', async () => {
-    const input = `2\nGCF\nACDEB`;
-    const responseCpp = await runService.execute('clang', cppCode, input);
-    expect(responseCpp.result).toBe('99437');
-  });
 });
