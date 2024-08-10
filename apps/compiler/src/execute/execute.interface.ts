@@ -57,4 +57,5 @@ export interface Execute {
    * @returns 실행 결과를 리턴한다.
    */
   execute: (code: string, input: string) => Promise<ResponseExecuteDto>;
+  handleError: (error: Error) => Promise<void> | void;
 }

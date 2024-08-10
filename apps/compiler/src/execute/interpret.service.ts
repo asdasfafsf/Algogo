@@ -84,18 +84,14 @@ export class InterpretService implements Execute {
         input,
       );
       return result;
-    } catch (e) {
-      this.logger.error('제발 왜ㅔ그러세요', {
-        e,
-      });
-      if (e instanceof TimeoutError) {
-        throw e;
-      }
-      throw new RuntimeError(e?.data?.toString() ?? e.message);
+    } catch (error) {
+      this.handleError(error);
+      throw error;
     } finally {
       if (tmpPath) {
         this.fileService.removeDir(tmpPath);
       }
     }
   }
+  handleError(error: Error) {}
 }

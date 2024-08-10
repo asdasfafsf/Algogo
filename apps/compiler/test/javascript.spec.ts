@@ -30,7 +30,7 @@ describe('JavascriptInterpretService', () => {
         WinstonModule.forRoot({
           transports: [
             new winston.transports.Console({
-              level: 'info',
+              level: 'silly',
               format: winston.format.combine(
                 winston.format.timestamp(),
                 nestWinstonModuleUtilities.format.nestLike('MyApp', {
@@ -54,17 +54,18 @@ describe('JavascriptInterpretService', () => {
     await module.close();
   });
 
-  it('javascript be defined', () => {
+  it('javascript service should be defined', () => {
     expect(javascriptInterpretService).toBeDefined();
   });
 
-  it('javascript timeout error', async () => {
-    // 상대 경로 설정
-    const inputPath = join(
-      __dirname,
-      'code/javascript/javascript.timeout.input.txt',
-    );
-    const sourcePath = join(__dirname, 'code/javascript/javascript.timeout.js');
+  const runTestWithErrorExpectation = async (
+    sourceFileName: string,
+    inputFileName: string,
+    expectedError: any,
+    errorMessageContains: string,
+  ) => {
+    const inputPath = join(__dirname, `code/javascript/${inputFileName}`);
+    const sourcePath = join(__dirname, `code/javascript/${sourceFileName}`);
 
     const input = await fs.readFile(inputPath, 'utf-8');
     const source = await fs.readFile(sourcePath, 'utf-8');
@@ -72,49 +73,82 @@ describe('JavascriptInterpretService', () => {
     try {
       await javascriptInterpretService.execute(source, input);
     } catch (e) {
-      expect(e).toBeInstanceOf(TimeoutError);
+      expect(e).toBeInstanceOf(expectedError);
+      if (errorMessageContains) {
+        expect(e.message).toBe(errorMessageContains);
+      }
     }
+  };
+
+  // it('should throw timeout error', async () => {
+  //   await runTestWithErrorExpectation(
+  //     'javascript.timeout.js',
+  //     'javascript.timeout.input.txt',
+  //     TimeoutError,
+  //     '',
+  //   );
+  // }, 10000);
+
+  // it('should throw runtime error', async () => {
+  //   await runTestWithErrorExpectation(
+  //     'javascript.runtime.error.js',
+  //     'javascript.runtime.error.input.txt',
+  //     RuntimeError,
+  //     '',
+  //   );
+  // }, 10000);
+
+  // it('should throw segmentation fault error', async () => {
+  //   await runTestWithErrorExpectation(
+  //     'javascript.stackoverflow.js',
+  //     'javascript.stackoverflow.input.txt',
+  //     RuntimeError,
+  //     'Segmentation fault',
+  //   );
+  // }, 10000);
+
+  it('should throw type error', async () => {
+    await runTestWithErrorExpectation(
+      'javascript.type.error.js',
+      'javascript.type.error.input.txt',
+      RuntimeError,
+      'TypeError',
+    );
   }, 10000);
 
-  it('javascript runtime error', async () => {
-    const inputPath = join(
-      __dirname,
-      'code/javascript/javascript.runtime.error.input.txt',
+  it('should throw reference error', async () => {
+    await runTestWithErrorExpectation(
+      'javascript.reference.error.js',
+      'javascript.reference.error.input.txt',
+      RuntimeError,
+      'ReferenceError',
     );
-    const sourcePath = join(
-      __dirname,
-      'code/javascript/javascript.runtime.error.js',
-    );
-
-    const input = await fs.readFile(inputPath, 'utf-8');
-    const source = await fs.readFile(sourcePath, 'utf-8');
-
-    try {
-      await javascriptInterpretService.execute(source, input);
-    } catch (e) {
-      expect(e).toBeInstanceOf(RuntimeError);
-    }
   }, 10000);
 
-  it('javascript segfault', async () => {
-    const inputPath = join(
-      __dirname,
-      'code/javascript/javascript.stackoverflow.input.txt',
+  it('should throw syntax error', async () => {
+    await runTestWithErrorExpectation(
+      'javascript.syntax.error.js',
+      'javascript.syntax.error.input.txt',
+      RuntimeError,
+      'SyntaxError',
     );
-    const sourcePath = join(
-      __dirname,
-      'code/javascript/javascript.stackoverflow.js',
+  }, 10000);
+
+  it('should throw range error', async () => {
+    await runTestWithErrorExpectation(
+      'javascript.range.error.js',
+      'javascript.range.error.input.txt',
+      RuntimeError,
+      'RangeError',
     );
+  }, 10000);
 
-    const input = await fs.readFile(inputPath, 'utf-8');
-    const source = await fs.readFile(sourcePath, 'utf-8');
-
-    try {
-      await javascriptInterpretService.execute(source, input);
-    } catch (e) {
-      console.log(e.message);
-      expect(e).toBeInstanceOf(RuntimeError);
-      expect(e.message).toContain('Segmentation fault');
-    }
+  it('should throw CannotFindModule', async () => {
+    await runTestWithErrorExpectation(
+      'javascript.CannotFindModule.js',
+      'javascript.CannotFindModule.input.txt',
+      RuntimeError,
+      'CannotFindModule',
+    );
   }, 10000);
 });

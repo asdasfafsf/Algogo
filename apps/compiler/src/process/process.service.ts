@@ -39,7 +39,7 @@ export class ProcessService {
     const uuid = uuidv7();
     const startTime = performance.now();
 
-    this.logger.info(`Executing command: ${command} ${commandArgs.join(' ')}`);
+    this.logger.silly(`Executing command: ${command} ${commandArgs.join(' ')}`);
 
     const childProcess = spawn(command, commandArgs, option);
     this.tasks.set(uuid, childProcess);
@@ -66,7 +66,9 @@ export class ProcessService {
       if (input) {
         childProcess.stdin.write(input);
         childProcess.stdin.end();
+        this.logger.silly('process input end');
       }
+
       childProcess.stdout.on('data', (e) => {
         result.push(e.toString());
       });
@@ -84,9 +86,11 @@ export class ProcessService {
           });
         }
 
-        this.logger.info('closeCode', {
+        this.logger.silly('closeCode', {
           closeCode,
           closeResult,
+          result,
+          stdError,
         });
 
         switch (closeResult) {
@@ -97,7 +101,7 @@ export class ProcessService {
             reject(new TimeoutError('시간 초과'));
             break;
           default:
-            reject(new RuntimeError(''));
+            reject(new RuntimeError(stdError.join('')));
         }
       });
 
@@ -112,9 +116,6 @@ export class ProcessService {
         );
         const message = error.toString().replace(tmpDirPattern, '');
         stdError.push(message);
-        this.logger.error('도데체 왜그러세요..', {
-          error: message,
-        });
       });
     })
       .then((responseExecute) => responseExecute)

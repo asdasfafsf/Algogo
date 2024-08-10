@@ -134,4 +134,6 @@ export class ExecuteService implements Execute {
       this.fileService.removeDir(tmpPath);
     }
   }
+
+  handleError: () => Promise<void> | void;
 }
