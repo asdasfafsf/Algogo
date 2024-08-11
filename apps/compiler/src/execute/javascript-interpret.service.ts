@@ -14,7 +14,7 @@ export class JavascriptInterpretService extends InterpretService {
   }
 
   getExecuteCommandArgs(codePath: string, compiledPath: string) {
-    return ['--stack-size=65536', compiledPath];
+    return [`--stack-size=${65535 >> 2}`, compiledPath];
   }
 
   handleError(error: Error) {
@@ -27,7 +27,11 @@ export class JavascriptInterpretService extends InterpretService {
       } else if (error.message.includes('SyntaxError:')) {
         error.message = 'SyntaxError';
       } else if (error.message.includes('RangeError:')) {
-        error.message = 'RangeError';
+        if (error.message.includes('stack size exceeded')) {
+          error.message = 'StackSizeExceeded';
+        } else {
+          error.message = 'RangeError';
+        }
       } else if (error.message.includes(`code: 'MODULE_NOT_FOUND'`)) {
         error.message = 'CannotFindModule';
       } else if (error.message.includes('ENOENT:')) {
