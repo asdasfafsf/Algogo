@@ -58,9 +58,14 @@ describe('pythonInterpretService', () => {
     expect(pythonInterpretService).toBeDefined();
   });
 
-  it('python timeout error', async () => {
-    const inputPath = join(__dirname, 'code/python/python.timeout.input.txt');
-    const sourcePath = join(__dirname, 'code/python/python.timeout.py');
+  const runTestWithErrorExpectation = async (
+    sourceFileName: string,
+    inputFileName: string,
+    expectedError: any,
+    errorMessageContains?: string,
+  ) => {
+    const inputPath = join(__dirname, `code/python/${inputFileName}`);
+    const sourcePath = join(__dirname, `code/python/${sourceFileName}`);
 
     const input = await fs.readFile(inputPath, 'utf-8');
     const source = await fs.readFile(sourcePath, 'utf-8');
@@ -68,42 +73,144 @@ describe('pythonInterpretService', () => {
     try {
       await pythonInterpretService.execute(source, input);
     } catch (e) {
-      expect(e).toBeInstanceOf(TimeoutError);
+      expect(e).toBeInstanceOf(expectedError);
+      if (errorMessageContains) {
+        expect(e.message).toBe(errorMessageContains);
+      }
     }
+  };
+
+  it('python timeout error', async () => {
+    await runTestWithErrorExpectation(
+      'python.timeout.py',
+      'python.timeout.input.txt',
+      TimeoutError,
+      '',
+    );
   }, 10000);
 
   it('python runtime error', async () => {
-    const inputPath = join(
-      __dirname,
-      'code/python/python.runtime.error.input.txt',
+    await runTestWithErrorExpectation(
+      'python.runtime.error.py',
+      'python.runtime.error.input.txt',
+      RuntimeError,
     );
-    const sourcePath = join(__dirname, 'code/python/python.runtime.error.py');
-
-    const input = await fs.readFile(inputPath, 'utf-8');
-    const source = await fs.readFile(sourcePath, 'utf-8');
-
-    try {
-      await pythonInterpretService.execute(source, input);
-    } catch (e) {
-      expect(e).toBeInstanceOf(RuntimeError);
-    }
   }, 10000);
 
-  it('python segfault', async () => {
-    const inputPath = join(
-      __dirname,
-      'code/python/python.stackoverflow.input.txt',
+  it('python recursion', async () => {
+    await runTestWithErrorExpectation(
+      'python.stackoverflow.py',
+      'python.stackoverflow.input.txt',
+      RuntimeError,
+      'RecursionError',
     );
-    const sourcePath = join(__dirname, 'code/python/python.stackoverflow.py');
+  }, 10000);
 
-    const input = await fs.readFile(inputPath, 'utf-8');
-    const source = await fs.readFile(sourcePath, 'utf-8');
+  it('python ValueError', async () => {
+    await runTestWithErrorExpectation(
+      'python.value.error.py',
+      'python.value.error.input.txt',
+      RuntimeError,
+      'ValueError',
+    );
+  }, 10000);
 
-    try {
-      await pythonInterpretService.execute(source, input);
-    } catch (e) {
-      expect(e).toBeInstanceOf(RuntimeError);
-      expect(e.message).toContain('Segmentation fault');
-    }
+  it('python IndexError', async () => {
+    await runTestWithErrorExpectation(
+      'python.index.error.py',
+      'python.index.error.input.txt',
+      RuntimeError,
+      'IndexError',
+    );
+  }, 10000);
+
+  it('python NameError', async () => {
+    await runTestWithErrorExpectation(
+      'python.name.error.py',
+      'python.name.error.input.txt',
+      RuntimeError,
+      'NameError',
+    );
+  }, 10000);
+
+  it('python TypeError', async () => {
+    await runTestWithErrorExpectation(
+      'python.type.error.py',
+      'python.type.error.input.txt',
+      RuntimeError,
+      'TypeError',
+    );
+  }, 10000);
+
+  it('python AssertionError', async () => {
+    await runTestWithErrorExpectation(
+      'python.assertion.error.py',
+      'python.assertion.error.input.txt',
+      RuntimeError,
+      'AssertionError',
+    );
+  }, 10000);
+
+  it('python FileNotFoundError', async () => {
+    await runTestWithErrorExpectation(
+      'python.filenotfound.error.py',
+      'python.filenotfound.error.input.txt',
+      RuntimeError,
+      'FileNotFoundError',
+    );
+  }, 10000);
+
+  it('python SyntaxError', async () => {
+    await runTestWithErrorExpectation(
+      'python.syntax.error.py',
+      'python.syntax.error.input.txt',
+      RuntimeError,
+      'SyntaxError',
+    );
+  }, 10000);
+
+  it('python AttributeError', async () => {
+    await runTestWithErrorExpectation(
+      'python.attribute.error.py',
+      'python.attribute.error.input.txt',
+      RuntimeError,
+      'AttributeError',
+    );
+  }, 10000);
+
+  it('python ZeroDivisionError', async () => {
+    await runTestWithErrorExpectation(
+      'python.zerodivision.error.py',
+      'python.zerodivision.error.input.txt',
+      RuntimeError,
+      'ZeroDivisionError',
+    );
+  }, 10000);
+
+  it('python ModuleNotFoundError', async () => {
+    await runTestWithErrorExpectation(
+      'python.modulenotfound.error.py',
+      'python.modulenotfound.error.input.txt',
+      RuntimeError,
+      'ModuleNotFoundError',
+    );
+  }, 10000);
+
+  it('python UnboundLocalError', async () => {
+    await runTestWithErrorExpectation(
+      'python.unboundlocal.error.py',
+      'python.unboundlocal.error.input.txt',
+      RuntimeError,
+      'UnboundLocalError',
+    );
+  }, 10000);
+
+  it('python OverflowError', async () => {
+    await runTestWithErrorExpectation(
+      'python.overflow.error.py',
+      'python.overflow.error.input.txt',
+      RuntimeError,
+      'OverflowError',
+    );
   }, 10000);
 });
