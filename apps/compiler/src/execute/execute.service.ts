@@ -129,11 +129,12 @@ export class ExecuteService implements Execute {
       if (e instanceof TimeoutError) {
         throw e;
       }
-      throw new RuntimeError(e.message);
+      this.handleError(e);
+      throw new RuntimeError('');
     } finally {
       this.fileService.removeDir(tmpPath);
     }
   }
 
-  handleError: () => Promise<void> | void;
+  handleError(error: Error) {}
 }
