@@ -80,23 +80,23 @@ describe('JavascriptInterpretService', () => {
     }
   };
 
-  // it('should throw timeout error', async () => {
-  //   await runTestWithErrorExpectation(
-  //     'javascript.timeout.js',
-  //     'javascript.timeout.input.txt',
-  //     TimeoutError,
-  //     '',
-  //   );
-  // }, 10000);
+  it('should throw timeout error', async () => {
+    await runTestWithErrorExpectation(
+      'javascript.timeout.js',
+      'javascript.timeout.input.txt',
+      TimeoutError,
+      '',
+    );
+  }, 10000);
 
-  // it('should throw runtime error', async () => {
-  //   await runTestWithErrorExpectation(
-  //     'javascript.runtime.error.js',
-  //     'javascript.runtime.error.input.txt',
-  //     RuntimeError,
-  //     '',
-  //   );
-  // }, 10000);
+  it('should throw runtime error', async () => {
+    await runTestWithErrorExpectation(
+      'javascript.runtime.error.js',
+      'javascript.runtime.error.input.txt',
+      RuntimeError,
+      '',
+    );
+  }, 10000);
 
   // it('should throw segmentation fault error', async () => {
   //   await runTestWithErrorExpectation(

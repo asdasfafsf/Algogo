@@ -14,7 +14,7 @@ export class JavascriptInterpretService extends InterpretService {
   }
 
   getExecuteCommandArgs(codePath: string, compiledPath: string) {
-    return [`--stack-size=${65535 >> 2}`, compiledPath];
+    return [`--stack-size=${65535 >> 4}`, compiledPath];
   }
 
   handleError(error: Error) {
