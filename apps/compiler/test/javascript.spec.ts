@@ -151,4 +151,13 @@ describe('JavascriptInterpretService', () => {
       'CannotFindModule',
     );
   }, 10000);
+
+  it('should throw stacksize', async () => {
+    await runTestWithErrorExpectation(
+      'javascript.stacksize.error.js',
+      'javascript.stacksize.error.input.txt',
+      RuntimeError,
+      'StackSizeExceeded',
+    );
+  }, 50000);
 });
