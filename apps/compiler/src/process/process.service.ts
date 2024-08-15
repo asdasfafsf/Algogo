@@ -33,7 +33,7 @@ export class ProcessService {
     option: SpawnOptionsWithoutStdio = {},
     input?: string,
   ): Promise<ResponseExecuteDto> {
-    option.timeout = option.timeout ?? 5000;
+    option.timeout = 5000;
     option.cwd = this.config.tmpDir;
 
     const uuid = uuidv7();
@@ -69,7 +69,15 @@ export class ProcessService {
         this.logger.silly('process input end');
       }
 
+      // setTimeout(() => {
+      //   childProcess.kill('SIGKILL');
+      //   reject(new TimeoutError('시간 초과'));
+      // }, 10000);
+
       childProcess.stdout.on('data', (e) => {
+        this.logger.silly('data', {
+          data: e.toString(),
+        });
         result.push(e.toString());
       });
 
@@ -110,6 +118,9 @@ export class ProcessService {
       });
 
       childProcess.stderr.on('data', (error) => {
+        this.logger.silly('stderr', {
+          stdErr: error.toString(),
+        });
         const tmpDirPattern = new RegExp(
           `${this.config.tmpDir}|${process.cwd()}`,
           'g',

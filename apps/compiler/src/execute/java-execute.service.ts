@@ -18,9 +18,9 @@ export class JavaExecuteService extends ExecuteService {
     return [
       '--release',
       '11',
-      '-J-Xms1024m',
-      '-J-Xmx1920m',
-      '-J-Xss512m',
+      '-J-Xms128m',
+      '-J-Xmx256m',
+      '-J-Xss512k',
       '-encoding',
       'UTF-8',
       codePath,
