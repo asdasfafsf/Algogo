@@ -109,7 +109,7 @@ export class ProcessService {
             reject(new TimeoutError('시간 초과'));
             break;
           default:
-            reject(new RuntimeError(stdError.join('')));
+            reject(new Error(stdError.join('')));
         }
       });
 
