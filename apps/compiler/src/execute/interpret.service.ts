@@ -85,6 +85,10 @@ export class InterpretService implements Execute {
       );
       return result;
     } catch (error) {
+      if (error instanceof TimeoutError) {
+        throw error;
+      }
+
       this.handleError(error);
       throw error;
     } finally {
