@@ -1,0 +1,6 @@
+// This file is supposed to trigger CorruptedList error
+
+int main() {
+    // TODO: Implement code that causes CorruptedList
+    return 0;
+}

@@ -1,0 +1,6 @@
+// This file is supposed to trigger ShiftExponent error
+
+int main() {
+    // TODO: Implement code that causes ShiftExponent
+    return 0;
+}

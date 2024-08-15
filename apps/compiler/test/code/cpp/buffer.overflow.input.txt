@@ -1,0 +1,6 @@
+// This file is supposed to trigger BufferOverflow error
+
+int main() {
+    // TODO: Implement code that causes BufferOverflow
+    return 0;
+}

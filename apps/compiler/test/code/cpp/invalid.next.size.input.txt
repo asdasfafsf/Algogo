@@ -1,0 +1,6 @@
+// This file is supposed to trigger InvalidNextSize error
+
+int main() {
+    // TODO: Implement code that causes InvalidNextSize
+    return 0;
+}

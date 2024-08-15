@@ -1,0 +1,6 @@
+// This file is supposed to trigger Segfault error
+
+int main() {
+    // TODO: Implement code that causes Segfault
+    return 0;
+}

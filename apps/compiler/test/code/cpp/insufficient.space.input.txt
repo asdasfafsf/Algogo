@@ -1,0 +1,6 @@
+// This file is supposed to trigger InsufficientSpace error
+
+int main() {
+    // TODO: Implement code that causes InsufficientSpace
+    return 0;
+}

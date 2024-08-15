@@ -1,0 +1,6 @@
+// This file is supposed to trigger StoreToNullPointer error
+
+int main() {
+    // TODO: Implement code that causes StoreToNullPointer
+    return 0;
+}

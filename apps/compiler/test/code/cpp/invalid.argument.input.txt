@@ -1,0 +1,6 @@
+// This file is supposed to trigger invalid_argument error
+
+int main() {
+    // TODO: Implement code that causes invalid_argument
+    return 0;
+}

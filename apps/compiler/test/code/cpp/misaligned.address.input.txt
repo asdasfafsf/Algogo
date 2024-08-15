@@ -1,0 +1,6 @@
+// This file is supposed to trigger MisalignedAddress error
+
+int main() {
+    // TODO: Implement code that causes MisalignedAddress
+    return 0;
+}

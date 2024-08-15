@@ -1,0 +1,6 @@
+// This file is supposed to trigger DoubleFree error
+
+int main() {
+    // TODO: Implement code that causes DoubleFree
+    return 0;
+}

@@ -1,0 +1,6 @@
+// This file is supposed to trigger AssertionFailed error
+
+int main() {
+    // TODO: Implement code that causes AssertionFailed
+    return 0;
+}

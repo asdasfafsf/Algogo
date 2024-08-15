@@ -1,0 +1,6 @@
+// This file is supposed to trigger bad_alloc error
+
+int main() {
+    // TODO: Implement code that causes bad_alloc
+    return 0;
+}

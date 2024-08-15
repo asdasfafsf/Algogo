@@ -1,0 +1,6 @@
+// This file is supposed to trigger bad_array_new_length error
+
+int main() {
+    // TODO: Implement code that causes bad_array_new_length
+    return 0;
+}

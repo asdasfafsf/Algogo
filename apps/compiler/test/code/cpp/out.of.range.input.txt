@@ -1,0 +1,6 @@
+// This file is supposed to trigger out_of_range error
+
+int main() {
+    // TODO: Implement code that causes out_of_range
+    return 0;
+}

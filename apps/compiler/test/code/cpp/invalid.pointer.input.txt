@@ -1,0 +1,6 @@
+// This file is supposed to trigger InvalidPointer error
+
+int main() {
+    // TODO: Implement code that causes InvalidPointer
+    return 0;
+}
