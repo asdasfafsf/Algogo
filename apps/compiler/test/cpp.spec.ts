@@ -101,21 +101,21 @@ describe('CppExecuteService - Error Tests', () => {
   //   );
   // }, 10000);
 
-  // it('should throw double free error', async () => {
-  //   await runTestWithErrorExpectation(
-  //     'double.free.cpp',
-  //     RuntimeError,
-  //     'Double free or corruption',
-  //   );
-  // }, 10000);
-
-  it('should throw invalid pointer error', async () => {
+  it('should throw double free error', async () => {
     await runTestWithErrorExpectation(
-      'invalid.pointer.cpp',
+      'double.free.cpp',
       RuntimeError,
-      'InvalidPointer',
+      'Double free or corruption',
     );
   }, 10000);
+
+  // it('should throw invalid pointer error', async () => {
+  //   await runTestWithErrorExpectation(
+  //     'invalid.pointer.cpp',
+  //     RuntimeError,
+  //     'InvalidPointer',
+  //   );
+  // }, 10000);
 
   // it('should throw memory corruption error', async () => {
   //   await runTestWithErrorExpectation(

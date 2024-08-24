@@ -14,7 +14,7 @@ export class CppExecuteService extends ExecuteService {
       '-o',
       compiledPath,
       '-O2',
-      // '-Wall',
+      '-Wall',
       '-lm',
       '-std=gnu++17',
       '-DONLINE_JUDGE',
