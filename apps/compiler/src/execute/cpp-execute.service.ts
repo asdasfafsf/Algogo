@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ExecuteService } from './execute.service';
+import RuntimeError from './error/runtime-error';
 
 @Injectable()
 export class CppExecuteService extends ExecuteService {
@@ -31,5 +32,16 @@ export class CppExecuteService extends ExecuteService {
 
   getFileExtension(): string {
     return 'cc';
+  }
+
+  handleError(error: Error) {
+    if (error.message === 'Segmentation fault') {
+      throw new RuntimeError('Segmentation fault');
+    } else if (
+      error.message.includes('Buffer contains: This is a very long string')
+    ) {
+      throw new RuntimeError('BufferOverflow');
+    }
+    throw error;
   }
 }

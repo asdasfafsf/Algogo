@@ -1,6 +1,3 @@
-// This file is supposed to trigger DoubleFree error
-
-int main() {
-    // TODO: Implement code that causes DoubleFree
-    return 0;
-}
+1000
+2
+1 0

@@ -1,10 +1,8 @@
 #include <iostream>
 
 int main() {
-    int a = 10;
-    int b = 0;
 
-    int c = a / b; // 0으로 나누기 시도
+    float c = 1.25 / 0.0; // 0으로 나누기 시도
 
     std::cout << "Result: " << c << std::endl;
 

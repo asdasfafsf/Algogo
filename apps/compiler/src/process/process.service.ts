@@ -10,7 +10,6 @@ import { uuidv7 } from 'uuidv7';
 import { Logger } from 'winston';
 import Config from '../config/config';
 import { ConfigType } from '@nestjs/config';
-import RuntimeError from '../execute/error/runtime-error';
 import TimeoutError from '../execute/error/timeout-error';
 
 @Injectable()
@@ -69,11 +68,6 @@ export class ProcessService {
         this.logger.silly('process input end');
       }
 
-      // setTimeout(() => {
-      //   childProcess.kill('SIGKILL');
-      //   reject(new TimeoutError('시간 초과'));
-      // }, 10000);
-
       childProcess.stdout.on('data', (e) => {
         this.logger.silly('data', {
           data: e.toString(),
@@ -82,18 +76,22 @@ export class ProcessService {
       });
 
       childProcess.on('exit', async () => {
+        this.logger.silly('exit', {});
         clearInterval(checkProcessUsageInterval);
       });
 
       childProcess.on('close', async (closeCode, closeResult) => {
         if (closeCode === 0) {
+          this.logger.silly('closeCode 0', {});
           resolve({
             processTime: Number((performance.now() - startTime).toFixed(1)),
             memory: Number((currentMemory / Math.pow(1024, 1)).toFixed(1)),
             result: result.join('\n').trim(),
           });
+          childProcess.kill('SIGKILL');
+        } else if (closeCode !== 0 && !closeResult) {
+          reject(new Error('NZEC ERROR'));
         }
-
         this.logger.silly('closeCode', {
           closeCode,
           closeResult,
@@ -103,7 +101,10 @@ export class ProcessService {
 
         switch (closeResult) {
           case 'SIGSEGV':
-            reject(new RuntimeError('Segmentation fault'));
+            reject(new Error('Segmentation fault'));
+            break;
+          case 'SIGABRT':
+            reject(new Error(result.join('')));
             break;
           case 'SIGTERM':
             reject(new TimeoutError('시간 초과'));
@@ -114,6 +115,9 @@ export class ProcessService {
       });
 
       childProcess.on('error', (error) => {
+        this.logger.silly('error', {
+          error,
+        });
         reject(error);
       });
 
@@ -132,7 +136,7 @@ export class ProcessService {
       .then((responseExecute) => responseExecute)
       .finally(() => {
         clearInterval(checkProcessUsageInterval);
-        childProcess.kill();
+        childProcess.kill('SIGKILL');
         this.tasks.delete(uuid);
       });
   }
@@ -140,7 +144,7 @@ export class ProcessService {
   async clearAllProcesses() {
     this.tasks.forEach((process) => {
       if (process.killed === false) {
-        process.kill();
+        process.kill('SIGKILL');
       }
     });
 
