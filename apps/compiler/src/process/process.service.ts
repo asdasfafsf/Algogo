@@ -90,7 +90,7 @@ export class ProcessService {
           });
           childProcess.kill('SIGKILL');
         } else if (closeCode !== 0 && !closeResult) {
-          reject(new Error('NZEC ERROR'));
+          reject(new Error('NZEC'));
         }
         this.logger.silly('closeCode', {
           closeCode,
@@ -106,7 +106,7 @@ export class ProcessService {
           case 'SIGABRT':
             reject(
               new Error(
-                result.length > 0 ? result.join('') : stdError.join(''),
+                stdError.length > 0 ? stdError.join('') : result.join(''),
               ),
             );
             break;

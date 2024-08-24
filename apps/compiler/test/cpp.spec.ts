@@ -66,15 +66,15 @@ describe('CppExecuteService - Error Tests', () => {
     const input = await fs.readFile(inputPath, 'utf-8');
     try {
       await cppExecuteService.execute(source, input);
+      throw new Error('');
     } catch (e) {
-      console.error(e.message);
       expect(e).toBeInstanceOf(expectedError);
       if (errorMessageContains) {
         expect(e.message).toContain(errorMessageContains);
       }
     }
 
-    throw new Error('exception not occured');
+    // throw new Error('exception not occured');
   };
 
   // it('should throw segfault error', async () => {
@@ -105,7 +105,7 @@ describe('CppExecuteService - Error Tests', () => {
     await runTestWithErrorExpectation(
       'double.free.cpp',
       RuntimeError,
-      'Double free or corruption',
+      'DoubleFree',
     );
   }, 10000);
 

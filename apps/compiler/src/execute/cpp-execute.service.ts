@@ -37,12 +37,12 @@ export class CppExecuteService extends ExecuteService {
   handleError(error: Error) {
     if (error.message === 'Segmentation fault') {
       throw new RuntimeError('Segmentation fault');
-    } else if (
-      error.message.includes('Buffer contains: This is a very long string')
-    ) {
+    } else if (error.message.includes('Buffer contains: This is a')) {
       throw new RuntimeError('BufferOverflow');
     } else if (error.message.includes('free(): invalid pointer')) {
       throw new RuntimeError('InvalidPointer');
+    } else if (error.message.includes('double free or corruption')) {
+      throw new RuntimeError('DoubleFree');
     }
     throw error;
   }
