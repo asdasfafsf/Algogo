@@ -14,7 +14,7 @@ export class CppExecuteService extends ExecuteService {
       '-o',
       compiledPath,
       '-O2',
-      '-Wall',
+      // '-Wall',
       '-lm',
       '-std=gnu++17',
       '-DONLINE_JUDGE',
@@ -41,6 +41,8 @@ export class CppExecuteService extends ExecuteService {
       error.message.includes('Buffer contains: This is a very long string')
     ) {
       throw new RuntimeError('BufferOverflow');
+    } else if (error.message.includes('free(): invalid pointer')) {
+      throw new RuntimeError('InvalidPointer');
     }
     throw error;
   }

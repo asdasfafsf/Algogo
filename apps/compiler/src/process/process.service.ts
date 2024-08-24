@@ -104,7 +104,11 @@ export class ProcessService {
             reject(new Error('Segmentation fault'));
             break;
           case 'SIGABRT':
-            reject(new Error(result.join('')));
+            reject(
+              new Error(
+                result.length > 0 ? result.join('') : stdError.join(''),
+              ),
+            );
             break;
           case 'SIGTERM':
             reject(new TimeoutError('시간 초과'));

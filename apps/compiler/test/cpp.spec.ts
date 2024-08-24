@@ -67,6 +67,7 @@ describe('CppExecuteService - Error Tests', () => {
     try {
       await cppExecuteService.execute(source, input);
     } catch (e) {
+      console.error(e.message);
       expect(e).toBeInstanceOf(expectedError);
       if (errorMessageContains) {
         expect(e.message).toContain(errorMessageContains);
@@ -112,7 +113,7 @@ describe('CppExecuteService - Error Tests', () => {
     await runTestWithErrorExpectation(
       'invalid.pointer.cpp',
       RuntimeError,
-      'Invalid pointer',
+      'InvalidPointer',
     );
   }, 10000);
 
