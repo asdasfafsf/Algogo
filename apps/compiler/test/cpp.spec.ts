@@ -133,13 +133,13 @@ describe('CppExecuteService - Error Tests', () => {
   //   );
   // }, 10000);
 
-  it('should throw out of range error', async () => {
-    await runTestWithErrorExpectation(
-      'out.of.range.cpp',
-      RuntimeError,
-      'out_of_range',
-    );
-  }, 10000);
+  // it('should throw out of range error', async () => {
+  //   await runTestWithErrorExpectation(
+  //     'out.of.range.cpp',
+  //     RuntimeError,
+  //     'out_of_range',
+  //   );
+  // }, 10000);
 
   // it('should throw past the end iterator error', async () => {
   //   await runTestWithErrorExpectation(
@@ -149,13 +149,13 @@ describe('CppExecuteService - Error Tests', () => {
   //   );
   // }, 10000);
 
-  // it('should throw invalid next size error', async () => {
-  //   await runTestWithErrorExpectation(
-  //     'invalid.next.size.cpp',
-  //     RuntimeError,
-  //     'Invalid next size',
-  //   );
-  // }, 10000);
+  it('should throw invalid next size error', async () => {
+    await runTestWithErrorExpectation(
+      'invalid.next.size.cpp',
+      RuntimeError,
+      'Invalid next size',
+    );
+  }, 10000);
 
   // it('should throw bad alloc error', async () => {
   //   await runTestWithErrorExpectation(

@@ -47,6 +47,10 @@ export class CppExecuteService extends ExecuteService {
       throw new RuntimeError('MemoryCorruption');
     } else if (error.message.includes('std::out_of_range')) {
       throw new RuntimeError('out_of_range');
+    } else if (
+      error.message.includes('attempt to decrement a past-the-end iterator')
+    ) {
+      throw new RuntimeError('PastTheEndIterator');
     }
     throw error;
   }

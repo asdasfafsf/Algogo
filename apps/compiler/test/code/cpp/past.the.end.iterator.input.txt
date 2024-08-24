@@ -1,6 +1,0 @@
-// This file is supposed to trigger PastTheEndIterator error
-
-int main() {
-    // TODO: Implement code that causes PastTheEndIterator
-    return 0;
-}
