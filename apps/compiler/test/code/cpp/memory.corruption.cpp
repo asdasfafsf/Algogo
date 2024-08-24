@@ -1,12 +1,27 @@
-#include <iostream>
-#include <cstring>
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct {
+    int id;
+    char name[20];
+} Employee;
 
 int main() {
-    char* buffer = new char[10];
-    std::strcpy(buffer, "This is a string that is too long"); // 버퍼 크기를 초과하여 메모리 덮어쓰기
+    Employee* empList;
+    int empCount = 5;
 
-    std::cout << "Buffer contains: " << buffer << std::endl;
+    empList = (Employee*)malloc(empCount * sizeof(Employee));
 
-    delete[] buffer;
+    for (int i = 0; i <= empCount; i++) {
+        empList[i].id = i + 1;
+        snprintf(empList[i].name, sizeof(empList[i].name), "Employee %d", i + 1);
+    }
+
+    for (int i = 0; i <= empCount; i++) {
+        printf("ID: %d, Name: %s\n", empList[i].id, empList[i].name);
+    }
+
+    free(empList);
+
     return 0;
 }

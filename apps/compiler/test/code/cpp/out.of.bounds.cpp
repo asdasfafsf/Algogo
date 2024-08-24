@@ -1,12 +1,10 @@
 #include <iostream>
-#include <vector>
 
 int main() {
-    std::vector<int> vec = {1, 2, 3};
+    int arr[5] = {1, 2, 3, 4, 5};
 
-    int value = vec[5]; // 범위를 벗어난 인덱스에 접근 시도
-
-    std::cout << "Value: " << value << std::endl;
+    // 배열 경계를 넘어서 접근 (Out of Bounds)
+    std::cout << arr[10] << std::endl;  // Undefined Behavior
 
     return 0;
 }

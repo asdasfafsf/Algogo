@@ -1,6 +1,0 @@
-// This file is supposed to trigger MemoryCorruption error
-
-int main() {
-    // TODO: Implement code that causes MemoryCorruption
-    return 0;
-}

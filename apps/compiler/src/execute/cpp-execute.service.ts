@@ -43,6 +43,10 @@ export class CppExecuteService extends ExecuteService {
       throw new RuntimeError('InvalidPointer');
     } else if (error.message.includes('double free or corruption')) {
       throw new RuntimeError('DoubleFree');
+    } else if (error.message.includes('malloc(): memory corruption')) {
+      throw new RuntimeError('MemoryCorruption');
+    } else if (error.message.includes('std::out_of_range')) {
+      throw new RuntimeError('out_of_range');
     }
     throw error;
   }

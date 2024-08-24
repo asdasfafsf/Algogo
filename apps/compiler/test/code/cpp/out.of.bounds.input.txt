@@ -1,6 +1,14 @@
-// This file is supposed to trigger OutOfBounds error
-
-int main() {
-    // TODO: Implement code that causes OutOfBounds
-    return 0;
-}
+13
+but
+i
+wont
+hesitate
+no
+more
+no
+more
+it
+cannot
+wait
+im
+yours
