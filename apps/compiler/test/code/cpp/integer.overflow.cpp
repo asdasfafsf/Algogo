@@ -1,11 +1,11 @@
 #include <iostream>
-#include <limits>
-
+#include <vector>
+using namespace std;
 int main() {
-    int maxInt = std::numeric_limits<int>::max(); // int의 최대값
-    int overflowed = maxInt + 1; // 정수 오버플로우 발생
-
-    std::cout << "Overflowed value: " << overflowed << std::endl;
-
+    int a = 2147483647;
+    a += 1;
+    cout << a << '\n';
+    vector<int> d(10);
+    d[1000] = 100;
     return 0;
 }

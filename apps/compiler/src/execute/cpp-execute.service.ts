@@ -37,7 +37,10 @@ export class CppExecuteService extends ExecuteService {
   handleError(error: Error) {
     if (error.message === 'Segmentation fault') {
       throw new RuntimeError('Segmentation fault');
-    } else if (error.message.includes('Buffer contains: This is a')) {
+    } else if (
+      error.message.includes('Buffer contains: This is a') ||
+      error.message.includes('buffer overflow detected')
+    ) {
       throw new RuntimeError('BufferOverflow');
     } else if (error.message.includes('free(): invalid pointer')) {
       throw new RuntimeError('InvalidPointer');
@@ -61,6 +64,12 @@ export class CppExecuteService extends ExecuteService {
       throw new RuntimeError('AssertionFailed');
     } else if (error.message === 'BusError') {
       throw new RuntimeError('BusError');
+    } else if (error.message.includes('corrupted double-linked list')) {
+      throw new RuntimeError('CorruptedList');
+    } else if (
+      error.message.toLowerCase().includes('floating point exception')
+    ) {
+      throw new RuntimeError('FloatingPointException');
     }
     throw error;
   }
