@@ -113,6 +113,8 @@ export class ProcessService {
           case 'SIGTERM':
             reject(new TimeoutError('시간 초과'));
             break;
+          case 'SIGBUS':
+            reject(new Error('BusError'));
           default:
             reject(new Error(stdError.join('')));
         }

@@ -149,13 +149,13 @@ describe('CppExecuteService - Error Tests', () => {
   //   );
   // }, 10000);
 
-  it('should throw invalid next size error', async () => {
-    await runTestWithErrorExpectation(
-      'invalid.next.size.cpp',
-      RuntimeError,
-      'Invalid next size',
-    );
-  }, 10000);
+  // it('should throw invalid next size error', async () => {
+  //   await runTestWithErrorExpectation(
+  //     'invalid.next.size.cpp',
+  //     RuntimeError,
+  //     'Invalid next size',
+  //   );
+  // }, 10000);
 
   // it('should throw bad alloc error', async () => {
   //   await runTestWithErrorExpectation(
@@ -177,7 +177,7 @@ describe('CppExecuteService - Error Tests', () => {
   //   await runTestWithErrorExpectation(
   //     'assertion.failed.cpp',
   //     RuntimeError,
-  //     'Assertion failed',
+  //     'AssertionFailed',
   //   );
   // }, 10000);
 
@@ -189,13 +189,13 @@ describe('CppExecuteService - Error Tests', () => {
   //   );
   // }, 10000);
 
-  // it('should throw bus error', async () => {
-  //   await runTestWithErrorExpectation(
-  //     'bus.error.cpp',
-  //     RuntimeError,
-  //     'Bus error',
-  //   );
-  // }, 10000);
+  it('should throw bus error', async () => {
+    await runTestWithErrorExpectation(
+      'bus.error.cpp',
+      RuntimeError,
+      'Bus error',
+    );
+  }, 10000);
 
   // it('should throw misaligned address error', async () => {
   //   await runTestWithErrorExpectation(

@@ -51,6 +51,16 @@ export class CppExecuteService extends ExecuteService {
       error.message.includes('attempt to decrement a past-the-end iterator')
     ) {
       throw new RuntimeError('PastTheEndIterator');
+    } else if (error.message.includes('free(): invalid next size')) {
+      throw new RuntimeError('InvalidNextSize');
+    } else if (error.message.includes('std::bad_alloc')) {
+      throw new RuntimeError('bad_alloc');
+    } else if (error.message.includes('std::bad_array_new_length')) {
+      throw new RuntimeError('bad_array_new_length');
+    } else if (error.message.match(/Assertion\s+`([^']+)'\s+failed/)) {
+      throw new RuntimeError('AssertionFailed');
+    } else if (error.message === 'BusError') {
+      throw new RuntimeError('BusError');
     }
     throw error;
   }
