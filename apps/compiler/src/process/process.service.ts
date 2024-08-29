@@ -89,9 +89,12 @@ export class ProcessService {
             result: result.join('\n').trim(),
           });
           childProcess.kill('SIGKILL');
-        } else if (closeCode !== 0 && !closeResult) {
-          reject(new Error('NZEC'));
         }
+
+        if (stdError.length === 0 && closeCode !== 0) {
+          throw new Error('NZEC');
+        }
+
         this.logger.silly('closeCode', {
           closeCode,
           closeResult,
@@ -121,16 +124,10 @@ export class ProcessService {
       });
 
       childProcess.on('error', (error) => {
-        this.logger.silly('error', {
-          error,
-        });
         reject(error);
       });
 
       childProcess.stderr.on('data', (error) => {
-        this.logger.silly('stderr', {
-          stdErr: error.toString(),
-        });
         const tmpDirPattern = new RegExp(
           `${this.config.tmpDir}|${process.cwd()}`,
           'g',
