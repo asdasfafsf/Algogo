@@ -47,7 +47,7 @@ export class RunService {
         return {
           ...format,
           code: '9001',
-          result: '런타임 에러',
+          result: '런타임 에러(' + (e.message || 'Unknown') + ')',
         };
       }
 
@@ -60,7 +60,11 @@ export class RunService {
       }
 
       this.logger.error(e.message);
-      throw e;
+      return {
+        ...format,
+        code: '9999',
+        result: '예외 오류',
+      };
     }
   }
 }

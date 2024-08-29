@@ -25,14 +25,16 @@ import { ExecuteConsumer } from './execute.consumer';
       }),
     }),
     BullModule.registerQueueAsync({
-      useFactory: async () => ({
-        name: 'execute',
-        connection: {
-          host: process.env.BULLMQ_HOST,
-          port: Number(process.env.BULLMQ_PORT),
-          password: process.env.BULLMQ_PASSWORD,
-        },
-      }),
+      useFactory: async () => {
+        return {
+          name: process.env.BULLMQ_QUEUE_NAME,
+          connection: {
+            host: process.env.BULLMQ_HOST,
+            port: Number(process.env.BULLMQ_PORT),
+            password: process.env.BULLMQ_PASSWORD,
+          },
+        };
+      },
     }),
     ProcessModule,
     FileModule,

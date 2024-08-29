@@ -67,7 +67,6 @@ export class InterpretService implements Execute {
 
   async execute(code: string, input: string): Promise<ResponseExecuteDto> {
     const codePath = await this.compile(code);
-    this.logger.silly('interpreter execute start');
     const tmpPath = path.dirname(codePath);
 
     try {
