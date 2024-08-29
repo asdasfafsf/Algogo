@@ -8,8 +8,8 @@ export class ProblemsRepository {
   async getProblemList(
     pageNo: number,
     pageSize: number,
-    levelList: number[],
-    typeList: string[],
+    levelList?: number[],
+    typeList?: string[],
   ) {
     const problemSummaryList = await this.prismaService.problem.findMany({
       select: {
