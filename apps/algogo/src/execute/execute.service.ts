@@ -31,33 +31,31 @@ export class ExecuteService {
     const { provider } = requestExecuteDto;
     const jobId = await this.generateJobId(provider);
 
-    const event = new QueueEvents('execute', {
+    const event = new QueueEvents(this.config.queueName, {
       connection: {
         ...this.config,
       },
     });
 
     try {
-      const job = await this.queue.add('execute', requestExecuteDto, {
-        attempts: 3,
-        backoff: { type: 'exponential', delay: 1000 },
-        jobId,
-        removeOnComplete: true,
-        removeOnFail: true,
-        priority: 1,
-      });
-
-      const result = await job.waitUntilFinished(event, 0.1);
+      const job = await this.queue.add(
+        this.config.queueName,
+        requestExecuteDto,
+        {
+          attempts: 3,
+          backoff: { type: 'exponential', delay: 1000 },
+          jobId,
+          removeOnComplete: true,
+          removeOnFail: true,
+          priority: 1,
+        },
+      );
+      const result = await job.waitUntilFinished(event);
 
       return result;
     } catch (error) {
-      this.logger.error('execute error');
-
-      if (error?.message?.includes('timed out before finishing') > -1) {
-        throw {
-          ...new BadRequestException('시간 초과'),
-          errorCode: '9000',
-        };
+      if (error?.message?.includes('timed out before finishing')) {
+        throw new BadRequestException('시간 초과');
       }
       throw new InternalServerErrorException('실행 오류');
     } finally {
