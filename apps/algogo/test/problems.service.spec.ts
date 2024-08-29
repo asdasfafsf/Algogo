@@ -8,13 +8,14 @@ import {
 } from 'nest-winston';
 import * as winston from 'winston';
 import { PrismaModule } from '../src/prisma/prisma.module';
+import { ProblemsRepository } from '../src/problems/problems.repository';
 
 describe('ProblemsService', () => {
   let service: ProblemsService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ProblemsService],
+      providers: [ProblemsService, ProblemsRepository],
       imports: [
         WinstonModule.forRoot({
           transports: [
