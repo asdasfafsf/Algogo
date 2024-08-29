@@ -59,30 +59,22 @@ export class ProcessService {
     return new Promise<ResponseExecuteDto>((resolve, reject) => {
       const result = [];
       const stdError = [];
-      this.logger.silly('process input', {
-        input: input + '',
-      });
+
       if (input) {
         childProcess.stdin.write(input);
         childProcess.stdin.end();
-        this.logger.silly('process input end');
       }
 
       childProcess.stdout.on('data', (e) => {
-        this.logger.silly('data', {
-          data: e.toString(),
-        });
         result.push(e.toString());
       });
 
       childProcess.on('exit', async () => {
-        this.logger.silly('exit', {});
         clearInterval(checkProcessUsageInterval);
       });
 
       childProcess.on('close', async (closeCode, closeResult) => {
         if (closeCode === 0) {
-          this.logger.silly('closeCode 0', {});
           resolve({
             processTime: Number((performance.now() - startTime).toFixed(1)),
             memory: Number((currentMemory / Math.pow(1024, 1)).toFixed(1)),
@@ -94,13 +86,6 @@ export class ProcessService {
         if (stdError.length === 0 && closeCode !== 0) {
           throw new Error('NZEC');
         }
-
-        this.logger.silly('closeCode', {
-          closeCode,
-          closeResult,
-          result,
-          stdError,
-        });
 
         switch (closeResult) {
           case 'SIGSEGV':
