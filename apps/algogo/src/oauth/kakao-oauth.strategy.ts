@@ -40,7 +40,7 @@ export class KakaoOAuthStrategy extends PassportStrategy(Strategy, 'kakao') {
       provider: 'kakao',
       name: nickname,
       id: sub,
-      email,
+      email: email ?? '',
       accessToken,
     };
   }
