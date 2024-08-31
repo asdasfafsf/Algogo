@@ -84,7 +84,7 @@ export class ProcessService {
         }
 
         if (stdError.length === 0 && closeCode !== 0) {
-          throw new Error('NZEC');
+          reject(new Error('NZEC'));
         }
 
         switch (closeResult) {
