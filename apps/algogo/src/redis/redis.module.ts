@@ -24,6 +24,10 @@ export class RedisModule {
           url: `redis://${host}:${port}`,
           password,
         }) as RedisClientType;
+        client.on('connect', async () => {});
+        client.on('end', async () => {});
+        client.on('error', async () => {});
+
         await client.connect();
         return client;
       },
