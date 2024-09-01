@@ -1,6 +1,10 @@
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 
 export class RequestExecuteDto {
+  @IsString()
+  @IsNotEmpty()
+  seq: string;
+
   @IsEnum(['java', 'java17', 'cpp', 'javascript', 'python', 'c++'])
   @IsNotEmpty()
   provider: 'java' | 'java17' | 'cpp' | 'javascript' | 'python' | 'c++';
