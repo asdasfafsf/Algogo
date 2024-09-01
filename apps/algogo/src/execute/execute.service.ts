@@ -1,15 +1,12 @@
 import { RequestExecuteDto } from '@libs/core/dto/RequestExecuteDto';
 import { InjectQueue } from '@nestjs/bullmq';
-import {
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Queue, QueueEvents } from 'bullmq';
 import bullmqConfig from '../config/bullmqConfig';
 import { ConfigType } from '@nestjs/config';
 import { Logger } from 'winston';
 import { uuidv7 } from 'uuidv7';
+import { ResponseExecuteResultDto } from '@libs/core/dto/ResponseExecuteResultDto';
 
 @Injectable()
 export class ExecuteService {
@@ -26,7 +23,9 @@ export class ExecuteService {
     return `${provider}_${Math.floor(new Date().getTime() / 1000)}_${uuidv7()}`;
   }
 
-  async execute(requestExecuteDto: RequestExecuteDto) {
+  async execute(
+    requestExecuteDto: RequestExecuteDto,
+  ): Promise<ResponseExecuteResultDto> {
     const { provider } = requestExecuteDto;
     const jobId = await this.generateJobId(provider);
 
@@ -55,11 +54,18 @@ export class ExecuteService {
     } catch (error) {
       if (error?.message?.includes('timed out before finishing')) {
         return {
+          processTime: 0,
+          memory: 0,
           code: '9001',
           result: '시간 초과',
         };
       }
-      throw new InternalServerErrorException('실행 오류');
+      return {
+        processTime: 0,
+        memory: 0,
+        code: '9999',
+        result: '예외 오류',
+      };
     } finally {
       if (await this.queue.getJob(jobId)) {
         this.queue.remove(jobId);
