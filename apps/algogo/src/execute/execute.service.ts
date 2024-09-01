@@ -1,7 +1,6 @@
 import { RequestExecuteDto } from '@libs/core/dto/RequestExecuteDto';
 import { InjectQueue } from '@nestjs/bullmq';
 import {
-  BadRequestException,
   Inject,
   Injectable,
   InternalServerErrorException,
@@ -55,7 +54,10 @@ export class ExecuteService {
       return result;
     } catch (error) {
       if (error?.message?.includes('timed out before finishing')) {
-        throw new BadRequestException('시간 초과');
+        return {
+          code: '9001',
+          result: '시간 초과',
+        };
       }
       throw new InternalServerErrorException('실행 오류');
     } finally {

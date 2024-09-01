@@ -4,6 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 import * as requestIp from 'request-ip';
 import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
+import { RedisIoAdapter } from './redis/redis.io.adapter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -25,6 +26,9 @@ async function bootstrap() {
       transformOptions: { enableImplicitConversion: true },
     }),
   );
-  await app.listen(process.env.SERVER_PORT);
+  const redisIoAdapter = new RedisIoAdapter(app);
+  await redisIoAdapter.connectToRedis();
+  app.useWebSocketAdapter(redisIoAdapter);
+  await app.listen(Number(process.env.SERVER_PORT));
 }
 bootstrap();

@@ -3,17 +3,16 @@ import { ExecuteService } from './execute.service';
 import { ExecuteController } from './execute.controller';
 import { BullModule } from '@nestjs/bullmq';
 import { AuthModule } from '../auth/auth.module';
-import { ConfigModule, ConfigService, ConfigType } from '@nestjs/config';
+import { ConfigType } from '@nestjs/config';
 import bullmqConfig from '../config/bullmqConfig';
+import { ExecuteGateway } from './execute.gateway';
 
 @Module({
   imports: [
     BullModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => {
-        const config: ConfigType<typeof bullmqConfig> =
-          configService.get('bullmqConfig');
+      imports: [],
+      inject: [bullmqConfig.KEY],
+      useFactory: async (config: ConfigType<typeof bullmqConfig>) => {
         return {
           connection: {
             host: config.host,
@@ -24,11 +23,9 @@ import bullmqConfig from '../config/bullmqConfig';
       },
     }),
     BullModule.registerQueueAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => {
-        const config: ConfigType<typeof bullmqConfig> =
-          configService.get('bullmqConfig');
+      imports: [],
+      inject: [bullmqConfig.KEY],
+      useFactory: async (config: ConfigType<typeof bullmqConfig>) => {
         return {
           name: config.queueName,
           connection: {
@@ -42,6 +39,6 @@ import bullmqConfig from '../config/bullmqConfig';
     AuthModule,
   ],
   controllers: [ExecuteController],
-  providers: [ExecuteService],
+  providers: [ExecuteService, ExecuteGateway],
 })
 export class ExecuteModule {}

@@ -50,7 +50,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     const stackTrace = (exception as any)?.stack || 'No stack trace available';
 
-    if (statusCode === HttpStatus.INTERNAL_SERVER_ERROR) {
+    if (
+      statusCode === HttpStatus.INTERNAL_SERVER_ERROR ||
+      process.env.NODE_ENV === 'development'
+    ) {
       this.logger.error(`INTERNAL_SERVER_ERROR`, {
         ip: request.ip,
         url: request.url,
