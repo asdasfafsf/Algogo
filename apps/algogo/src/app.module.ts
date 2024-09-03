@@ -34,6 +34,7 @@ import redisConfig from './config/redisConfig';
 import jwtConfig from './config/jwtConfig';
 import encryptConfig from './config/encryptConfig';
 import bullmqConfig from './config/bullmqConfig';
+import wsConfig from './config/wsConfig';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import bullmqConfig from './config/bullmqConfig';
         jwtConfig,
         encryptConfig,
         bullmqConfig,
+        wsConfig,
       ],
       isGlobal: true,
       validationSchema,

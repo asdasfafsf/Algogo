@@ -8,7 +8,7 @@ export class RedisService implements OnModuleDestroy {
     @Inject(REDIS_CLIENT) private readonly redisClient: RedisClientType,
   ) {}
 
-  async set(key: string, value: string, ttl: number): Promise<void> {
+  async set(key: string, value: string, ttl?: number): Promise<void> {
     await this.redisClient.set(key, value, {
       EX: ttl,
     });
@@ -20,6 +20,10 @@ export class RedisService implements OnModuleDestroy {
 
   async del(key: string): Promise<void> {
     await this.redisClient.del(key);
+  }
+
+  async keys(pattern: string): Promise<string[]> {
+    return this.redisClient.keys(pattern);
   }
 
   onModuleDestroy() {
