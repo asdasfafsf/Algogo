@@ -45,6 +45,8 @@ export class ExecuteGateway {
   private server: Server;
 
   async handleConnection(socket: AuthSocket) {
+    this.logger.silly('start connection');
+
     const context = { switchToWs: () => ({ getClient: () => socket }) };
     const isAuthorized = await this.wsAuthGurad.canActivate(context as any);
     if (!isAuthorized) {
@@ -52,23 +54,28 @@ export class ExecuteGateway {
       return;
     }
 
+    this.logger.silly(`connected id : ${socket.id}`);
+
     const { userNo, id } = socket;
     const preSocketId = await this.redisService.get(
       `${this.wsConfig.wsTag}_${userNo}`,
     );
 
+    await this.redisService.set(`${this.wsConfig.wsTag}_${userNo}`, id);
+
     if (preSocketId) {
       const prevSocket = this.server.sockets.sockets.get(preSocketId);
+      this.logger.silly(`prev socket id : ${prevSocket?.id}`);
       if (prevSocket?.connected) {
         prevSocket.disconnect();
       }
     }
 
-    await this.redisService.set(`${this.wsConfig.wsTag}_${userNo}`, id);
     socket.messageCount = 0;
   }
 
   async handleDisconnect(socket: AuthSocket) {
+    this.logger.silly('disconnect');
     const { userNo } = socket;
 
     const savedSocketId = await this.redisService.get(
@@ -76,6 +83,7 @@ export class ExecuteGateway {
     );
 
     if (savedSocketId === socket.id) {
+      this.logger.silly(`remove prev socket : ${savedSocketId}`);
       await this.redisService.del(`${this.wsConfig.wsTag}_${userNo}`);
     }
   }
