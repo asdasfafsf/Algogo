@@ -1,3 +1,9 @@
+generator markdown {
+    provider = "prisma-markdown"
+    output   = "./ERD.md"
+    title    = "Sinchon ICPC Camp ERD"
+}
+
 generator client {
     provider = "prisma-client-js"
 }
