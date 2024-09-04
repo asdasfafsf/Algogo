@@ -22,10 +22,12 @@ import { Logger } from 'winston';
 import { RedisService } from '../redis/redis.service';
 import WsConfig from '../config/wsConfig';
 import { ConfigType } from '@nestjs/config';
+import { Cron } from '@nestjs/schedule';
 
 class AuthSocket extends Socket {
   messageCount: number;
   userNo: string;
+  lastRequestTime: number;
 }
 
 @WebSocketGateway()
@@ -71,6 +73,7 @@ export class ExecuteGateway {
       }
     }
 
+    socket.lastRequestTime = Math.floor(new Date().getTime() / 1000);
     socket.messageCount = 0;
   }
 
@@ -82,7 +85,7 @@ export class ExecuteGateway {
       `${this.wsConfig.wsTag}_${userNo}`,
     );
 
-    if (savedSocketId === socket.id) {
+    if (!savedSocketId || savedSocketId === socket.id) {
       this.logger.silly(`remove prev socket : ${savedSocketId}`);
       await this.redisService.del(`${this.wsConfig.wsTag}_${userNo}`);
     }
@@ -115,6 +118,7 @@ export class ExecuteGateway {
     }
 
     try {
+      socket.lastRequestTime = Math.floor(new Date().getTime() / 1000);
       const response = await this.executeService.execute(requestExecuteDto);
       socket.messageCount--;
       return {
@@ -139,6 +143,28 @@ export class ExecuteGateway {
         message: '예외 오류',
         data: '',
       };
+    }
+  }
+
+  @Cron('0 * * * *')
+  async clearConnection() {
+    this.logger.silly('Clearing all socket connections from Redis');
+
+    const pattern = `${this.wsConfig.wsTag}_*`;
+    const keys = await this.redisService.keys(pattern);
+    const currentDateTime = Math.floor(new Date().getTime() / 1000);
+    for (const key of keys) {
+      const socketId = await this.redisService.get(key);
+
+      if (socketId) {
+        const socket = this.server.sockets.sockets.get(socketId) as AuthSocket;
+
+        if (socket) {
+          if (currentDateTime - socket.lastRequestTime > 60 * 59) {
+            socket.disconnect();
+          }
+        }
+      }
     }
   }
 }

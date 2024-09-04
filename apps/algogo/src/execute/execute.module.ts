@@ -6,9 +6,11 @@ import { AuthModule } from '../auth/auth.module';
 import { ConfigType } from '@nestjs/config';
 import bullmqConfig from '../config/bullmqConfig';
 import { ExecuteGateway } from './execute.gateway';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     BullModule.forRootAsync({
       imports: [],
       inject: [bullmqConfig.KEY],
