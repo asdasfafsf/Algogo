@@ -18,17 +18,18 @@ export class S3Service {
     });
   }
 
-  async upload(fileName: string, file: Buffer, contentType?: string) {
+  async upload(Key: string, Body: Buffer, ContentType?: string) {
     const command = new PutObjectCommand({
       Bucket: this.config.bucketName,
-      Key: fileName,
-      Body: file,
+      Key,
+      Body,
       ACL: 'public-read',
-      ContentType: contentType,
+      ContentType,
     });
 
     await this.s3Client.send(command);
 
-    return true;
+    const fileUrl = `https://${this.config.bucketName}.s3.${this.config.region}.amazonaws.com/${Key}`;
+    return fileUrl;
   }
 }
