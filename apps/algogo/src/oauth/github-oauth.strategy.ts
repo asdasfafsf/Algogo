@@ -6,6 +6,7 @@ import { Logger } from 'winston';
 import githubOAuthConfig from '../config/githubOAuthConfig';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
+import { OAuthProvider } from '../common/enums/OAuthProviderEnum';
 
 @Injectable()
 export class GithubOAuthStrategy extends PassportStrategy(Strategy, 'github') {
@@ -38,7 +39,7 @@ export class GithubOAuthStrategy extends PassportStrategy(Strategy, 'github') {
     const { id, name, email } = userInfo;
 
     return {
-      provider: 'github',
+      provider: OAuthProvider.GITHUB,
       name,
       id: id.toString(),
       email,

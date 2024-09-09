@@ -6,6 +6,7 @@ import { Logger } from 'winston';
 import kakaoOAuthConfig from '../config/kakaoOAuthConfig';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
+import { OAuthProvider } from '../common/enums/OAuthProviderEnum';
 
 @Injectable()
 export class KakaoOAuthStrategy extends PassportStrategy(Strategy, 'kakao') {
@@ -37,7 +38,7 @@ export class KakaoOAuthStrategy extends PassportStrategy(Strategy, 'kakao') {
     const userInfo = await this.getUserInfo(accessToken);
     const { sub, nickname, email } = userInfo;
     return {
-      provider: 'kakao',
+      provider: OAuthProvider.KAKAO,
       name: nickname,
       id: sub,
       email: email ?? '',

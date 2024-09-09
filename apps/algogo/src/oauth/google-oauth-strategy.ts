@@ -7,6 +7,7 @@ import { Logger } from 'winston';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
 import { RequestOAuthDto } from '@libs/core/dto/RequestOAuthDto';
+import { OAuthProvider } from '../common/enums/OAuthProviderEnum';
 
 @Injectable()
 export class GoogleOauthStrategy extends PassportStrategy(Strategy, 'google') {
@@ -38,7 +39,7 @@ export class GoogleOauthStrategy extends PassportStrategy(Strategy, 'google') {
     const userInfo = await this.getUserInfo(accessToken);
     const { sub, name, email } = userInfo;
     return {
-      provider: 'google',
+      provider: OAuthProvider.GOOGLE,
       name,
       id: sub,
       email,
