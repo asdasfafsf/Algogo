@@ -27,6 +27,7 @@ import { RedisModule } from './redis/redis.module';
 import { JwtModule } from './jwt/jwt.module';
 import { CryptoModule } from './crypto/crypto.module';
 import { ExecuteModule } from './execute/execute.module';
+import { MeModule } from './me/me.module';
 import googleOAuthConfig from './config/googleOAuthConfig';
 import kakaoOAuthConfig from './config/kakaoOAuthConfig';
 import githubOAuthConfig from './config/githubOAuthConfig';
@@ -84,6 +85,7 @@ import wsConfig from './config/wsConfig';
     JwtModule,
     CryptoModule,
     ExecuteModule,
+    MeModule,
   ],
 
   controllers: [AppController],

@@ -23,7 +23,7 @@ erDiagram
   String USER_OAUTH_ID
 }
 "USER_SOCIAL" {
-  String USER_SOCIAL_TYPE
+  String USER_SOCIAL_PROVIDER
   Int USER_NO FK
   String USER_SOCIAL_CONTENT
 }
@@ -101,7 +101,7 @@ erDiagram
 ### `USER_SOCIAL`
 
 **Properties**
-  - `USER_SOCIAL_TYPE`: 
+  - `USER_SOCIAL_PROVIDER`: 
   - `USER_NO`: 
   - `USER_SOCIAL_CONTENT`: 
 
