@@ -3,6 +3,10 @@ import { Logger } from 'winston';
 import { RequestProblemSummaryListDto } from '@libs/core/dto/RequestProblemSummaryListDto';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { ProblemsRepository } from './problems.repository';
+import { ResponseProblemSummaryDto } from './dto/ResponseProblemSummaryDto';
+import { ProblemType } from '../common/enums/ProblemTypeEnum';
+import { ResponseProblemDto } from './dto/ResponseProblemDto';
+import { ResponseProblemContentDto } from './dto/ResponseProblemContentDto';
 
 @Injectable()
 export class ProblemsService {
@@ -14,7 +18,7 @@ export class ProblemsService {
 
   async getProblemSummaryList(
     requestProblemSummaryDto: RequestProblemSummaryListDto,
-  ) {
+  ): Promise<ResponseProblemSummaryDto[]> {
     const { pageNo, pageSize, typeList, levelList } = requestProblemSummaryDto;
 
     try {
@@ -28,7 +32,7 @@ export class ProblemsService {
       return problemSummaryList.map((summary) => {
         return {
           ...summary,
-          key: summary.source,
+          typeList: summary.typeList.map((elem) => elem.name as ProblemType),
         };
       });
     } catch (e) {
@@ -40,7 +44,7 @@ export class ProblemsService {
     }
   }
 
-  async getProblem(uuid: string) {
+  async getProblem(uuid: string): Promise<ResponseProblemDto> {
     try {
       const problem = await this.problemsRepository.getProblem(uuid);
 
@@ -48,7 +52,12 @@ export class ProblemsService {
         throw new NotFoundException('문제를 찾을 수 없습니다.');
       }
 
-      return problem;
+      return {
+        ...problem,
+        contentList: problem?.contentList?.map(
+          (content) => content as ResponseProblemContentDto,
+        ),
+      };
     } catch (e) {
       this.logger.error(`${ProblemsService.name} getProblem uuid`, {
         message: e.message,

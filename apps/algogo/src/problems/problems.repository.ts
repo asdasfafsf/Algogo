@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { ProblemType } from '../common/enums/ProblemTypeEnum';
 
 @Injectable()
 export class ProblemsRepository {
@@ -9,7 +10,7 @@ export class ProblemsRepository {
     pageNo: number,
     pageSize: number,
     levelList?: number[],
-    typeList?: string[],
+    typeList?: ProblemType[],
   ) {
     const problemSummaryList = await this.prismaService.problem.findMany({
       select: {

@@ -1,6 +1,7 @@
-import { IsNumber, IsIn, Min } from 'class-validator';
+import { IsNumber, IsIn, Min, IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { ProblemType } from 'apps/algogo/src/common/enums/ProblemTypeEnum';
 
 export class RequestProblemSummaryListDto {
   @Transform(({ value }) => (value !== undefined ? Number(value) : 1))
@@ -41,5 +42,9 @@ export class RequestProblemSummaryListDto {
     default: [],
     isArray: true,
   })
-  typeList?: string[];
+  @IsOptional()
+  @IsIn(Object.values(ProblemType), {
+    message: '올바른 문제 유형이 아닙니다',
+  })
+  typeList?: ProblemType[];
 }
