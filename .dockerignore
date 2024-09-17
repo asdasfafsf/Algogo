@@ -1,0 +1,29 @@
+# Node.js 의존성 파일
+node_modules/
+
+# 빌드된 파일들
+dist/
+build/
+
+# Git 정보
+.git/
+
+# 환경 변수 파일 (필요한 경우 주석 처리)
+# .env
+
+# 로그 파일
+npm-debug.log
+yarn-error.log
+*.log
+
+# MacOS에서 생성되는 임시 파일
+.DS_Store
+
+# Docker 관련 설정 파일 (필요한 경우 추가)
+.dockerignore
+docker-compose.yml
+
+# IDE 관련 파일 (Visual Studio Code 등)
+.vscode/
+.idea/
+*.swp

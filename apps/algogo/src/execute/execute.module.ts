@@ -10,37 +10,28 @@ import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    BullModule.forRoot({
+      connection: {
+        host: process.env.BULLMQ_HOST,
+        port: Number(process.env.BULLMQ_PORT),
+        password: process.env.BULLMQ_PASSWORD,
+      },
+    }),
+    BullModule.registerQueue({
+      name: process.env.BULLMQ_QUEUE_NAME,
+      connection: {
+        host: process.env.BULLMQ_HOST,
+        port: Number(process.env.BULLMQ_PORT),
+        password: process.env.BULLMQ_PASSWORD,
+      },
+    }),
     ScheduleModule.forRoot(),
-    BullModule.forRootAsync({
-      imports: [],
-      inject: [bullmqConfig.KEY],
-      useFactory: async (config: ConfigType<typeof bullmqConfig>) => {
-        return {
-          connection: {
-            host: config.host,
-            port: config.port,
-            password: config.password,
-          },
-        };
-      },
-    }),
-    BullModule.registerQueueAsync({
-      imports: [],
-      inject: [bullmqConfig.KEY],
-      useFactory: async (config: ConfigType<typeof bullmqConfig>) => {
-        return {
-          name: config.queueName,
-          connection: {
-            host: config.host,
-            port: config.port,
-            password: config.password,
-          },
-        };
-      },
-    }),
     AuthModule,
   ],
   controllers: [ExecuteController],
   providers: [ExecuteService, ExecuteGateway],
 })
 export class ExecuteModule {}
+
+
+
