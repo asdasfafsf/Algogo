@@ -3,27 +3,30 @@ import { ExecuteService } from './execute.service';
 import { ExecuteController } from './execute.controller';
 import { BullModule } from '@nestjs/bullmq';
 import { AuthModule } from '../auth/auth.module';
-import { ConfigType } from '@nestjs/config';
+import { ConfigModule, ConfigType } from '@nestjs/config';
 import bullmqConfig from '../config/bullmqConfig';
 import { ExecuteGateway } from './execute.gateway';
 import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
-    BullModule.forRoot({
-      connection: {
-        host: process.env.BULLMQ_HOST,
-        port: Number(process.env.BULLMQ_PORT),
-        password: process.env.BULLMQ_PASSWORD,
-      },
+    ConfigModule.forRoot(),
+    BullModule.forRootAsync({
+      inject: [bullmqConfig.KEY],
+      useFactory: (config: ConfigType<typeof bullmqConfig>) => ({
+        connection: {
+          ...config,
+        },
+      }),
     }),
-    BullModule.registerQueue({
-      name: process.env.BULLMQ_QUEUE_NAME,
-      connection: {
-        host: process.env.BULLMQ_HOST,
-        port: Number(process.env.BULLMQ_PORT),
-        password: process.env.BULLMQ_PASSWORD,
-      },
+    BullModule.registerQueueAsync({
+      inject: [bullmqConfig.KEY],
+      useFactory: (config: ConfigType<typeof bullmqConfig>) => ({
+        name: config.queueName,
+        connection: {
+          ...config,
+        },
+      }),
     }),
     ScheduleModule.forRoot(),
     AuthModule,
@@ -32,6 +35,3 @@ import { ScheduleModule } from '@nestjs/schedule';
   providers: [ExecuteService, ExecuteGateway],
 })
 export class ExecuteModule {}
-
-
-

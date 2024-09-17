@@ -8,7 +8,6 @@ import { RedisIoAdapter } from './redis/redis.io.adapter';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
-  console.log(process.env);
   const app = await NestFactory.create(AppModule);
 
   if (process.env.NODE_ENV === 'development') {
