@@ -81,7 +81,6 @@ export class ExecuteService implements OnModuleInit {
       if (await this.queue.getJob(jobId)) {
         this.queue.remove(jobId);
       }
-      event.close();
     }
   }
 }
