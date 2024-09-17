@@ -28,6 +28,7 @@ import { JwtModule } from './jwt/jwt.module';
 import { CryptoModule } from './crypto/crypto.module';
 import { ExecuteModule } from './execute/execute.module';
 import { MeModule } from './me/me.module';
+import { LoggerModule } from './logger/logger.module';
 import googleOAuthConfig from './config/googleOAuthConfig';
 import kakaoOAuthConfig from './config/kakaoOAuthConfig';
 import githubOAuthConfig from './config/githubOAuthConfig';
@@ -36,6 +37,7 @@ import jwtConfig from './config/jwtConfig';
 import encryptConfig from './config/encryptConfig';
 import bullmqConfig from './config/bullmqConfig';
 import wsConfig from './config/wsConfig';
+import LoggerConfig from './config/LoggerConfig';
 
 @Module({
   imports: [
@@ -67,6 +69,7 @@ import wsConfig from './config/wsConfig';
         encryptConfig,
         bullmqConfig,
         wsConfig,
+        LoggerConfig,
       ],
       isGlobal: true,
       validationSchema,
@@ -88,6 +91,7 @@ import wsConfig from './config/wsConfig';
     CryptoModule,
     ExecuteModule,
     MeModule,
+    LoggerModule,
   ],
 
   controllers: [AppController],

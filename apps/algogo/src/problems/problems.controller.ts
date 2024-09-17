@@ -34,7 +34,6 @@ export class ProblemsController {
   async getProblemList(
     @Query() requestProblemSummaryDto: RequestProblemSummaryListDto,
   ): Promise<ResponseProblemSummaryDto[]> {
-    console.log(requestProblemSummaryDto);
     return await this.problemsService.getProblemSummaryList(
       requestProblemSummaryDto,
     );

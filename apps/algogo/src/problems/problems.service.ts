@@ -1,18 +1,16 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { Logger } from 'winston';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { RequestProblemSummaryListDto } from '@libs/core/dto/RequestProblemSummaryListDto';
-import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { ProblemsRepository } from './problems.repository';
 import { ResponseProblemSummaryDto } from './dto/ResponseProblemSummaryDto';
 import { ProblemType } from '../common/enums/ProblemTypeEnum';
 import { ResponseProblemDto } from './dto/ResponseProblemDto';
 import { ResponseProblemContentDto } from './dto/ResponseProblemContentDto';
+import { CustomLogger } from '../logger/custom-logger';
 
 @Injectable()
 export class ProblemsService {
   constructor(
-    @Inject(WINSTON_MODULE_NEST_PROVIDER)
-    private readonly logger: Logger,
+    private readonly logger: CustomLogger,
     private readonly problemsRepository: ProblemsRepository,
   ) {}
 
@@ -20,6 +18,8 @@ export class ProblemsService {
     requestProblemSummaryDto: RequestProblemSummaryListDto,
   ): Promise<ResponseProblemSummaryDto[]> {
     const { pageNo, pageSize, typeList, levelList } = requestProblemSummaryDto;
+
+    this.logger.silly('hihi');
 
     try {
       const problemSummaryList = await this.problemsRepository.getProblemList(
