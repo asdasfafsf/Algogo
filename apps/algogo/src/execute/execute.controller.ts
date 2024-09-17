@@ -5,10 +5,13 @@ import {
   HttpStatus,
   Inject,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { ExecuteService } from './execute.service';
 import { RequestExecuteDto } from '@libs/core/dto/RequestExecuteDto';
 import { Logger } from 'winston';
+import { AuthGuard } from '../auth/auth.guard';
+import { ApiExcludeEndpoint } from '@nestjs/swagger';
 
 @Controller('api/v1/execute')
 export class ExecuteController {
@@ -20,6 +23,8 @@ export class ExecuteController {
 
   @Post('/')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  @ApiExcludeEndpoint()
   async execute(@Body() requestExecuteDto: RequestExecuteDto) {
     this.logger.silly('api/v1/execute', {
       data: requestExecuteDto,
