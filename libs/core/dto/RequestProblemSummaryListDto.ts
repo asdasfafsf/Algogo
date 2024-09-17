@@ -27,24 +27,30 @@ export class RequestProblemSummaryListDto {
   })
   pageSize?: number = 10;
 
-  @Transform(({ value }) => (Array.isArray(value) ? value.map(Number) : []))
+  @IsOptional() // levelList가 선택 항목이 되도록 추가
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.split(',').map(Number) : [],
+  )
   @ApiProperty({
     description: '해당하는 난이도에 대한 문제를 가져옴',
     default: [],
+    required: false,
     type: Number,
     isArray: true,
   })
   levelList?: number[];
 
-  @Transform(({ value }) => (Array.isArray(value) ? value : []))
+  @IsOptional() // typeList가 선택 항목이 되도록 추가
+  @Transform(({ value }) => (typeof value === 'string' ? value.split(',') : []))
   @ApiProperty({
     description: '해당하는 문제 유형에 대한 문제를 가져옴',
     default: [],
+    required: false,
     isArray: true,
   })
-  @IsOptional()
   @IsIn(Object.values(ProblemType), {
     message: '올바른 문제 유형이 아닙니다',
+    each: true, // 배열 내 각각의 값에 대해 검사
   })
   typeList?: ProblemType[];
 }

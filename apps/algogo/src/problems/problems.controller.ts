@@ -10,6 +10,7 @@ import {
 } from '@nestjs/swagger';
 import { ResponseProblemSummaryDto } from './dto/ResponseProblemSummaryDto';
 import { ApiBadRequestErrorResponse } from '../common/decorators/swagger/ApiBadRequestErrorResponse';
+import { ResponseProblemDto } from './dto/ResponseProblemDto';
 
 @ApiTags('문제 관련 API')
 @ApiBadRequestErrorResponse()
@@ -33,6 +34,7 @@ export class ProblemsController {
   async getProblemList(
     @Query() requestProblemSummaryDto: RequestProblemSummaryListDto,
   ): Promise<ResponseProblemSummaryDto[]> {
+    console.log(requestProblemSummaryDto);
     return await this.problemsService.getProblemSummaryList(
       requestProblemSummaryDto,
     );
@@ -42,8 +44,15 @@ export class ProblemsController {
     summary: '문제 상세조회',
     description: '문제에 대한 상세 정보를 가져온다',
   })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '문제 상세 조회 성공',
+    type: ResponseProblemDto,
+  })
   @Get('/:problemUuid')
-  async getProblem(@Param('problemUuid') uuid: string) {
+  async getProblem(
+    @Param('problemUuid') uuid: string,
+  ): Promise<ResponseProblemDto> {
     return await this.problemsService.getProblem(uuid);
   }
 
