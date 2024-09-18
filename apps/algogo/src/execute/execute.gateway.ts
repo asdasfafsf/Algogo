@@ -18,11 +18,11 @@ import {
 } from '@nestjs/common';
 import { WsAuthGuard } from '../auth/ws.auth.guard';
 import { Server, Socket } from 'socket.io';
-import { Logger } from 'winston';
 import { RedisService } from '../redis/redis.service';
 import WsConfig from '../config/wsConfig';
 import { ConfigType } from '@nestjs/config';
 import { Cron } from '@nestjs/schedule';
+import { CustomLogger } from '../logger/custom-logger';
 
 class AuthSocket extends Socket {
   messageCount: number;
@@ -36,8 +36,7 @@ export class ExecuteGateway {
   constructor(
     private readonly executeService: ExecuteService,
     private readonly wsAuthGurad: WsAuthGuard,
-    @Inject('winston')
-    private readonly logger: Logger,
+    private readonly logger: CustomLogger,
     @Inject(WsConfig.KEY)
     private readonly wsConfig: ConfigType<typeof WsConfig>,
     private readonly redisService: RedisService,

@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   HttpStatus,
-  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -11,13 +10,12 @@ import { ImageService } from '../image/image.service';
 import { S3Service } from '../s3/s3.service';
 import { ResponseProblemContent } from '@libs/core/dto/ResponseProblemContent';
 import { PrismaService } from '../prisma/prisma.service';
-import { Logger } from 'winston';
+import { CustomLogger } from '../logger/custom-logger';
 
 @Injectable()
 export class ProblemsCollectService {
   constructor(
-    @Inject('winston')
-    private readonly logger: Logger,
+    private readonly logger: CustomLogger,
     private readonly imageService: ImageService,
     private readonly crawlerService: CrawlerService,
     private readonly s3Service: S3Service,

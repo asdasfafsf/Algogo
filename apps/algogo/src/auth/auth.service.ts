@@ -9,9 +9,9 @@ import EncryptConfig from '../config/encryptConfig';
 import { ConfigType } from '@nestjs/config';
 import { CryptoService } from '../crypto/crypto.service';
 import * as crypto from 'crypto';
-import { Logger } from 'winston';
 import ResponseTokenDto from '@libs/core/dto/ResponseTokenDto';
 import JwtConfig from '../config/jwtConfig';
+import { CustomLogger } from '../logger/custom-logger';
 
 @Injectable()
 export class AuthService {
@@ -23,8 +23,7 @@ export class AuthService {
     private readonly encryptConfig: ConfigType<typeof EncryptConfig>,
     @Inject(JwtConfig.KEY)
     private readonly jwtConfig: ConfigType<typeof JwtConfig>,
-    @Inject('winston')
-    private readonly logger: Logger,
+    private readonly logger: CustomLogger,
   ) {}
 
   async getLoginToken(uuid: string): Promise<ResponseTokenDto> {

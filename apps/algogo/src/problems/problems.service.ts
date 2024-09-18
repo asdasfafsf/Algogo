@@ -19,8 +19,6 @@ export class ProblemsService {
   ): Promise<ResponseProblemSummaryDto[]> {
     const { pageNo, pageSize, typeList, levelList } = requestProblemSummaryDto;
 
-    this.logger.silly('hihi');
-
     try {
       const problemSummaryList = await this.problemsRepository.getProblemList(
         pageNo,

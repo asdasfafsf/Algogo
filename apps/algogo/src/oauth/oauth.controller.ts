@@ -11,22 +11,20 @@ import {
 } from '@nestjs/common';
 import { OauthService } from './oauth.service';
 import { RequestOAuthCallbackDto } from '@libs/core/dto/RequestOAuthCallbackDto';
-import { Logger } from 'winston';
-import { Inject } from '@nestjs/common';
 import { DynamicOAuthGuard } from './dynamic-oauth.guard';
 import { RequestOAuthDto } from '@libs/core/dto/RequestOAuthDto';
 import { Request, Response } from 'express';
 import { OAuthExceptionFilter } from './oauth-exception.filter';
 import { OAuthProvider } from '../common/enums/OAuthProviderEnum';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { CustomLogger } from '../logger/custom-logger';
 
 @ApiTags('OAuth API')
 @Controller('v1/oauth')
 export class OauthController {
   constructor(
     private readonly oauthService: OauthService,
-    @Inject('winston')
-    private readonly logger: Logger,
+    private readonly logger: CustomLogger,
   ) {}
 
   @ApiOperation({

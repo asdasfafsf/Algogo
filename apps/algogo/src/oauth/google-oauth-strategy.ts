@@ -3,19 +3,18 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-oauth2';
 import googleOAuthConfig from '../config/googleOAuthConfig';
 import { ConfigType } from '@nestjs/config';
-import { Logger } from 'winston';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
 import { RequestOAuthDto } from '@libs/core/dto/RequestOAuthDto';
 import { OAuthProvider } from '../common/enums/OAuthProviderEnum';
+import { CustomLogger } from '../logger/custom-logger';
 
 @Injectable()
 export class GoogleOauthStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(
     @Inject(googleOAuthConfig.KEY)
     private readonly oauthConfig: ConfigType<typeof googleOAuthConfig>,
-    @Inject('winston')
-    private readonly logger: Logger,
+    private readonly logger: CustomLogger,
     private readonly httpService: HttpService,
   ) {
     super({

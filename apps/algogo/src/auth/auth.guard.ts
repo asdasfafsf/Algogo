@@ -10,11 +10,11 @@ import { RedisService } from '../redis/redis.service';
 import { CryptoService } from '../crypto/crypto.service';
 import EncryptConfig from '../config/encryptConfig';
 import { ConfigType } from '@nestjs/config';
-import { Logger } from 'winston';
 import {
   INVALID_JWT_MESSAGE,
   NO_JWT_MESSAGE,
 } from '../common/constants/ErrorMessage';
+import { CustomLogger } from '../logger/custom-logger';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -24,8 +24,7 @@ export class AuthGuard implements CanActivate {
     private readonly cryptoService: CryptoService,
     @Inject(EncryptConfig.KEY)
     private readonly encryptConfig: ConfigType<typeof EncryptConfig>,
-    @Inject('winston')
-    private readonly logger: Logger,
+    private readonly logger: CustomLogger,
   ) {}
   async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
