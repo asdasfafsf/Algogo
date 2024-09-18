@@ -9,9 +9,6 @@ RUN npm install -g @nestjs/cli
 # Create app directory
 WORKDIR /usr/src/app
 
-# Copy package.json and pnpm-lock.yaml (or package-lock.json)
-COPY ../../package*.json ./
-
 # Copy the app source code and the .env file
 COPY . .
 COPY apps/algogo/src/config/env/.production.env /usr/src/app/.env
