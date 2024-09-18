@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   HttpStatus,
-  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -9,22 +8,17 @@ import {
 import { CrawlerService } from '../crawler/crawler.service';
 import { ImageService } from '../image/image.service';
 import { S3Service } from '../s3/s3.service';
-import S3Config from '../config/s3Config';
-import { ConfigType } from '@nestjs/config';
 import { ResponseProblemContent } from '@libs/core/dto/ResponseProblemContent';
 import { PrismaService } from '../prisma/prisma.service';
-import { Logger } from 'winston';
+import { CustomLogger } from '../logger/custom-logger';
 
 @Injectable()
 export class ProblemsCollectService {
   constructor(
-    @Inject('winston')
-    private readonly logger: Logger,
+    private readonly logger: CustomLogger,
     private readonly imageService: ImageService,
     private readonly crawlerService: CrawlerService,
     private readonly s3Service: S3Service,
-    @Inject(S3Config.KEY)
-    private readonly s3Config: ConfigType<typeof S3Config>,
     private readonly prismaService: PrismaService,
   ) {}
 
@@ -127,7 +121,7 @@ export class ProblemsCollectService {
           return {
             order: index,
             type: 'image',
-            content: `https://${this.s3Config.bucketName}.s3.${this.s3Config.region}.amazonaws.com/problems/${site}/${key}_${index}.webp`,
+            content: s3Result,
           };
         }
 

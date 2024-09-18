@@ -2,18 +2,18 @@ import { Injectable, Inject } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-oauth2';
 import { ConfigType } from '@nestjs/config';
-import { Logger } from 'winston';
 import githubOAuthConfig from '../config/githubOAuthConfig';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
+import { OAuthProvider } from '../common/enums/OAuthProviderEnum';
+import { CustomLogger } from '../logger/custom-logger';
 
 @Injectable()
 export class GithubOAuthStrategy extends PassportStrategy(Strategy, 'github') {
   constructor(
     @Inject(githubOAuthConfig.KEY)
     private readonly oauthConfig: ConfigType<typeof githubOAuthConfig>,
-    @Inject('winston')
-    private readonly logger: Logger,
+    private readonly logger: CustomLogger,
     private readonly httpService: HttpService,
   ) {
     super({
@@ -38,7 +38,7 @@ export class GithubOAuthStrategy extends PassportStrategy(Strategy, 'github') {
     const { id, name, email } = userInfo;
 
     return {
-      provider: 'github',
+      provider: OAuthProvider.GITHUB,
       name,
       id: id.toString(),
       email,

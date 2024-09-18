@@ -6,6 +6,10 @@ import {
 } from '@nestjs/jwt';
 import jwtConfig from '../config/jwtConfig';
 import { ConfigType } from '@nestjs/config';
+import {
+  EXPIRRED_JWT_MESSAGE,
+  INVALID_JWT_MESSAGE,
+} from '../common/constants/ErrorMessage';
 
 @Injectable()
 export class JwtService {
@@ -31,10 +35,7 @@ export class JwtService {
       return;
     } catch (error) {
       if (error instanceof TokenExpiredError) {
-        throw {
-          ...new UnauthorizedException('토큰이 만료되었습니다.'),
-          errorCode: '9999',
-        };
+        new UnauthorizedException(EXPIRRED_JWT_MESSAGE);
       }
     }
 
@@ -44,15 +45,9 @@ export class JwtService {
       });
     } catch (error) {
       if (error instanceof TokenExpiredError) {
-        throw {
-          ...new UnauthorizedException('토큰이 만료되었습니다.'),
-          errorCode: '9999',
-        };
+        new UnauthorizedException(EXPIRRED_JWT_MESSAGE);
       } else if (error instanceof JsonWebTokenError) {
-        throw {
-          ...new UnauthorizedException('유효하지 않은 토큰입니다.'),
-          errorCode: '9999',
-        };
+        new UnauthorizedException(INVALID_JWT_MESSAGE);
       }
     }
   }
@@ -61,10 +56,7 @@ export class JwtService {
     try {
       return this.nestJwtService.decode(token);
     } catch (e) {
-      throw {
-        ...new UnauthorizedException('유효하지 않은 토큰입니다.'),
-        errorCode: '9999',
-      };
+      new UnauthorizedException(INVALID_JWT_MESSAGE);
     }
   }
 }

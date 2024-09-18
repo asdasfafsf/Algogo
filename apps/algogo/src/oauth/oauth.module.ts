@@ -8,12 +8,14 @@ import { GithubOAuthStrategy } from './github-oauth.strategy';
 import { HttpModule } from '@nestjs/axios';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
+import { OauthRepository } from './oauth.repository';
 
 @Module({
   imports: [PassportModule.register({}), HttpModule, PrismaModule, AuthModule],
   controllers: [OauthController],
   providers: [
     OauthService,
+    OauthRepository,
     GoogleOauthStrategy,
     GithubOAuthStrategy,
     KakaoOAuthStrategy,

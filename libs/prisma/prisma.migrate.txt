@@ -1,1 +1,2 @@
 npx prisma generate --schema=./libs/prisma/schema.prisma
+npx prisma db push --schema=./libs/prisma/schema.prisma

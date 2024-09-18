@@ -26,12 +26,18 @@ import { AuthModule } from './auth/auth.module';
 import { RedisModule } from './redis/redis.module';
 import { JwtModule } from './jwt/jwt.module';
 import { CryptoModule } from './crypto/crypto.module';
+import { ExecuteModule } from './execute/execute.module';
+import { MeModule } from './me/me.module';
+import { LoggerModule } from './logger/logger.module';
 import googleOAuthConfig from './config/googleOAuthConfig';
 import kakaoOAuthConfig from './config/kakaoOAuthConfig';
 import githubOAuthConfig from './config/githubOAuthConfig';
 import redisConfig from './config/redisConfig';
 import jwtConfig from './config/jwtConfig';
 import encryptConfig from './config/encryptConfig';
+import bullmqConfig from './config/bullmqConfig';
+import wsConfig from './config/wsConfig';
+import LoggerConfig from './config/LoggerConfig';
 
 @Module({
   imports: [
@@ -49,7 +55,9 @@ import encryptConfig from './config/encryptConfig';
       ],
     }),
     ConfigModule.forRoot({
-      envFilePath: [`${__dirname}/config/env/.${process.env.NODE_ENV}.env`],
+      envFilePath: [
+        `${__dirname}/config/env/.${process.env.NODE_ENV ?? 'production'}.env`,
+      ],
       load: [
         crawlerConfig,
         s3Config,
@@ -59,6 +67,9 @@ import encryptConfig from './config/encryptConfig';
         redisConfig,
         jwtConfig,
         encryptConfig,
+        bullmqConfig,
+        wsConfig,
+        LoggerConfig,
       ],
       isGlobal: true,
       validationSchema,
@@ -78,6 +89,9 @@ import encryptConfig from './config/encryptConfig';
     }),
     JwtModule,
     CryptoModule,
+    ExecuteModule,
+    MeModule,
+    LoggerModule,
   ],
 
   controllers: [AppController],

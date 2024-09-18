@@ -4,40 +4,26 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
 import { Logger } from 'winston';
 import { AuthService } from '../auth/auth.service';
+import { OauthRepository } from './oauth.repository';
 
 @Injectable()
 export class OauthService {
   constructor(
-    private readonly prismaService: PrismaService,
     @Inject('winston')
     private readonly logger: Logger,
     private readonly authService: AuthService,
+    private readonly oauthRepository: OauthRepository,
   ) {}
   async login(requestOAuthDto: RequestOAuthDto) {
     const { id, provider } = requestOAuthDto;
 
     try {
-      const userOAuth = await this.prismaService.userOAuth.findUnique({
-        select: {
-          userNo: true,
-        },
-        where: {
-          id_provider: {
-            id,
-            provider,
-          },
-        },
-      });
-
+      const userOAuth = await this.oauthRepository.getUserOAuth(id, provider);
       let userNo = -1;
       if (!userOAuth) {
-        const user = await this.register(requestOAuthDto);
-        this.logger.silly('OauthService register', {
-          user: user ?? {},
-        });
+        const user = await this.oauthRepository.insertUser(requestOAuthDto);
         userNo = user.no;
       } else {
         userNo = userOAuth.userNo;
@@ -48,9 +34,6 @@ export class OauthService {
       }
 
       const uuid = await this.authService.generateLoginToken(userNo);
-
-      this.logger.silly('OauthService Login', {});
-
       return uuid;
     } catch (e) {
       this.logger.error('OauthService registerOrLogin', {
@@ -58,44 +41,6 @@ export class OauthService {
       });
 
       throw e;
-    }
-  }
-
-  async register(requestOAuthDto: RequestOAuthDto) {
-    const { id, email, provider, name } = requestOAuthDto;
-    try {
-      const user = await this.prismaService.$transaction(async (prisma) => {
-        const user = await prisma.user.create({
-          select: {
-            no: true,
-          },
-          data: {
-            name,
-            email,
-            emailVerified: false,
-            profilePhoto: '',
-            lastLoginDate: new Date(),
-          },
-        });
-
-        const { no } = user;
-
-        await prisma.userOAuth.create({
-          data: {
-            id,
-            userNo: no,
-            provider,
-          },
-        });
-
-        return user;
-      });
-
-      return user;
-    } catch (e) {
-      this.logger.error('oauth register', {
-        error: e,
-      });
     }
   }
 }

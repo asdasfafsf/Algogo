@@ -7,29 +7,44 @@ import {
   Req,
   Res,
   UseFilters,
+  HttpStatus,
 } from '@nestjs/common';
 import { OauthService } from './oauth.service';
 import { RequestOAuthCallbackDto } from '@libs/core/dto/RequestOAuthCallbackDto';
-import { Logger } from 'winston';
-import { Inject } from '@nestjs/common';
 import { DynamicOAuthGuard } from './dynamic-oauth.guard';
 import { RequestOAuthDto } from '@libs/core/dto/RequestOAuthDto';
 import { Request, Response } from 'express';
 import { OAuthExceptionFilter } from './oauth-exception.filter';
+import { OAuthProvider } from '../common/enums/OAuthProviderEnum';
+import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { CustomLogger } from '../logger/custom-logger';
 
+@ApiTags('OAuth API')
 @Controller('v1/oauth')
 export class OauthController {
   constructor(
     private readonly oauthService: OauthService,
-    @Inject('winston')
-    private readonly logger: Logger,
+    private readonly logger: CustomLogger,
   ) {}
 
+  @ApiOperation({
+    summary: 'OAuth Page로 이동',
+    description: 'OAuth Page로 이동함',
+  })
+  @ApiParam({
+    name: 'provider',
+    enum: OAuthProvider,
+    description: '인증 기관',
+  })
+  @ApiResponse({
+    status: HttpStatus.TEMPORARY_REDIRECT,
+    description: ':provider/callback 으로 redirect함',
+  })
   @Get(':provider')
   @UseGuards(DynamicOAuthGuard)
   @UseFilters(OAuthExceptionFilter)
   async oauth(
-    @Param('provider') provider: string,
+    @Param('provider') provider: OAuthProvider,
     @Query() requestOAuthCallbackDto: RequestOAuthCallbackDto,
   ) {
     this.logger.silly('OAuth callback reached', {
@@ -38,11 +53,20 @@ export class OauthController {
     });
   }
 
+  @ApiOperation({
+    summary: 'OAuth callback',
+    description: 'OAuth 토큰 발급 페이지로 redirect 해줌',
+  })
+  @ApiResponse({
+    status: HttpStatus.TEMPORARY_REDIRECT,
+    description:
+      '/oauth/token 으로 이동. 프론트는 여기서 토큰 발급 API로 요청을 보내면 토큰이 발급됨',
+  })
   @Get(':provider/callback')
   @UseGuards(DynamicOAuthGuard)
   @UseFilters(OAuthExceptionFilter)
   async callback(
-    @Param('provider') provider: string,
+    @Param('provider') provider: OAuthProvider,
     @Query() requestOAuthCallbackDto: RequestOAuthCallbackDto,
     @Req() req: Request,
     @Res() res: Response,
@@ -61,7 +85,7 @@ export class OauthController {
     res.redirect(
       process.env.NODE_ENV === 'development'
         ? 'http://localhost:5173/oauth/token/'
-        : '/oauth/token',
+        : 'https://www.algogo.co.kr/oauth/token',
     );
   }
 }

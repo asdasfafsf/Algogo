@@ -10,7 +10,11 @@ import { RedisService } from '../redis/redis.service';
 import { CryptoService } from '../crypto/crypto.service';
 import EncryptConfig from '../config/encryptConfig';
 import { ConfigType } from '@nestjs/config';
-import { Logger } from 'winston';
+import {
+  INVALID_JWT_MESSAGE,
+  NO_JWT_MESSAGE,
+} from '../common/constants/ErrorMessage';
+import { CustomLogger } from '../logger/custom-logger';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -20,15 +24,14 @@ export class AuthGuard implements CanActivate {
     private readonly cryptoService: CryptoService,
     @Inject(EncryptConfig.KEY)
     private readonly encryptConfig: ConfigType<typeof EncryptConfig>,
-    @Inject('winston')
-    private readonly logger: Logger,
+    private readonly logger: CustomLogger,
   ) {}
   async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
     const encryptedToken = this.extractTokenFromHeader(request);
 
     if (!encryptedToken) {
-      throw new UnauthorizedException('토큰이 없습니다.');
+      throw new UnauthorizedException(NO_JWT_MESSAGE);
     }
 
     this.logger.silly('auth guard encryptToken', {
@@ -47,6 +50,7 @@ export class AuthGuard implements CanActivate {
         prePayload,
       });
 
+      request.userNo = Number(prePayload);
       this.redisService.set(encryptedToken, prePayload, 300);
       return true;
     }
@@ -71,12 +75,12 @@ export class AuthGuard implements CanActivate {
       );
 
       if (!decryptedToken.includes(this.encryptConfig.prevTag)) {
-        throw new UnauthorizedException('토큰 검증에 실패하였습니다.');
+        throw new UnauthorizedException(INVALID_JWT_MESSAGE);
       }
     }
 
     if (!decryptedToken) {
-      throw new UnauthorizedException('토큰 검증에 실패하였습니다.');
+      throw new UnauthorizedException(INVALID_JWT_MESSAGE);
     }
 
     this.logger.silly('auth guard decrypt previous', {
@@ -97,21 +101,17 @@ export class AuthGuard implements CanActivate {
     const { userNo } = decodedToken;
 
     if (!userNo) {
-      throw new UnauthorizedException('토큰 검증에 실패하였습니다.');
+      throw new UnauthorizedException(INVALID_JWT_MESSAGE);
     }
 
     this.redisService.set(hashedToken, userNo.toString(), 300);
 
-    request.userNo = userNo;
+    request.userNo = Number(userNo);
     return true;
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
     const [type, token] = request?.headers['authorization']?.split(' ') ?? [];
-    this.logger.silly('extractTokenFromHeader', {
-      type: type + '',
-      token: token + '',
-    });
     return type === 'Bearer' ? token : undefined;
   }
 }

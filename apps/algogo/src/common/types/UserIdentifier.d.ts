@@ -1,0 +1,3 @@
+type UserIdentifier = {
+  userNo: number;
+};

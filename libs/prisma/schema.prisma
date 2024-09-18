@@ -1,3 +1,9 @@
+generator markdown {
+    provider = "prisma-markdown"
+    output   = "./ERD.md"
+    title    = "Sinchon ICPC Camp ERD"
+}
+
 generator client {
     provider = "prisma-client-js"
 }
@@ -39,13 +45,13 @@ model UserOAuth {
 }
 
 model UserSocial {
-    type    String @map("USER_SOCIAL_TYPE")
-    User    User   @relation("UserToUserSocial", fields: [userNo], references: [no])
-    userNo  Int    @map("USER_NO")
-    content String @map("USER_SOCIAL_CONTENT")
+    provider String @map("USER_SOCIAL_PROVIDER")
+    User     User   @relation("UserToUserSocial", fields: [userNo], references: [no])
+    userNo   Int    @map("USER_NO")
+    content  String @map("USER_SOCIAL_CONTENT")
 
-    @@unique([type, userNo])
-    @@index([userNo, type])
+    @@unique([provider, userNo])
+    @@index([userNo, provider])
     @@map("USER_SOCIAL")
 }
 
