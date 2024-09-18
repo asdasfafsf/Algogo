@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ResponseSocialDto } from './ResponseSocialDto';
-import { ResponseOAuthDto } from './ResponseOAuthDto';
+import { ResponseSocialDto } from '../../me/dto/ResponseSocialDto';
+import { ResponseOAuthDto } from '../../me/dto/ResponseOAuthDto';
 
-export class ResponseMeDto {
+export class ResponseUserDto {
   @ApiProperty({
     description: 'The UUID of the user',
     example: '550e8400-e29b-41d4-a716-446655440000',
@@ -35,7 +35,7 @@ export class ResponseMeDto {
 
   @ApiProperty({
     type: [ResponseOAuthDto],
-    description: "List of user's social accounts",
+    description: '내 정보일때만 출력됨',
   })
-  oauthList: ResponseOAuthDto[];
+  oauthList?: ResponseOAuthDto[];
 }

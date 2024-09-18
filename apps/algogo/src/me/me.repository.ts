@@ -19,6 +19,11 @@ export class MeRepository {
             content: true,
           },
         },
+        oauthList: {
+          select: {
+            provider: true,
+          },
+        },
       },
       where: {
         no: userNo,
@@ -79,6 +84,11 @@ export class MeRepository {
               userNo: false,
               provider: true,
               content: true,
+            },
+          },
+          oauthList: {
+            select: {
+              provider: true,
             },
           },
         },

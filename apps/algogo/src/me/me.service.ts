@@ -8,6 +8,7 @@ import { CryptoService } from '../crypto/crypto.service';
 import { ImageService } from '../image/image.service';
 import { UpdateMeDto } from './dto/UpdateMeDto';
 import { SocialProvider } from '../common/enums/SocialProviderEnum';
+import { OAuthProvider } from '../common/enums/OAuthProviderEnum';
 
 @Injectable()
 export class MeService {
@@ -24,10 +25,13 @@ export class MeService {
       provider: elem.provider as SocialProvider,
       content: elem.content,
     })) as ResponseSocialDto[];
-
+    const oauthList = me.oauthList.map(({ provider }) => ({
+      provider: provider as OAuthProvider,
+    }));
     const responseMeDto = {
       ...me,
       socialList,
+      oauthList,
     };
 
     return responseMeDto;
@@ -50,6 +54,9 @@ export class MeService {
       socialList: me.socialList.map(({ provider, content }) => ({
         provider: provider as SocialProvider,
         content,
+      })),
+      oauthList: me.oauthList.map(({ provider }) => ({
+        provider: provider as OAuthProvider,
       })),
     };
   }
