@@ -69,7 +69,7 @@ model Problem {
     input             String   @map("PROBLEM_INPUT") @db.VarChar(600)
     output            String   @map("PROBLEM_OUTPUT") @db.VarChar(600)
     hint              String   @default("") @map("PROBLEM_HINT") @db.VarChar(600)
-    limit             String   @map("PROBLEM_LIMIT")
+    limit             String   @map("PROBLEM_LIMIT") @db.VarChar(600)
     answerCount       Int      @map("PROBLEM_ANSWER_COUNT")
     answerPeopleCount Int      @map("PROBLEM_ANSWER_PEOPLE_COUNT")
     submitCount       Int      @map("PROBLEM_SUBMIT_COUNT")
