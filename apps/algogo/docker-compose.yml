@@ -1,0 +1,11 @@
+version: '3'
+services:
+  algogo:
+    build:
+      context: . # 현재 디렉토리를 빌드 컨텍스트로 사용
+      dockerfile: apps/algogo/dockerfile # Dockerfile 경로
+    container_name: algogo-container
+    ports:
+      - '3001:3001' # 외부 포트 3001을 내부 포트 3001으로 포워딩
+    volumes:
+      - ./apps/algogo/src/config/env:/app/env # 환경 파일 마운트
