@@ -4,16 +4,20 @@ import { ProblemsCollectService } from './problems-collect.service';
 import { RequestProblemSummaryListDto } from '@libs/core/dto/RequestProblemSummaryListDto';
 import {
   ApiExcludeEndpoint,
+  ApiExtraModels,
   ApiOperation,
   ApiResponse,
   ApiTags,
+  getSchemaPath,
 } from '@nestjs/swagger';
 import { ApiBadRequestErrorResponse } from '../common/decorators/swagger/ApiBadRequestErrorResponse';
 import { ResponseProblemDto } from './dto/ResponseProblemDto';
 import { ResponseProblemSummaryListDto } from './dto/ResponseProblemSummaryListDto';
+import { ResponseDto } from '../common/dto/ResponseDto';
 
 @ApiTags('문제 관련 API')
 @ApiBadRequestErrorResponse()
+@ApiExtraModels(ResponseProblemSummaryListDto, ResponseDto)
 @Controller('api/v1/problems')
 export class ProblemsController {
   constructor(
@@ -28,7 +32,17 @@ export class ProblemsController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: '문제 리스트 조회 성공',
-    type: ResponseProblemSummaryListDto,
+    type: ResponseDto<ResponseProblemSummaryListDto>,
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: { $ref: getSchemaPath(ResponseProblemSummaryListDto) },
+          },
+        },
+      ],
+    },
   })
   @Get('/')
   async getProblemList(
