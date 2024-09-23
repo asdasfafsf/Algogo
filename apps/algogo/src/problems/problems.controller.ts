@@ -31,14 +31,17 @@ export class ProblemsController {
   })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: '문제 리스트 조회 성공',
-    type: ResponseDto<ResponseProblemSummaryListDto>,
+    description: 'List of problem summaries with pagination',
     schema: {
       allOf: [
-        { $ref: getSchemaPath(ResponseDto) },
         {
           properties: {
-            data: { $ref: getSchemaPath(ResponseProblemSummaryListDto) },
+            statusCode: { type: 'number', example: 200 },
+            errorCode: { type: 'string', example: '' },
+            errorMessage: { type: 'string', example: '' },
+            data: {
+              $ref: getSchemaPath(ResponseProblemSummaryListDto), // 여기서 구체적인 데이터 타입 지정
+            },
           },
         },
       ],
