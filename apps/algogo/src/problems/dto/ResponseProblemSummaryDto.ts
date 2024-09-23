@@ -27,6 +27,12 @@ export class ResponseProblemSummaryDto {
   answerCount: number;
 
   @ApiProperty({
+    description: '정답률',
+    example: 15.54,
+  })
+  answerRate: number;
+
+  @ApiProperty({
     description: '전체 제출 횟수',
     example: 456,
   })
