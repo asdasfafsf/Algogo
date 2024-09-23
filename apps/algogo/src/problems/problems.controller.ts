@@ -14,6 +14,7 @@ import { ApiBadRequestErrorResponse } from '../common/decorators/swagger/ApiBadR
 import { ResponseProblemDto } from './dto/ResponseProblemDto';
 import { ResponseProblemSummaryListDto } from './dto/ResponseProblemSummaryListDto';
 import { ResponseDto } from '../common/dto/ResponseDto';
+import { CustomLogger } from '../logger/custom-logger';
 
 @ApiTags('문제 관련 API')
 @ApiBadRequestErrorResponse()
@@ -23,6 +24,7 @@ export class ProblemsController {
   constructor(
     private readonly problemsCollectService: ProblemsCollectService,
     private readonly problemsService: ProblemsService,
+    private readonly Logger: CustomLogger,
   ) {}
 
   @ApiOperation({
