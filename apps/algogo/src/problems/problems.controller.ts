@@ -8,7 +8,6 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { ResponseProblemSummaryDto } from './dto/ResponseProblemSummaryDto';
 import { ApiBadRequestErrorResponse } from '../common/decorators/swagger/ApiBadRequestErrorResponse';
 import { ResponseProblemDto } from './dto/ResponseProblemDto';
 import { ResponseProblemSummaryListDto } from './dto/ResponseProblemSummaryListDto';
@@ -29,7 +28,7 @@ export class ProblemsController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: '문제 리스트 조회 성공',
-    type: [ResponseProblemSummaryDto],
+    type: ResponseProblemSummaryListDto,
   })
   @Get('/')
   async getProblemList(
