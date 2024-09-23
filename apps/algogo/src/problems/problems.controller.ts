@@ -11,6 +11,7 @@ import {
 import { ResponseProblemSummaryDto } from './dto/ResponseProblemSummaryDto';
 import { ApiBadRequestErrorResponse } from '../common/decorators/swagger/ApiBadRequestErrorResponse';
 import { ResponseProblemDto } from './dto/ResponseProblemDto';
+import { ResponseProblemSummaryListDto } from './dto/ResponseProblemSummaryListDto';
 
 @ApiTags('문제 관련 API')
 @ApiBadRequestErrorResponse()
@@ -33,7 +34,7 @@ export class ProblemsController {
   @Get('/')
   async getProblemList(
     @Query() requestProblemSummaryDto: RequestProblemSummaryListDto,
-  ): Promise<ResponseProblemSummaryDto[]> {
+  ): Promise<ResponseProblemSummaryListDto> {
     return await this.problemsService.getProblemSummaryList(
       requestProblemSummaryDto,
     );

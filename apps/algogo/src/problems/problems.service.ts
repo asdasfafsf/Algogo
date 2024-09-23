@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { RequestProblemSummaryListDto } from '@libs/core/dto/RequestProblemSummaryListDto';
 import { ProblemsRepository } from './problems.repository';
-import { ResponseProblemSummaryDto } from './dto/ResponseProblemSummaryDto';
 import { ProblemType } from '../common/enums/ProblemTypeEnum';
 import { ResponseProblemDto } from './dto/ResponseProblemDto';
 import { ResponseProblemContentDto } from './dto/ResponseProblemContentDto';
 import { CustomLogger } from '../logger/custom-logger';
+import { ResponseProblemSummaryListDto } from './dto/ResponseProblemSummaryListDto';
 
 @Injectable()
 export class ProblemsService {
@@ -16,23 +16,26 @@ export class ProblemsService {
 
   async getProblemSummaryList(
     requestProblemSummaryDto: RequestProblemSummaryListDto,
-  ): Promise<ResponseProblemSummaryDto[]> {
+  ): Promise<ResponseProblemSummaryListDto> {
     const { pageNo, pageSize, typeList, levelList } = requestProblemSummaryDto;
 
     try {
-      const problemSummaryList = await this.problemsRepository.getProblemList(
+      const problemSummary = await this.problemsRepository.getProblemList(
         pageNo,
         pageSize,
         levelList,
         typeList,
       );
 
-      return problemSummaryList.map((summary) => {
-        return {
-          ...summary,
-          typeList: summary.typeList.map((elem) => elem.name as ProblemType),
-        };
-      });
+      return {
+        ...problemSummary,
+        problemList: problemSummary.problemList.map((summary) => {
+          return {
+            ...summary,
+            typeList: summary.typeList.map((elem) => elem.name as ProblemType),
+          };
+        }),
+      };
     } catch (e) {
       this.logger.error(`${ProblemsService.name} getProblemSummaryList`, {
         message: e.message,
