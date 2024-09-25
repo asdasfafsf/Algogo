@@ -28,9 +28,7 @@ export class RequestProblemSummaryListDto {
   pageSize?: number = 10;
 
   @IsOptional() // levelList가 선택 항목이 되도록 추가
-  @Transform(({ value }) =>
-    typeof value === 'string' ? value.split(',').map(Number) : [],
-  )
+  @Transform(({ value }) => (Array.isArray(value) ? value.map(Number) : []))
   @ApiProperty({
     description: '해당하는 난이도에 대한 문제를 가져옴',
     default: [],
@@ -41,7 +39,7 @@ export class RequestProblemSummaryListDto {
   levelList?: number[];
 
   @IsOptional() // typeList가 선택 항목이 되도록 추가
-  @Transform(({ value }) => (typeof value === 'string' ? value.split(',') : []))
+  @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
   @ApiProperty({
     description: '해당하는 문제 유형에 대한 문제를 가져옴',
     default: [],

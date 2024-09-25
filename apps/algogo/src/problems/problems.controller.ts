@@ -4,21 +4,27 @@ import { ProblemsCollectService } from './problems-collect.service';
 import { RequestProblemSummaryListDto } from '@libs/core/dto/RequestProblemSummaryListDto';
 import {
   ApiExcludeEndpoint,
+  ApiExtraModels,
   ApiOperation,
   ApiResponse,
   ApiTags,
+  getSchemaPath,
 } from '@nestjs/swagger';
-import { ResponseProblemSummaryDto } from './dto/ResponseProblemSummaryDto';
 import { ApiBadRequestErrorResponse } from '../common/decorators/swagger/ApiBadRequestErrorResponse';
 import { ResponseProblemDto } from './dto/ResponseProblemDto';
+import { ResponseProblemSummaryListDto } from './dto/ResponseProblemSummaryListDto';
+import { ResponseDto } from '../common/dto/ResponseDto';
+import { CustomLogger } from '../logger/custom-logger';
 
 @ApiTags('문제 관련 API')
 @ApiBadRequestErrorResponse()
+@ApiExtraModels(ResponseProblemSummaryListDto, ResponseDto)
 @Controller('api/v1/problems')
 export class ProblemsController {
   constructor(
     private readonly problemsCollectService: ProblemsCollectService,
     private readonly problemsService: ProblemsService,
+    private readonly Logger: CustomLogger,
   ) {}
 
   @ApiOperation({
@@ -27,13 +33,26 @@ export class ProblemsController {
   })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: '문제 리스트 조회 성공',
-    type: [ResponseProblemSummaryDto],
+    description: 'List of problem summaries with pagination',
+    schema: {
+      allOf: [
+        {
+          properties: {
+            statusCode: { type: 'number', example: 200 },
+            errorCode: { type: 'string', example: '' },
+            errorMessage: { type: 'string', example: '' },
+            data: {
+              $ref: getSchemaPath(ResponseProblemSummaryListDto), // 여기서 구체적인 데이터 타입 지정
+            },
+          },
+        },
+      ],
+    },
   })
   @Get('/')
   async getProblemList(
     @Query() requestProblemSummaryDto: RequestProblemSummaryListDto,
-  ): Promise<ResponseProblemSummaryDto[]> {
+  ): Promise<ResponseProblemSummaryListDto> {
     return await this.problemsService.getProblemSummaryList(
       requestProblemSummaryDto,
     );
