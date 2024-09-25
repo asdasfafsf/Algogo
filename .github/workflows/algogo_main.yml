@@ -18,4 +18,4 @@ jobs:
           JENKINS_URL: ${{ secrets.JENKINS_URL }}  # Jenkins URL
           ALGOGO_DEPLOY_TOKEN: ${{ secrets.ALGOGO_DEPLOY_TOKEN }}  # Jenkins Token
         run: |
-          curl -X POST "${{ env.JENKINS_URL }}/job/algogo_main/build?token=${{ env.ALGOGO_DEPLOY_TOKEN }}"
+          curl -X GET "${{ env.JENKINS_URL }}/job/algogo_main/build?token=${{ env.ALGOGO_DEPLOY_TOKEN }}"
