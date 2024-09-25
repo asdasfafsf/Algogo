@@ -15,7 +15,7 @@ jobs:
 
       - name: Trigger Jenkins job
         env:
-          JENKINS_URL: ${{ secrets.JENKINS_URL }}
-          ALGOGO_DEPLOY_TOKEN: ${{ secrets.ALGOGO_DEPLOY_TOKEN }}
+          JENKINS_URL: ${{ secrets.JENKINS_URL }}  # Jenkins URL
+          ALGOGO_DEPLOY_TOKEN: ${{ secrets.ALGOGO_DEPLOY_TOKEN }}  # Jenkins Token
         run: |
-          curl -X POST "$JENKINS_URL/job/algogo_main/buildWithParameters?token=$ALGOGO_DEPLOY_TOKEN"
+          curl -X POST "${{ env.JENKINS_URL }}/job/algogo_main/buildWithParameters?token=${{ env.ALGOGO_DEPLOY_TOKEN }}"
