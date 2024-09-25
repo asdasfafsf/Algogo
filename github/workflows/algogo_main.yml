@@ -1,0 +1,21 @@
+name: Deploy to Jenkins
+
+on:
+  push:
+    branches:
+      - dev/algogo
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Trigger Jenkins job
+        env:
+          JENKINS_URL: ${{ secrets.JENKINS_URL }}
+          ALGOGO_DEPLOY_TOKEN: ${{ secrets.ALGOGO_DEPLOY_TOKEN }}
+        run: |
+          curl -X POST "$JENKINS_URL/job/algogo_main/buildWithParameters?token=$ALGOGO_DEPLOY_TOKEN"
