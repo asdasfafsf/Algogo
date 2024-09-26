@@ -54,6 +54,7 @@ export class ProblemsCollectService {
             output: data.output,
             limit: data.limit,
             answerCount: data.answerCount,
+            answerRate: data.answerRate,
             answerPeopleCount: data.answerPeopleCount,
             submitCount: data.submitCount,
             timeout: data.timeout,

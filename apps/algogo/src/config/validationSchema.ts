@@ -28,11 +28,11 @@ export const validationSchema = Joi.object({
   PREV_JWT_SECRET: Joi.string().required(),
   REDIS_HOST: Joi.string().required(),
   REDIS_PORT: Joi.number().required(),
-  // REDIS_PASSWORD: Joi.string().required(),
+  REDIS_PASSWORD: Joi.string().required(),
   JWT_ACCESS_TOKEN_EXPIRES_IN: Joi.number().required(),
   JWT_REFRESH_TOKEN_EXPIRES_IN: Joi.number().required(),
   BULLMQ_HOST: Joi.string().required(),
   BULLMQ_PORT: Joi.number().required(),
-  // BULLMQ_PASSWORD: Joi.string().required(),
+  BULLMQ_PASSWORD: Joi.string().required(),
   BULLMQ_QUEUE_NAME: Joi.string().required(),
 });

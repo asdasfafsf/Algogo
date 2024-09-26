@@ -71,6 +71,7 @@ model Problem {
     hint              String   @default("") @map("PROBLEM_HINT") @db.VarChar(600)
     limit             String   @map("PROBLEM_LIMIT") @db.VarChar(600)
     answerCount       Int      @map("PROBLEM_ANSWER_COUNT")
+    answerRate        Int      @default(0) @map("PROBLEM_ANSWER_RATE")
     answerPeopleCount Int      @map("PROBLEM_ANSWER_PEOPLE_COUNT")
     submitCount       Int      @map("PROBLEM_SUBMIT_COUNT")
     timeout           Int      @map("PROBLEM_TIMEOUT")
