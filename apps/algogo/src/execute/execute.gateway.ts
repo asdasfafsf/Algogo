@@ -49,6 +49,8 @@ export class ExecuteGateway {
     this.logger.silly('start connection');
 
     const context = { switchToWs: () => ({ getClient: () => socket }) };
+
+    this.logger.silly('socket header', socket.handshake.headers);
     const isAuthorized = await this.wsAuthGurad.canActivate(context as any);
     if (!isAuthorized) {
       socket.disconnect();
@@ -105,6 +107,8 @@ export class ExecuteGateway {
     socket.messageCount++;
     const { messageCount } = socket;
     const { seq } = requestExecuteDto;
+
+    this.logger.silly('execute');
 
     if (messageCount >= 1) {
       socket.messageCount--;

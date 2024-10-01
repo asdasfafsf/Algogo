@@ -9,8 +9,8 @@ import { RedisService } from '../redis/redis.service';
 import { CryptoService } from '../crypto/crypto.service';
 import EncryptConfig from '../config/encryptConfig';
 import { ConfigType } from '@nestjs/config';
-import { Logger } from 'winston';
 import { WsException } from '@nestjs/websockets';
+import { CustomLogger } from '../logger/custom-logger';
 
 @Injectable()
 export class WsAuthGuard implements CanActivate {
@@ -20,14 +20,15 @@ export class WsAuthGuard implements CanActivate {
     private readonly cryptoService: CryptoService,
     @Inject(EncryptConfig.KEY)
     private readonly encryptConfig: ConfigType<typeof EncryptConfig>,
-    @Inject('winston')
-    private readonly logger: Logger,
+    private readonly logger: CustomLogger,
   ) {}
 
   async canActivate(context: ExecutionContext) {
     try {
       const client = context.switchToWs().getClient();
       // const data = context.switchToWs().getData();
+
+      this.logger.silly('???', client);
 
       const encryptedToken = this.extractTokenFromClient(client);
 

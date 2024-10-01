@@ -17,39 +17,43 @@ export class CustomLogger {
       format: format.combine(
         format.timestamp(),
         format.json(),
-        format.printf(({ timestamp, level, message, context }) => {
-          return `${timestamp} [${context}] ${level}: ${message}`;
+        format.printf(({ timestamp, level, message, context, ...meta }) => {
+          const metaString =
+            meta && typeof meta === 'object' && Object.keys(meta).length
+              ? `\n${JSON.stringify(meta, null, 2)}`
+              : '';
+          return `${timestamp} [${context}] ${level}: ${message}${metaString}`;
         }),
       ),
       transports: [new transports.Console()],
     });
   }
 
-  log(message: string, meta?: any, callback?: () => void) {
+  log(message: string, meta: any = {}, callback?: () => void) {
     this.logger.info(message, { context: this.context, ...meta }, callback);
   }
 
-  error(message: string, meta?: any, callback?: () => void) {
+  error(message: string, meta: any = {}, callback?: () => void) {
     this.logger.error(message, { context: this.context, ...meta }, callback);
   }
 
-  warn(message: string, meta?: any, callback?: () => void) {
+  warn(message: string, meta: any = {}, callback?: () => void) {
     this.logger.warn(message, { context: this.context, ...meta }, callback);
   }
 
-  debug(message: string, meta?: any, callback?: () => void) {
+  debug(message: string, meta: any = {}, callback?: () => void) {
     this.logger.debug(message, { context: this.context, ...meta }, callback);
   }
 
-  verbose(message: string, meta?: any, callback?: () => void) {
+  verbose(message: string, meta: any = {}, callback?: () => void) {
     this.logger.verbose(message, { context: this.context, ...meta }, callback);
   }
 
-  http(message: string, meta?: any, callback?: () => void) {
+  http(message: string, meta: any = {}, callback?: () => void) {
     this.logger.http(message, { context: this.context, ...meta }, callback);
   }
 
-  silly(message: string, meta?: any, callback?: () => void) {
+  silly(message: string, meta: any = {}, callback?: () => void) {
     this.logger.silly(message, { context: this.context, ...meta }, callback);
   }
 }
