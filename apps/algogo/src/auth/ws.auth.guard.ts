@@ -26,10 +26,6 @@ export class WsAuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext) {
     try {
       const client = context.switchToWs().getClient();
-      // const data = context.switchToWs().getData();
-
-      this.logger.silly('???', client);
-
       const encryptedToken = this.extractTokenFromClient(client);
 
       if (!encryptedToken) {
@@ -87,8 +83,6 @@ export class WsAuthGuard implements CanActivate {
   }
 
   private extractTokenFromClient(client: any): string | undefined {
-    const authHeader = client.handshake?.headers['authorization'];
-    const [type, token] = authHeader ? authHeader.split(' ') : [null, null];
-    return type === 'Bearer' ? token : undefined;
+    return client.token ?? undefined;
   }
 }

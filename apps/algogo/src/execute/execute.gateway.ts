@@ -23,10 +23,12 @@ import WsConfig from '../config/wsConfig';
 import { ConfigType } from '@nestjs/config';
 import { Cron } from '@nestjs/schedule';
 import { CustomLogger } from '../logger/custom-logger';
+import { RequestWsAuthDto } from './dto/RequestWsAuthDto';
 
 class AuthSocket extends Socket {
   messageCount: number;
   userNo: string;
+  token: string;
   lastRequestTime: number;
 }
 
@@ -45,18 +47,31 @@ export class ExecuteGateway {
   @WebSocketServer()
   private server: Server;
 
+  private auth(socket: AuthSocket) {
+    return new Promise<void>(async (resolve, reject) => {
+      setTimeout(() => {
+        if (socket.disconnected) {
+          reject(new Error('connection disconnected'));
+        }
+
+        if (!socket.token) {
+          socket.disconnect();
+          reject(new Error('auth timeout'));
+        }
+
+        if (!socket.userNo) {
+          socket.disconnect();
+          reject(new Error('auth timeout'));
+        }
+
+        resolve();
+      }, 5000);
+    });
+  }
+
   async handleConnection(socket: AuthSocket) {
-    this.logger.silly('start connection');
-
-    const context = { switchToWs: () => ({ getClient: () => socket }) };
-
-    this.logger.silly('socket header', socket.handshake.headers);
-    const isAuthorized = await this.wsAuthGurad.canActivate(context as any);
-    if (!isAuthorized) {
-      socket.disconnect();
-      return;
-    }
-
+    this.logger.silly(`start connection socket id : ${socket.id}`);
+    await this.auth(socket);
     this.logger.silly(`connected id : ${socket.id}`);
 
     const { userNo, id } = socket;
@@ -90,6 +105,28 @@ export class ExecuteGateway {
       this.logger.silly(`remove prev socket : ${savedSocketId}`);
       await this.redisService.del(`${this.wsConfig.wsTag}_${userNo}`);
     }
+  }
+
+  @SubscribeMessage('auth')
+  async handleAuth(
+    @MessageBody() requestWsAuthDto: RequestWsAuthDto,
+    @ConnectedSocket() socket: AuthSocket,
+  ) {
+    const { token } = requestWsAuthDto;
+    socket.token = token;
+
+    const context = {
+      switchToWs: () => ({
+        getClient: () => socket,
+      }),
+    };
+    const isOk = await this.wsAuthGurad.canActivate(context as any);
+
+    if (!isOk) {
+      socket.disconnect();
+    }
+
+    return true;
   }
 
   @UsePipes(
