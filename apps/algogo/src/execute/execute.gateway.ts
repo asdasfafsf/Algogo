@@ -9,6 +9,7 @@ import { ExecuteService } from './execute.service';
 import { RequestExecuteDto } from '@libs/core/dto/RequestExecuteDto';
 import {
   BadRequestException,
+  ExecutionContext,
   HttpStatus,
   Inject,
   Injectable,
@@ -48,30 +49,35 @@ export class ExecuteGateway {
   private server: Server;
 
   private auth(socket: AuthSocket) {
-    return new Promise<void>(async (resolve, reject) => {
+    return new Promise<boolean>(async (resolve, reject) => {
       setTimeout(() => {
         if (socket.disconnected) {
-          reject(new Error('connection disconnected'));
+          resolve(false);
         }
 
         if (!socket.token) {
           socket.disconnect();
-          reject(new Error('auth timeout'));
+          resolve(false);
         }
 
         if (!socket.userNo) {
           socket.disconnect();
-          reject(new Error('auth timeout'));
+          resolve(false);
         }
 
-        resolve();
+        resolve(false);
       }, 5000);
     });
   }
 
   async handleConnection(socket: AuthSocket) {
     this.logger.silly(`start connection socket id : ${socket.id}`);
-    await this.auth(socket);
+    const isOk = await this.auth(socket);
+
+    if (!isOk) {
+      return;
+    }
+
     this.logger.silly(`connected id : ${socket.id}`);
 
     const { userNo, id } = socket;
@@ -120,11 +126,17 @@ export class ExecuteGateway {
         getClient: () => socket,
       }),
     };
-    const isOk = await this.wsAuthGurad.canActivate(context as any);
+    const isOk = await this.wsAuthGurad.canActivate(
+      context as ExecutionContext,
+    );
+
+    socket.lastRequestTime = Math.floor(new Date().getTime() / 1000);
 
     if (!isOk) {
       socket.disconnect();
     }
+
+    this.logger.silly('success auth');
 
     return true;
   }
@@ -138,14 +150,14 @@ export class ExecuteGateway {
   @UseGuards(WsAuthGuard)
   @SubscribeMessage('execute')
   async handleExecute(
-    @MessageBody() requestExecuteDto: RequestExecuteDto,
+    @MessageBody() requestExecuteDto: any,
     @ConnectedSocket() socket: AuthSocket,
   ) {
     socket.messageCount++;
     const { messageCount } = socket;
     const { seq } = requestExecuteDto;
 
-    this.logger.silly('execute');
+    this.logger.silly('execute', requestExecuteDto);
 
     if (messageCount >= 1) {
       socket.messageCount--;
