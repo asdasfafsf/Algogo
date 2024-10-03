@@ -28,6 +28,15 @@ import { ScheduleModule } from '@nestjs/schedule';
         },
       }),
     }),
+    BullModule.registerFlowProducerAsync({
+      inject: [bullmqConfig.KEY],
+      useFactory: (config: ConfigType<typeof bullmqConfig>) => ({
+        name: config.queueName,
+        connection: {
+          ...config,
+        },
+      }),
+    }),
     ScheduleModule.forRoot(),
     AuthModule,
   ],

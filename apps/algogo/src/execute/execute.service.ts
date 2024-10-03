@@ -1,31 +1,30 @@
 import { RequestExecuteDto } from '@libs/core/dto/RequestExecuteDto';
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
-import { Queue, QueueEvents } from 'bullmq';
+import { FlowProducer, Queue, QueueEvents } from 'bullmq';
 import bullmqConfig from '../config/bullmqConfig';
 import { ConfigType } from '@nestjs/config';
-import { Logger } from 'winston';
 import { uuidv7 } from 'uuidv7';
 import { ResponseExecuteResultDto } from '@libs/core/dto/ResponseExecuteResultDto';
+import { CustomLogger } from '../logger/custom-logger';
 
 @Injectable()
 export class ExecuteService implements OnModuleInit {
   constructor(
     @Inject(bullmqConfig.KEY)
     private readonly config: ConfigType<typeof bullmqConfig>,
-    @Inject('winston')
-    private readonly logger: Logger,
+    private readonly logger: CustomLogger,
   ) {}
 
-  private queue: Queue;
+  private flowProducer: FlowProducer;
   private queueEvents: QueueEvents;
 
   async onModuleInit() {
-    this.queue = new Queue(this.config.queueName, {
+    this.flowProducer = new FlowProducer({
       connection: {
         ...this.config,
       },
     });
-    await this.queue.waitUntilReady();
+    await this.flowProducer.waitUntilReady();
 
     this.queueEvents = new QueueEvents(this.config.queueName, {
       connection: {
@@ -34,6 +33,14 @@ export class ExecuteService implements OnModuleInit {
     });
 
     await this.queueEvents.waitUntilReady();
+
+    this.queueEvents.on('completed', async (job) => {
+      this.logger.silly('complete job', job);
+    });
+
+    this.queueEvents.on('failed', async (job) => {
+      this.logger.silly('complete job', job);
+    });
   }
 
   async generateJobId(provider: string) {

@@ -18,5 +18,5 @@ export class RequestExecuteDto {
 
   @IsOptional()
   @IsString()
-  input?: string = '';
+  inputList: string[] = [''];
 }

@@ -49,7 +49,7 @@ export class ExecuteGateway {
   private server: Server;
 
   private auth(socket: AuthSocket) {
-    return new Promise<boolean>(async (resolve, reject) => {
+    return new Promise<boolean>(async (resolve) => {
       setTimeout(() => {
         if (socket.disconnected) {
           resolve(false);
