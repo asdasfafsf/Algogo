@@ -50,25 +50,31 @@ export class ExecuteService implements OnModuleInit {
   async execute(
     requestExecuteDto: RequestExecuteDto,
   ): Promise<ResponseExecuteResultDto> {
-    const { provider } = requestExecuteDto;
-    const jobId = await this.generateJobId(provider);
-
     try {
-      const job = await this.queue.add(
-        this.config.queueName,
-        requestExecuteDto,
-        {
-          attempts: 3,
-          backoff: { type: 'exponential', delay: 1000 },
-          jobId,
-          removeOnComplete: true,
-          removeOnFail: true,
-          priority: 1,
-        },
-      );
-      const result = await job.waitUntilFinished(this.queueEvents);
+      const flow = await this.flowProducer.add({
+        name: 'execute',
+        queueName: this.config.queueName,
+        children: [
+          {
+            name: 'compile',
+            data: {
+              provider: requestExecuteDto.provider,
+              code: requestExecuteDto.code,
+            },
+            queueName: this.config.queueName,
+          },
+          ...requestExecuteDto.inputList.map((elem, index) => ({
+            name: 'execute',
+            queueName: this.config.queueName,
+            data: {
+              seq: index,
+              input: elem,
+            },
+          })),
+        ],
+      });
 
-      return result;
+      await flow.job.waitUntilFinished(this.queueEvents);
     } catch (error) {
       if (error?.message?.includes('timed out before finishing')) {
         return {
@@ -85,9 +91,6 @@ export class ExecuteService implements OnModuleInit {
         result: '예외 오류',
       };
     } finally {
-      if (await this.queue.getJob(jobId)) {
-        this.queue.remove(jobId);
-      }
     }
   }
 }

@@ -25,6 +25,7 @@ import { ConfigType } from '@nestjs/config';
 import { Cron } from '@nestjs/schedule';
 import { CustomLogger } from '../logger/custom-logger';
 import { RequestWsAuthDto } from './dto/RequestWsAuthDto';
+import { OnEvent } from '@nestjs/event-emitter';
 
 class AuthSocket extends Socket {
   messageCount: number;
@@ -218,5 +219,16 @@ export class ExecuteGateway {
         }
       }
     }
+  }
+
+  @OnEvent('execute.*')
+  async subscribeExecute(payload: any, socketId: string) {
+    this.logger.silly('execute result', payload);
+    this.server.to(socketId).emit('execute', payload);
+  }
+
+  @OnEvent('compile.*')
+  async subscribeCompile(payload: any, socketId: string) {
+    this.logger.silly('compile completed');
   }
 }
