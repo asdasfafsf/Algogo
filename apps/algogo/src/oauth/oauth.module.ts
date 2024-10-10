@@ -9,6 +9,7 @@ import { HttpModule } from '@nestjs/axios';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
 import { OauthRepository } from './oauth.repository';
+import OAuthFactory from './oauth-guard.factory';
 
 @Module({
   imports: [PassportModule.register({}), HttpModule, PrismaModule, AuthModule],
@@ -19,6 +20,7 @@ import { OauthRepository } from './oauth.repository';
     GoogleOauthStrategy,
     GithubOAuthStrategy,
     KakaoOAuthStrategy,
+    OAuthFactory,
   ],
 })
 export class OauthModule {}

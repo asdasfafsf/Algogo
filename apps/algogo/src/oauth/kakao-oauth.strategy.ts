@@ -9,7 +9,10 @@ import { OAuthProvider } from '../common/enums/OAuthProviderEnum';
 import { CustomLogger } from '../logger/custom-logger';
 
 @Injectable()
-export class KakaoOAuthStrategy extends PassportStrategy(Strategy, 'kakao') {
+export class KakaoOAuthStrategy extends PassportStrategy(
+  Strategy,
+  OAuthProvider.KAKAO,
+) {
   constructor(
     @Inject(kakaoOAuthConfig.KEY)
     private readonly oauthConfig: ConfigType<typeof kakaoOAuthConfig>,

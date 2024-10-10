@@ -9,7 +9,10 @@ import { OAuthProvider } from '../common/enums/OAuthProviderEnum';
 import { CustomLogger } from '../logger/custom-logger';
 
 @Injectable()
-export class GithubOAuthStrategy extends PassportStrategy(Strategy, 'github') {
+export class GithubOAuthStrategy extends PassportStrategy(
+  Strategy,
+  OAuthProvider.GITHUB,
+) {
   constructor(
     @Inject(githubOAuthConfig.KEY)
     private readonly oauthConfig: ConfigType<typeof githubOAuthConfig>,

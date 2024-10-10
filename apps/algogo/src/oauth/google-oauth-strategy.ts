@@ -10,7 +10,10 @@ import { OAuthProvider } from '../common/enums/OAuthProviderEnum';
 import { CustomLogger } from '../logger/custom-logger';
 
 @Injectable()
-export class GoogleOauthStrategy extends PassportStrategy(Strategy, 'google') {
+export class GoogleOauthStrategy extends PassportStrategy(
+  Strategy,
+  OAuthProvider.GOOGLE,
+) {
   constructor(
     @Inject(googleOAuthConfig.KEY)
     private readonly oauthConfig: ConfigType<typeof googleOAuthConfig>,
