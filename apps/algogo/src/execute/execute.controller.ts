@@ -25,6 +25,6 @@ export class ExecuteController {
   @ApiExcludeEndpoint()
   async execute(@Body() requestExecuteDto: RequestExecuteDto) {
     this.logger.silly('execute', requestExecuteDto);
-    return this.executeService.execute(requestExecuteDto);
+    return {};
   }
 }

@@ -1,10 +1,7 @@
-import { IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsIn, IsNotEmpty, IsString } from 'class-validator';
+import { RequestExecuteInputDto } from '@libs/core/dto/RequestExecuteInputDto';
 
 export class RequestExecuteDto {
-  @IsString()
-  @IsNotEmpty({ message: 'seq 필드는 비워둘 수 없습니다.' })
-  seq: string;
-
   @IsIn(['java', 'java17', 'cpp', 'javascript', 'python', 'c++'], {
     message:
       'provider는 "java", "java17", "cpp", "javascript", "python", "c++" 중 하나여야 합니다.',
@@ -16,7 +13,5 @@ export class RequestExecuteDto {
   @IsNotEmpty({ message: 'code 필드는 비워둘 수 없습니다.' })
   code: string;
 
-  @IsOptional()
-  @IsString()
-  inputList: string[] = [''];
+  inputList: RequestExecuteInputDto[];
 }

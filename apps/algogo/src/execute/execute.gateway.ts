@@ -26,6 +26,7 @@ import { Cron } from '@nestjs/schedule';
 import { CustomLogger } from '../logger/custom-logger';
 import { RequestWsAuthDto } from './dto/RequestWsAuthDto';
 import { OnEvent } from '@nestjs/event-emitter';
+import { CryptoService } from '../crypto/crypto.service';
 
 class AuthSocket extends Socket {
   messageCount: number;
@@ -44,6 +45,7 @@ export class ExecuteGateway {
     @Inject(WsConfig.KEY)
     private readonly wsConfig: ConfigType<typeof WsConfig>,
     private readonly redisService: RedisService,
+    private readonly cryptoServoce: CryptoService,
   ) {}
 
   @WebSocketServer()
@@ -157,8 +159,10 @@ export class ExecuteGateway {
     socket.messageCount++;
     const { messageCount } = socket;
     const { seq } = requestExecuteDto;
+    const { id } = socket;
+    const requestRunDto = { id, ...requestExecuteDto };
 
-    this.logger.silly('execute', requestExecuteDto);
+    this.logger.silly('execute', requestRunDto);
 
     if (messageCount >= 1) {
       socket.messageCount--;
@@ -172,7 +176,7 @@ export class ExecuteGateway {
 
     try {
       socket.lastRequestTime = Math.floor(new Date().getTime() / 1000);
-      const response = await this.executeService.execute(requestExecuteDto);
+      const response = await this.executeService.run(requestRunDto);
       socket.messageCount--;
       return {
         seq,

@@ -7,6 +7,7 @@ import { ConfigModule, ConfigType } from '@nestjs/config';
 import bullmqConfig from '../config/bullmqConfig';
 import { ExecuteGateway } from './execute.gateway';
 import { ScheduleModule } from '@nestjs/schedule';
+import { CryptoModule } from '../crypto/crypto.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { ScheduleModule } from '@nestjs/schedule';
       }),
     }),
     ScheduleModule.forRoot(),
+    CryptoModule,
     AuthModule,
   ],
   controllers: [ExecuteController],

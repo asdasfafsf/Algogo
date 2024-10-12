@@ -1,11 +1,11 @@
-import { RequestExecuteDto } from '@libs/core/dto/RequestExecuteDto';
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
-import { FlowProducer, Queue, QueueEvents } from 'bullmq';
+import { FlowProducer, Job, Queue, QueueEvents } from 'bullmq';
 import bullmqConfig from '../config/bullmqConfig';
 import { ConfigType } from '@nestjs/config';
 import { uuidv7 } from 'uuidv7';
-import { ResponseExecuteResultDto } from '@libs/core/dto/ResponseExecuteResultDto';
 import { CustomLogger } from '../logger/custom-logger';
+import { RequestCompileDto } from './dto/RequestCompileDto';
+import { RequestRunDto } from './dto/RequestRunDto';
 
 @Injectable()
 export class ExecuteService implements OnModuleInit {
@@ -33,48 +33,79 @@ export class ExecuteService implements OnModuleInit {
     });
 
     await this.queueEvents.waitUntilReady();
-
-    this.queueEvents.on('completed', async (job) => {
-      this.logger.silly('complete job', job);
-    });
-
-    this.queueEvents.on('failed', async (job) => {
-      this.logger.silly('complete job', job);
-    });
   }
 
   async generateJobId(provider: string) {
     return `${provider}_${Math.floor(new Date().getTime() / 1000)}_${uuidv7()}`;
   }
 
-  async execute(
-    requestExecuteDto: RequestExecuteDto,
-  ): Promise<ResponseExecuteResultDto> {
+  async run(requestExecuteDto: RequestRunDto): Promise<any> {
     try {
+      const { code, provider, inputList, id } = requestExecuteDto;
+      const requestCompileDto = {
+        id,
+        code,
+        provider,
+      } as RequestCompileDto;
+
       const flow = await this.flowProducer.add({
-        name: 'execute',
+        name: 'run',
         queueName: this.config.queueName,
         children: [
           {
             name: 'compile',
-            data: {
-              provider: requestExecuteDto.provider,
-              code: requestExecuteDto.code,
-            },
             queueName: this.config.queueName,
+            data: requestCompileDto,
+            opts: {
+              priority: 1,
+            },
           },
-          ...requestExecuteDto.inputList.map((elem, index) => ({
+          ...[{ seq: '1', input: '2' }].map(({ seq, input }) => ({
             name: 'execute',
             queueName: this.config.queueName,
             data: {
-              seq: index,
-              input: elem,
+              id,
+              seq,
+              input,
+              provider,
+            },
+            opts: {
+              priority: 3,
             },
           })),
         ],
       });
 
-      await flow.job.waitUntilFinished(this.queueEvents);
+      const compileJob = flow.children.find(
+        (elem) => elem.job.name === 'compile',
+      )!.job;
+      const compileResult = await compileJob.waitUntilFinished(
+        this.queueEvents,
+        2000,
+      );
+
+      this.logger.silly('compile result', compileResult);
+
+      if (compileResult.code !== '0000') {
+      }
+
+      const executeJobList = flow.children
+        .filter((elem) => elem.job.name === 'execute')
+        .map((elem) => elem.job);
+      const executeResultList = await Promise.all(
+        executeJobList.map(async (job) => {
+          const executeResult = await job.waitUntilFinished(
+            this.queueEvents,
+            5000,
+          );
+          console.log(executeResult);
+          return executeResult;
+        }),
+      );
+
+      const res = await flow.job.waitUntilFinished(this.queueEvents, 2000);
+
+      return executeResultList;
     } catch (error) {
       if (error?.message?.includes('timed out before finishing')) {
         return {
