@@ -6,18 +6,15 @@ import { JavascriptInterpretService } from './javascript-interpret.service';
 import { PythonInterpretService } from './python-interpret.service';
 import { Execute } from './execute.interface';
 import { Provider } from '@nestjs/common';
-export type ExecuteProvider =
-  | 'cpp'
-  | 'clang'
-  | 'java'
-  | 'java17'
-  | 'javascript'
-  | 'python';
+import { LanguageProvider } from '../common/enum/LanguageProviderEnum';
+
 export type ExecuteServiceFactory = {
-  get: (provider: ExecuteProvider) => Promise<Execute> | Execute;
+  get: (provider: LanguageProvider) => Promise<Execute> | Execute;
 };
+
 export const EXECUTE_SERVICE_FACTORY_NAME = 'EXECUTE_SERVICE_FACTORY';
-export const executeProvider: Provider = {
+
+export const ExecuteProvider: Provider = {
   provide: EXECUTE_SERVICE_FACTORY_NAME,
   useFactory: (
     cpp: CppExecuteService,
@@ -27,17 +24,17 @@ export const executeProvider: Provider = {
     javascript: JavascriptInterpretService,
     python: PythonInterpretService,
   ) => {
-    const services: { [key in ExecuteProvider]: Execute } = {
-      cpp,
-      clang,
-      java,
-      java17,
-      javascript,
-      python,
+    const services: { [key in LanguageProvider]: Execute } = {
+      [LanguageProvider.CPP]: cpp,
+      [LanguageProvider.CLANG]: clang,
+      [LanguageProvider.JAVA]: java,
+      [LanguageProvider.JAVA17]: java17,
+      [LanguageProvider.NODEJS]: javascript,
+      [LanguageProvider.PYTHON]: python,
     };
 
     return {
-      get: (provider: ExecuteProvider) => services[provider],
+      get: (provider: LanguageProvider) => services[provider] ?? javascript,
     };
   },
   inject: [
@@ -50,4 +47,4 @@ export const executeProvider: Provider = {
   ],
 };
 
-export default executeProvider;
+export default ExecuteProvider;

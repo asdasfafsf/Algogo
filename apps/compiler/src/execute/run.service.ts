@@ -1,7 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
 import {
   EXECUTE_SERVICE_FACTORY_NAME,
-  ExecuteProvider,
   ExecuteServiceFactory,
 } from './execute.provider';
 import { Logger } from 'winston';
@@ -9,6 +8,7 @@ import TimeoutError from './error/timeout-error';
 import { ResponseExecuteResultDto } from '@libs/core/dto/ResponseExecuteResultDto';
 import RuntimeError from './error/runtime-error';
 import CompileError from './error/compile-error';
+import { LanguageProvider } from '../common/enum/LanguageProviderEnum';
 
 @Injectable()
 export class RunService {
@@ -20,7 +20,7 @@ export class RunService {
   ) {}
 
   async execute(
-    provider: ExecuteProvider,
+    provider: LanguageProvider,
     code: string,
     input: string,
   ): Promise<ResponseExecuteResultDto> {

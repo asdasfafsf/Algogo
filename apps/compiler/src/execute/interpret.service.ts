@@ -58,20 +58,30 @@ export class InterpretService implements Execute {
         : '';
       const codePath = path.resolve(tmpDir, `main${fileExtension}`);
       await this.fileService.writeFile(codePath, '', code);
-      return codePath;
+
+      return {
+        code: '0000',
+        result: codePath,
+        processTime: 0,
+        memory: 0,
+      };
     } catch (e) {
-      throw new PreprocessError(e.message);
+      return {
+        code: '9999',
+        result: '전처리 오류',
+        processTime: 0,
+        memory: 0,
+      };
     } finally {
     }
   }
 
-  async execute(code: string, input: string): Promise<ResponseExecuteDto> {
-    const codePath = await this.compile(code);
+  async execute(codePath: string, input: string): Promise<ResponseExecuteDto> {
     const tmpPath = path.dirname(codePath);
 
     try {
       const command = this.getExecuteCommand();
-      const commandArgs = this.getExecuteCommandArgs(codePath, codePath, code);
+      const commandArgs = this.getExecuteCommandArgs(codePath, codePath, '');
       const options = {
         cwd: process.env.TMP_DIR,
       };

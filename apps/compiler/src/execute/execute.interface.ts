@@ -49,7 +49,7 @@ export interface Execute {
    * @param code 코드
    * @returns 컴파일 결과의 풀 경로를 리턴한다
    */
-  compile: (code: string) => Promise<string>;
+  compile: (code: string) => Promise<ResponseExecuteDto>;
   /**
    *
    * @param code 코드

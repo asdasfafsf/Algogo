@@ -85,7 +85,10 @@ export class ExecuteService implements Execute {
         options,
       );
 
-      return compiledFilePath;
+      return {
+        ...result,
+        result: compiledFilePath,
+      };
     } catch (e) {
       this.fileService.removeDir(tmpDir);
       this.logger.error(e);
@@ -94,9 +97,10 @@ export class ExecuteService implements Execute {
     }
   }
 
-  async execute(code: string, input: string): Promise<ResponseExecuteDto> {
-    const compiledFilePath = await this.compile(code);
-    this.logger.silly(`end compile`);
+  async execute(
+    compiledFilePath: string,
+    input: string,
+  ): Promise<ResponseExecuteDto> {
     const tmpPath = path.dirname(compiledFilePath);
 
     const fileExtension = this.getFileExtension()
@@ -106,11 +110,11 @@ export class ExecuteService implements Execute {
 
     try {
       this.logger.silly(`start process`);
-      const command = this.getExecuteCommand(filePath, compiledFilePath, code);
+      const command = this.getExecuteCommand(filePath, compiledFilePath, '');
       const commandArgs = this.getExecuteCommandArgs(
         filePath,
         compiledFilePath,
-        code,
+        '',
       );
       const options = {};
 
@@ -121,7 +125,10 @@ export class ExecuteService implements Execute {
         options,
         input,
       );
-      return result;
+      return {
+        // code: '0000',
+        ...result,
+      };
     } catch (e) {
       this.logger.error(`Execute Error occurred: ${e.message}`);
       this.logger.error(`Execute Error name: ${e.name}`);
