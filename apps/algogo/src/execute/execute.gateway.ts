@@ -225,16 +225,14 @@ export class ExecuteGateway {
     }
   }
 
-  @OnEvent('execute.*')
-  async subscribeExecute(payload: any, socketId: string) {
+  @OnEvent('execute')
+  async subscribeExecute(payload: any) {
     this.logger.silly('execute result', payload);
-    this.logger.silly('socketId', {
-      socketId,
-    });
-    this.server.to(socketId).emit('execute', payload);
+    const { id } = payload;
+    this.server.to(id).emit('execute', payload);
   }
 
-  @OnEvent('compile.*')
+  @OnEvent('compile')
   async subscribeCompile(payload: any, socketId: string) {
     this.logger.silly('compile completed');
   }

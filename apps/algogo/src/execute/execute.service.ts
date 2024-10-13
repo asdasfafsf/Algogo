@@ -52,6 +52,7 @@ export class ExecuteService implements OnModuleInit {
 
       this.logger.silly('run', {
         id,
+        inputList,
       });
 
       const flow = await this.flowProducer.add({
@@ -82,6 +83,8 @@ export class ExecuteService implements OnModuleInit {
         ],
       });
 
+      this.logger.silly('add end');
+
       const compileJob = flow.children.find(
         (elem) => elem.job.name === 'compile',
       )!.job;
@@ -110,7 +113,10 @@ export class ExecuteService implements OnModuleInit {
             5000,
           );
           this.logger.silly('executeResult', executeResult);
-          this.eventEmitter.emitAsync(`execute.${id}`, executeResult);
+          await this.eventEmitter.emitAsync(`execute`, {
+            ...executeResult,
+            id,
+          });
           return executeResult;
         }),
       );
@@ -124,6 +130,7 @@ export class ExecuteService implements OnModuleInit {
         result: '정상',
       };
     } catch (error) {
+      this.logger.error(error.message);
       if (error?.message?.includes('timed out before finishing')) {
         return {
           processTime: 0,
