@@ -6,6 +6,7 @@ import { uuidv7 } from 'uuidv7';
 import { CustomLogger } from '../logger/custom-logger';
 import { RequestCompileDto } from './dto/RequestCompileDto';
 import { RequestRunDto } from './dto/RequestRunDto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class ExecuteService implements OnModuleInit {
@@ -13,6 +14,7 @@ export class ExecuteService implements OnModuleInit {
     @Inject(bullmqConfig.KEY)
     private readonly config: ConfigType<typeof bullmqConfig>,
     private readonly logger: CustomLogger,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   private flowProducer: FlowProducer;
@@ -48,6 +50,10 @@ export class ExecuteService implements OnModuleInit {
         provider,
       } as RequestCompileDto;
 
+      this.logger.silly('run', {
+        id,
+      });
+
       const flow = await this.flowProducer.add({
         name: 'run',
         queueName: this.config.queueName,
@@ -60,7 +66,7 @@ export class ExecuteService implements OnModuleInit {
               priority: 1,
             },
           },
-          ...[{ seq: '1', input: '2' }].map(({ seq, input }) => ({
+          ...inputList.map(({ seq, input }) => ({
             name: 'execute',
             queueName: this.config.queueName,
             data: {
@@ -87,31 +93,42 @@ export class ExecuteService implements OnModuleInit {
       this.logger.silly('compile result', compileResult);
 
       if (compileResult.code !== '0000') {
+        return {
+          code: '9002',
+          result: '컴파일 오류',
+        };
       }
 
       const executeJobList = flow.children
         .filter((elem) => elem.job.name === 'execute')
         .map((elem) => elem.job);
+
       const executeResultList = await Promise.all(
         executeJobList.map(async (job) => {
           const executeResult = await job.waitUntilFinished(
             this.queueEvents,
             5000,
           );
-          console.log(executeResult);
+          this.logger.silly('executeResult', executeResult);
+          this.eventEmitter.emitAsync(`execute.${id}`, executeResult);
           return executeResult;
         }),
       );
 
       const res = await flow.job.waitUntilFinished(this.queueEvents, 2000);
 
-      return executeResultList;
+      return {
+        processTime: 0,
+        memory: 0,
+        code: '0000',
+        result: '정상',
+      };
     } catch (error) {
       if (error?.message?.includes('timed out before finishing')) {
         return {
           processTime: 0,
           memory: 0,
-          code: '9001',
+          code: '9000',
           result: '시간 초과',
         };
       }

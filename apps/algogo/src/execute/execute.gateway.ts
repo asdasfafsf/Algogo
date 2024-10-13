@@ -228,6 +228,9 @@ export class ExecuteGateway {
   @OnEvent('execute.*')
   async subscribeExecute(payload: any, socketId: string) {
     this.logger.silly('execute result', payload);
+    this.logger.silly('socketId', {
+      socketId,
+    });
     this.server.to(socketId).emit('execute', payload);
   }
 
