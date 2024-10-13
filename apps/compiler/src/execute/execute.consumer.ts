@@ -8,6 +8,7 @@ import {
 import { ResponseExecuteDto } from '@libs/core/dto/ResponseExecuteDto';
 import CompileError from './error/compile-error';
 import PreprocessError from './error/preprocess-error';
+import RuntimeError from './error/runtime-error';
 
 @Processor('execute')
 export class ExecuteConsumer extends WorkerHost {
@@ -35,19 +36,15 @@ export class ExecuteConsumer extends WorkerHost {
         const { code } = data;
         const compileResult = await executor.compile(code);
         this.cache.set(id, compileResult);
-        console.log('compileResult');
-        console.log(compileResult);
         return {
           ...compileResult,
         };
       } else if (name === 'execute') {
-        const path = this.cache.get(id);
-
-        console.log('path : ' + path);
-        const executeResult = await executor.execute(path.result, '1');
-        this.cache.delete(id);
+        const compileResult = this.cache.get(id);
+        const executeResult = await executor.execute(compileResult.result, '1');
         return executeResult;
       } else {
+        this.cache.delete(id);
         return true;
       }
     } catch (e) {
@@ -57,6 +54,14 @@ export class ExecuteConsumer extends WorkerHost {
           code: '9999',
           message: e.message,
           result: e.message,
+        };
+      }
+
+      if (e instanceof RuntimeError) {
+        return {
+          code: '9001',
+          result: `런타임 에러${e.message}`,
+          message: `런타임 에러${e.message}`,
         };
       }
 
