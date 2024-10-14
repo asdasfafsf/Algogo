@@ -61,6 +61,7 @@ export class ProcessService {
       const stdError = [];
 
       if (input) {
+        this.logger.silly('process input : ' + input);
         childProcess.stdin.write(input);
         childProcess.stdin.end();
       }

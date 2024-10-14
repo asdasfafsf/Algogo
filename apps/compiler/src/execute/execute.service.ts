@@ -88,6 +88,7 @@ export class ExecuteService implements Execute {
       );
 
       return {
+        code: '0000',
         ...result,
         result: compiledFilePath,
       };
@@ -102,7 +103,7 @@ export class ExecuteService implements Execute {
   async execute(
     compiledFilePath: string,
     input: string,
-  ): Promise<ResponseExecuteDto> {
+  ): Promise<ResponseExecuteResultDto> {
     const tmpPath = path.dirname(compiledFilePath);
 
     const fileExtension = this.getFileExtension()
@@ -128,7 +129,7 @@ export class ExecuteService implements Execute {
         input,
       );
       return {
-        // code: '0000',
+        code: '0000',
         ...result,
       };
     } catch (e) {

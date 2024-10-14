@@ -11,6 +11,7 @@ import { ConfigType } from '@nestjs/config';
 import PreprocessError from './error/preprocess-error';
 import RuntimeError from './error/runtime-error';
 import TimeoutError from './error/timeout-error';
+import { ResponseExecuteResultDto } from '@libs/core/dto/ResponseExecuteResultDto';
 
 @Injectable()
 export class InterpretService implements Execute {
@@ -76,7 +77,10 @@ export class InterpretService implements Execute {
     }
   }
 
-  async execute(codePath: string, input: string): Promise<ResponseExecuteDto> {
+  async execute(
+    codePath: string,
+    input: string,
+  ): Promise<ResponseExecuteResultDto> {
     const tmpPath = path.dirname(codePath);
 
     try {
@@ -92,7 +96,10 @@ export class InterpretService implements Execute {
         options,
         input,
       );
-      return result;
+      return {
+        ...result,
+        code: '0000',
+      };
     } catch (error) {
       this.logger.error('error', error);
       if (error instanceof TimeoutError) {

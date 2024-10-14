@@ -9,6 +9,7 @@ import { ResponseExecuteDto } from '@libs/core/dto/ResponseExecuteDto';
 import CompileError from './error/compile-error';
 import PreprocessError from './error/preprocess-error';
 import RuntimeError from './error/runtime-error';
+import TimeoutError from './error/timeout-error';
 
 @Processor('execute')
 export class ExecuteConsumer extends WorkerHost {
@@ -25,10 +26,6 @@ export class ExecuteConsumer extends WorkerHost {
   async process(job: Job): Promise<any> {
     const { name, data } = job;
     const { provider, id } = data;
-
-    console.log(`name : ${name}`);
-    console.log(data);
-
     const executor = await this.executorFactory.get(provider);
 
     try {
@@ -40,8 +37,12 @@ export class ExecuteConsumer extends WorkerHost {
           ...compileResult,
         };
       } else if (name === 'execute') {
+        const { input } = data;
         const compileResult = this.cache.get(id);
-        const executeResult = await executor.execute(compileResult.result, '1');
+        const executeResult = await executor.execute(
+          compileResult.result,
+          input,
+        );
         return executeResult;
       } else {
         this.cache.delete(id);
@@ -49,32 +50,41 @@ export class ExecuteConsumer extends WorkerHost {
       }
     } catch (e) {
       console.error(e);
-      if (e instanceof CompileError) {
+      const format = {
+        processTime: 0,
+        memory: 0,
+      };
+
+      if (e instanceof TimeoutError) {
         return {
-          code: '9999',
-          message: e.message,
-          result: e.message,
+          ...format,
+          code: '9000',
+          result: '시간 초과',
         };
       }
 
       if (e instanceof RuntimeError) {
         return {
+          ...format,
           code: '9001',
-          result: `런타임 에러${e.message}`,
-          message: `런타임 에러${e.message}`,
+          result: '런타임 에러(' + (e.message || 'Unknown') + ')',
         };
       }
 
-      if (e instanceof PreprocessError) {
+      if (e instanceof CompileError) {
         return {
-          code: '9999',
-          message: '파일 전처리 중 오류가 발생하였습니다.',
-          result: '파일 전처리 중 오류가 발생하였습니다.',
+          ...format,
+          code: '9002',
+          result: '컴파일 에러',
         };
       }
+
+      return {
+        ...format,
+        code: '9999',
+        result: '예외 오류',
+      };
     } finally {
     }
-
-    return {};
   }
 }

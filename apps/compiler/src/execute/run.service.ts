@@ -26,7 +26,8 @@ export class RunService {
   ): Promise<ResponseExecuteResultDto> {
     try {
       const executor = await this.executorFactory.get(provider);
-      const result = await executor.execute(code, input);
+      const compileResult = await executor.compile(code);
+      const result = await executor.execute(compileResult.result, input);
 
       return { ...result, code: '0000' };
     } catch (e) {
