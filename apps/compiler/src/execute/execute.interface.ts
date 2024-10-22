@@ -1,4 +1,4 @@
-import { ResponseExecuteDto } from '@libs/core/dto/ResponseExecuteDto';
+import { ResponseExecuteResultDto } from '@libs/core/dto/ResponseExecuteResultDto';
 
 export interface Execute {
   /**
@@ -49,13 +49,13 @@ export interface Execute {
    * @param code 코드
    * @returns 컴파일 결과의 풀 경로를 리턴한다
    */
-  compile: (code: string) => Promise<ResponseExecuteDto>;
+  compile: (code: string) => Promise<ResponseExecuteResultDto>;
   /**
    *
    * @param code 코드
    * @param input 입력값
    * @returns 실행 결과를 리턴한다.
    */
-  execute: (code: string, input: string) => Promise<ResponseExecuteDto>;
+  execute: (code: string, input: string) => Promise<ResponseExecuteResultDto>;
   handleError: (error: Error) => Promise<void> | void;
 }

@@ -9,6 +9,8 @@ import { ResponseExecuteResultDto } from '@libs/core/dto/ResponseExecuteResultDt
 import RuntimeError from './error/runtime-error';
 import CompileError from './error/compile-error';
 import { LanguageProvider } from '../common/enum/LanguageProviderEnum';
+import { FileService } from '../file/file.service';
+import path from 'path';
 
 @Injectable()
 export class RunService {
@@ -17,6 +19,7 @@ export class RunService {
     private readonly executorFactory: ExecuteServiceFactory,
     @Inject('winston')
     private readonly logger: Logger,
+    private readonly fileService: FileService,
   ) {}
 
   async execute(
@@ -24,9 +27,11 @@ export class RunService {
     code: string,
     input: string,
   ): Promise<ResponseExecuteResultDto> {
+    let filePath = '';
     try {
       const executor = await this.executorFactory.get(provider);
       const compileResult = await executor.compile(code);
+      filePath = path.basename(compileResult.result);
       const result = await executor.execute(compileResult.result, input);
 
       return { ...result, code: '0000' };
@@ -66,6 +71,8 @@ export class RunService {
         code: '9999',
         result: '예외 오류',
       };
+    } finally {
+      this.fileService.removeDir(filePath);
     }
   }
 }

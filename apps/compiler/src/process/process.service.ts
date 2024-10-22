@@ -30,7 +30,7 @@ export class ProcessService {
     command: string,
     commandArgs: string[],
     option: SpawnOptionsWithoutStdio = {},
-    input?: string,
+    input: string = '',
   ): Promise<ResponseExecuteDto> {
     option.timeout = 5000;
     option.cwd = this.config.tmpDir;
@@ -60,11 +60,9 @@ export class ProcessService {
       const result = [];
       const stdError = [];
 
-      if (input) {
-        this.logger.silly('process input : ' + input);
-        childProcess.stdin.write(input);
-        childProcess.stdin.end();
-      }
+      this.logger.silly('process input : ' + input);
+      childProcess.stdin.write(input);
+      childProcess.stdin.end();
 
       childProcess.stdout.on('data', (e) => {
         result.push(e.toString());

@@ -5,11 +5,10 @@ import {
   EXECUTE_SERVICE_FACTORY_NAME,
   ExecuteServiceFactory,
 } from './execute.provider';
-import { ResponseExecuteDto } from '@libs/core/dto/ResponseExecuteDto';
 import CompileError from './error/compile-error';
-import PreprocessError from './error/preprocess-error';
 import RuntimeError from './error/runtime-error';
 import TimeoutError from './error/timeout-error';
+import { ResponseExecuteResultDto } from '@libs/core/dto/ResponseExecuteResultDto';
 
 @Processor('execute')
 export class ExecuteConsumer extends WorkerHost {
@@ -21,11 +20,11 @@ export class ExecuteConsumer extends WorkerHost {
     this.cache = new Map();
   }
 
-  private cache: Map<string, ResponseExecuteDto>;
+  private cache: Map<string, ResponseExecuteResultDto>;
 
   async process(job: Job): Promise<any> {
     const { name, data } = job;
-    const { provider, id } = data;
+    const { provider, id, seq } = data;
     const executor = await this.executorFactory.get(provider);
 
     try {
@@ -37,22 +36,29 @@ export class ExecuteConsumer extends WorkerHost {
           ...compileResult,
         };
       } else if (name === 'execute') {
-        const { input } = data;
+        const { input, seq } = data;
         const compileResult = this.cache.get(id);
+
+        if (compileResult.code !== '0000') {
+          return {
+            ...compileResult,
+            result: '컴파일 오류',
+          };
+        }
         const executeResult = await executor.execute(
           compileResult.result,
           input,
         );
-        return executeResult;
+        return { ...executeResult, seq };
       } else {
         this.cache.delete(id);
         return true;
       }
     } catch (e) {
-      console.error(e);
       const format = {
         processTime: 0,
         memory: 0,
+        seq,
       };
 
       if (e instanceof TimeoutError) {
@@ -85,6 +91,7 @@ export class ExecuteConsumer extends WorkerHost {
         result: '예외 오류',
       };
     } finally {
+      // this.cache.delete(id ?? '');
     }
   }
 }

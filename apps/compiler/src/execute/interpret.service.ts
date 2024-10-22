@@ -109,9 +109,6 @@ export class InterpretService implements Execute {
       this.handleError(error);
       throw error;
     } finally {
-      if (tmpPath) {
-        this.fileService.removeDir(tmpPath);
-      }
     }
   }
   handleError(error: Error) {}

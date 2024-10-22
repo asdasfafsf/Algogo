@@ -142,7 +142,6 @@ export class ExecuteService implements Execute {
       this.handleError(e);
       throw new RuntimeError('');
     } finally {
-      this.fileService.removeDir(tmpPath);
     }
   }
 
