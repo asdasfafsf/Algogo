@@ -32,7 +32,7 @@ export class ProcessService {
     option: SpawnOptionsWithoutStdio = {},
     input: string = '',
   ): Promise<ResponseExecuteDto> {
-    option.timeout = 5000;
+    option.timeout = 3000;
     option.cwd = this.config.tmpDir;
 
     const uuid = uuidv7();
@@ -82,9 +82,9 @@ export class ProcessService {
           childProcess.kill('SIGKILL');
         }
 
-        if (stdError.length === 0 && closeCode !== 0) {
-          reject(new Error('NZEC'));
-        }
+        // if (stdError.length === 0 && closeCode !== 0) {
+        //   reject(new Error('NZEC'));
+        // }
 
         switch (closeResult) {
           case 'SIGSEGV':
