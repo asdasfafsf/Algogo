@@ -103,7 +103,9 @@ export class ProcessService {
           case 'SIGBUS':
             reject(new Error('BusError'));
           default:
-            reject(new Error(stdError.join('')));
+            stdError.length === 0 && closeCode !== 0
+              ? reject(new Error('NZEC'))
+              : reject(new Error(stdError.join('')));
         }
       });
 
