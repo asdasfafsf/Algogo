@@ -32,7 +32,7 @@ export class ProcessService {
     option: SpawnOptionsWithoutStdio = {},
     input: string = '',
   ): Promise<ResponseExecuteDto> {
-    option.timeout = 3000;
+    option.timeout = 2000;
     option.cwd = this.config.tmpDir;
 
     const uuid = uuidv7();
@@ -54,7 +54,7 @@ export class ProcessService {
       } catch (e) {
         clearInterval(checkProcessUsageInterval);
       }
-    }, 1);
+    }, 100);
 
     return new Promise<ResponseExecuteDto>((resolve, reject) => {
       const result = [];
@@ -76,8 +76,8 @@ export class ProcessService {
         if (closeCode === 0) {
           resolve({
             processTime: Number((performance.now() - startTime).toFixed(1)),
-            memory: Number((currentMemory / Math.pow(1024, 1)).toFixed(1)),
-            result: result.join('\n').trim(),
+            memory: Number((currentMemory / Math.pow(1024, 2)).toFixed(1)),
+            result: result.join(''),
           });
           childProcess.kill('SIGKILL');
         }

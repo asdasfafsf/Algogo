@@ -1,6 +1,6 @@
 import { ResponseProcessUsageDto } from '@libs/core/dto/ResponseProcessUsageDto';
 import { Injectable } from '@nestjs/common';
-import pidusage from 'pidusage';
+import * as pidusage from 'pidusage';
 
 @Injectable()
 export class ProcessManagementService {
