@@ -6,11 +6,8 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { ExecuteService } from './execute.service';
-import { RequestExecuteDto } from '@libs/core/dto/RequestExecuteDto';
 import {
-  BadRequestException,
   ExecutionContext,
-  HttpStatus,
   Inject,
   Injectable,
   UseGuards,
@@ -133,8 +130,6 @@ export class ExecuteGateway {
       context as ExecutionContext,
     );
 
-    socket.lastRequestTime = Math.floor(new Date().getTime() / 1000);
-
     if (!isOk) {
       socket.disconnect();
     }
@@ -156,49 +151,21 @@ export class ExecuteGateway {
     @MessageBody() requestExecuteDto: any,
     @ConnectedSocket() socket: AuthSocket,
   ) {
-    socket.messageCount++;
-    const { messageCount } = socket;
-    const { seq } = requestExecuteDto;
     const { id } = socket;
     const requestRunDto = { id, ...requestExecuteDto };
 
     this.logger.silly('execute', requestRunDto);
 
-    if (messageCount >= 1) {
-      socket.messageCount--;
-      return {
-        seq,
-        status: HttpStatus.BAD_REQUEST,
-        message: '동시요청 제한 횟수를 초과하였습니다.',
-        data: '',
-      };
-    }
-
     try {
-      socket.lastRequestTime = Math.floor(new Date().getTime() / 1000);
       const response = await this.executeService.run(requestRunDto);
-      socket.messageCount--;
-      return {
-        seq,
-        status: HttpStatus.OK,
-        message: '',
-        data: response,
-      };
+      return response;
     } catch (e) {
-      socket.messageCount--;
-      if (e instanceof BadRequestException) {
-        return {
-          seq,
-          status: HttpStatus.BAD_REQUEST,
-          message: e.message,
-          data: '',
-        };
-      }
+      this.logger.error(e.message);
       return {
-        seq,
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: '예외 오류',
-        data: '',
+        code: '9999',
+        result: '예외 오류',
+        processTime: 0,
+        memory: 0,
       };
     }
   }

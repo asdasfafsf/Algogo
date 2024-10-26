@@ -1,5 +1,5 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
-import { FlowProducer, Job, Queue, QueueEvents } from 'bullmq';
+import { FlowProducer, QueueEvents } from 'bullmq';
 import bullmqConfig from '../config/bullmqConfig';
 import { ConfigType } from '@nestjs/config';
 import { uuidv7 } from 'uuidv7';
@@ -97,8 +97,8 @@ export class ExecuteService implements OnModuleInit {
 
       if (compileResult.code !== '0000') {
         return {
-          code: '9002',
-          result: '컴파일 오류',
+          ...compileResult,
+          result: '컴파일 에러',
         };
       }
 
@@ -106,20 +106,17 @@ export class ExecuteService implements OnModuleInit {
         .filter((elem) => elem.job.name === 'execute')
         .map((elem) => elem.job);
 
-      const executeResultList = await Promise.all(
-        executeJobList.map(async (job) => {
-          const executeResult = await job.waitUntilFinished(
-            this.queueEvents,
-            5000,
-          );
-          this.logger.silly('executeResult', executeResult);
-          await this.eventEmitter.emitAsync(`execute`, {
-            ...executeResult,
-            id,
-          });
-          return executeResult;
-        }),
-      );
+      for (const executeJob of executeJobList) {
+        const executeResult = await executeJob.waitUntilFinished(
+          this.queueEvents,
+          5000,
+        );
+        this.logger.silly('executeResult', executeResult);
+        this.eventEmitter.emitAsync(`execute`, {
+          ...executeResult,
+          id,
+        });
+      }
 
       const res = await flow.job.waitUntilFinished(this.queueEvents, 2000);
 
@@ -127,7 +124,7 @@ export class ExecuteService implements OnModuleInit {
         processTime: 0,
         memory: 0,
         code: '0000',
-        result: '정상',
+        result: res,
       };
     } catch (error) {
       this.logger.error(error.message);
