@@ -12,7 +12,6 @@ export class ProblemsRepository {
     levelList?: number[],
     typeList?: ProblemType[],
   ) {
-    // 전체 문제 수를 계산
     const totalCount = await this.prismaService.problem.count({
       where: {
         ...(typeList && typeList.length > 0
@@ -24,7 +23,6 @@ export class ProblemsRepository {
       },
     });
 
-    // 문제 요약 리스트를 가져옴
     const problemSummaryList = await this.prismaService.problem.findMany({
       select: {
         no: false,
@@ -53,7 +51,52 @@ export class ProblemsRepository {
       take: pageSize,
     });
 
-    // 문제 목록과 페이지 관련 정보를 반환
+    return {
+      problemList: problemSummaryList,
+      totalCount,
+      pageSize,
+      pageNo,
+    };
+  }
+
+  async getProblemListFromTitle(
+    pageNo: number,
+    pageSize: number,
+    problemTitle: string,
+  ) {
+    const totalCount = await this.prismaService.problem.count({
+      where: {
+        title: {
+          contains: problemTitle,
+        },
+      },
+    });
+
+    const problemSummaryList = await this.prismaService.problem.findMany({
+      select: {
+        no: false,
+        uuid: true,
+        title: true,
+        levelText: true,
+        answerCount: true,
+        submitCount: true,
+        answerRate: true,
+        answerPeopleCount: true,
+        source: true,
+        sourceId: true,
+        sourceUrl: true,
+        level: true,
+        typeList: true,
+      },
+      where: {
+        title: {
+          contains: problemTitle,
+        },
+      },
+      skip: (pageNo - 1) * pageSize,
+      take: pageSize,
+    });
+
     return {
       problemList: problemSummaryList,
       totalCount,
