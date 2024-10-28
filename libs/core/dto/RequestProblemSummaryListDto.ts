@@ -30,6 +30,7 @@ export class RequestProblemSummaryListDto {
   @IsOptional()
   @ApiProperty({
     description: '문제 이름으로 검색할 때 필요한 파라미터',
+    required: false,
   })
   title?: string;
 
@@ -58,9 +59,11 @@ export class RequestProblemSummaryListDto {
   })
   typeList?: ProblemType[];
 
+  @IsOptional()
   @ApiProperty({
     description: '문제 이름으로 검색할지 조건으로 검색할지 필터',
     default: 0,
+    required: false,
   })
   filter: 0 | 1 = 0;
 }
