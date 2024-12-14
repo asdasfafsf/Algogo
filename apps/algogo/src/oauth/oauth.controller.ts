@@ -88,4 +88,42 @@ export class OauthController {
         : 'https://www.algogo.co.kr/oauth/token',
     );
   }
+
+  @ApiOperation({
+    summary: 'OAuth Page로 이동',
+    description: 'OAuth Page로 이동함',
+  })
+  @ApiParam({
+    name: 'provider',
+    enum: OAuthProvider,
+    description: '인증 기관',
+  })
+  @ApiResponse({
+    status: HttpStatus.TEMPORARY_REDIRECT,
+    description: ':provider/add/callback 으로 redirect함',
+  })
+  @Get(':provider/add')
+  @UseGuards(DynamicOAuthGuard)
+  @UseFilters(OAuthExceptionFilter)
+  async add(
+    @Param('provider') provider: OAuthProvider,
+    @Query() requestOAuthCallbackDto: RequestOAuthCallbackDto,
+  ) {
+    this.logger.silly('OAuth add reached', {
+      provider,
+      requestOAuthCallbackDto,
+    });
+  }
+
+  @Get(':provider/add/callback')
+  @UseGuards(DynamicOAuthGuard)
+  @UseFilters(OAuthExceptionFilter)
+  async addCallback(
+    @Param('provider') provider: OAuthProvider,
+    @Query() requestOAuthCallbackDto: RequestOAuthCallbackDto,
+  ) {
+    this.logger.silly('provider', provider);
+    this.logger.silly('dto', requestOAuthCallbackDto);
+    this.oauthService.addOAuthProvider();
+  }
 }

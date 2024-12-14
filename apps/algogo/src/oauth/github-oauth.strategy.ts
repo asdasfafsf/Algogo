@@ -22,6 +22,7 @@ export class GithubOAuthStrategy extends PassportStrategy(
     super({
       ...oauthConfig,
       scope: 'openid',
+      passReqToCallback: true,
     });
     this.logger.silly('GithubOauthStrategy initialized', oauthConfig);
   }

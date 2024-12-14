@@ -9,6 +9,7 @@ import { ImageService } from '../image/image.service';
 import { UpdateMeDto } from './dto/UpdateMeDto';
 import { SocialProvider } from '../common/enums/SocialProviderEnum';
 import { OAuthProvider } from '../common/enums/OAuthProviderEnum';
+import { CustomLogger } from '../logger/custom-logger';
 
 @Injectable()
 export class MeService {
@@ -17,6 +18,7 @@ export class MeService {
     private readonly s3Service: S3Service,
     private readonly cryptoService: CryptoService,
     private readonly imageService: ImageService,
+    private readonly logger: CustomLogger,
   ) {}
 
   async getMe(userNo: number): Promise<ResponseMeDto> {
@@ -38,6 +40,7 @@ export class MeService {
   }
 
   async updateMe(updateMeDto: UpdateMeDto): Promise<ResponseMeDto> {
+    this.logger.silly('hihi', updateMeDto);
     const { file } = updateMeDto;
     if (file) {
       const webp = await this.imageService.toWebp(file.buffer);

@@ -1,18 +1,13 @@
 import { RequestOAuthDto } from '@libs/core/dto/RequestOAuthDto';
-import {
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
-import { Logger } from 'winston';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { OauthRepository } from './oauth.repository';
+import { CustomLogger } from '../logger/custom-logger';
 
 @Injectable()
 export class OauthService {
   constructor(
-    @Inject('winston')
-    private readonly logger: Logger,
+    private readonly logger: CustomLogger,
     private readonly authService: AuthService,
     private readonly oauthRepository: OauthRepository,
   ) {}
@@ -43,4 +38,6 @@ export class OauthService {
       throw e;
     }
   }
+
+  async addOAuthProvider() {}
 }

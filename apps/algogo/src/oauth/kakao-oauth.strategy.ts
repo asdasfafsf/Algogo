@@ -22,6 +22,7 @@ export class KakaoOAuthStrategy extends PassportStrategy(
     super({
       ...oauthConfig,
       scope: 'openid',
+      passReqToCallback: true,
     });
     this.logger.silly('KakaoOauthStrategy initialized', oauthConfig);
   }

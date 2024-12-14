@@ -23,6 +23,7 @@ export class GoogleOauthStrategy extends PassportStrategy(
     super({
       ...oauthConfig,
       scope: ['profile', 'email'],
+      passReqToCallback: true,
     });
     this.logger.silly('GoogleOauthStrategy initialized', oauthConfig);
   }
