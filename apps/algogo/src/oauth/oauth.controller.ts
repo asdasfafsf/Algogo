@@ -10,14 +10,14 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { OauthService } from './oauth.service';
-import { RequestOAuthCallbackDto } from '@libs/core/dto/RequestOAuthCallbackDto';
 import { DynamicOAuthGuard } from './dynamic-oauth.guard';
-import { RequestOAuthDto } from '@libs/core/dto/RequestOAuthDto';
 import { Request, Response } from 'express';
 import { OAuthExceptionFilter } from './oauth-exception.filter';
 import { OAuthProvider } from '../common/enums/OAuthProviderEnum';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CustomLogger } from '../logger/custom-logger';
+import { RequestOAuthCallbackDto } from './dto/RequestOAuthCallbackDto';
+import { RequestOAuthDto } from './dto/RequestOAuthDto';
 
 @ApiTags('OAuth API')
 @Controller('v1/oauth')
@@ -102,28 +102,33 @@ export class OauthController {
     status: HttpStatus.TEMPORARY_REDIRECT,
     description: ':provider/add/callback 으로 redirect함',
   })
-  @Get(':provider/add')
+  @Get(':provider/connect')
   @UseGuards(DynamicOAuthGuard)
   @UseFilters(OAuthExceptionFilter)
   async add(
     @Param('provider') provider: OAuthProvider,
     @Query() requestOAuthCallbackDto: RequestOAuthCallbackDto,
   ) {
+    this.logger.silly('정말 여기 아무것도 안와?');
     this.logger.silly('OAuth add reached', {
       provider,
       requestOAuthCallbackDto,
     });
   }
 
-  @Get(':provider/add/callback')
+  @Get(':provider/connect/callback')
   @UseGuards(DynamicOAuthGuard)
   @UseFilters(OAuthExceptionFilter)
   async addCallback(
     @Param('provider') provider: OAuthProvider,
     @Query() requestOAuthCallbackDto: RequestOAuthCallbackDto,
+    @Req() req: Request,
+    @Res() res: Response,
   ) {
-    this.logger.silly('provider', provider);
+    const requestOAuthDto = { ...(req.user as RequestOAuthDto) };
+
+    this.logger.silly('provider', requestOAuthDto);
     this.logger.silly('dto', requestOAuthCallbackDto);
-    this.oauthService.addOAuthProvider();
+    this.oauthService.connectOAuthProvider(requestOAuthDto);
   }
 }

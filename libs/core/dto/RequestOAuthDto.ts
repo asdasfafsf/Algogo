@@ -27,5 +27,6 @@ export class RequestOAuthDto {
   @IsNotEmpty()
   accessToken: string;
 
+  userNo?: number;
   ip?: string;
 }

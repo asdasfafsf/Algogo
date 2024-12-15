@@ -1,5 +1,9 @@
 import { RequestOAuthDto } from '@libs/core/dto/RequestOAuthDto';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { OauthRepository } from './oauth.repository';
 import { CustomLogger } from '../logger/custom-logger';
@@ -39,5 +43,12 @@ export class OauthService {
     }
   }
 
-  async addOAuthProvider() {}
+  async connectOAuthProvider(requestOAuthDto: RequestOAuthDto) {
+    const { id, provider } = requestOAuthDto;
+    const userOAuth = await this.oauthRepository.getUserOAuth(id, provider);
+
+    if (userOAuth) {
+      throw new ConflictException('이미 연동 된 계정입니다.');
+    }
+  }
 }
