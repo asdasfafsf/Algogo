@@ -18,6 +18,7 @@ import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CustomLogger } from '../logger/custom-logger';
 import { RequestOAuthCallbackDto } from './dto/RequestOAuthCallbackDto';
 import { RequestOAuthDto } from './dto/RequestOAuthDto';
+import { AuthGuard } from '../auth/auth.guard';
 
 @ApiTags('OAuth API')
 @Controller('v1/oauth')
@@ -89,19 +90,6 @@ export class OauthController {
     );
   }
 
-  @ApiOperation({
-    summary: 'OAuth Page로 이동',
-    description: 'OAuth Page로 이동함',
-  })
-  @ApiParam({
-    name: 'provider',
-    enum: OAuthProvider,
-    description: '인증 기관',
-  })
-  @ApiResponse({
-    status: HttpStatus.TEMPORARY_REDIRECT,
-    description: ':provider/add/callback 으로 redirect함',
-  })
   @Get(':provider/connect')
   @UseGuards(DynamicOAuthGuard)
   @UseFilters(OAuthExceptionFilter)
@@ -117,7 +105,7 @@ export class OauthController {
   }
 
   @Get(':provider/connect/callback')
-  @UseGuards(DynamicOAuthGuard)
+  @UseGuards(AuthGuard, DynamicOAuthGuard)
   @UseFilters(OAuthExceptionFilter)
   async addCallback(
     @Param('provider') provider: OAuthProvider,
@@ -126,7 +114,7 @@ export class OauthController {
     @Res() res: Response,
   ) {
     const requestOAuthDto = { ...(req.user as RequestOAuthDto) };
-
+    console.log(req.user);
     this.logger.silly('provider', requestOAuthDto);
     this.logger.silly('dto', requestOAuthCallbackDto);
     this.oauthService.connectOAuthProvider(requestOAuthDto);

@@ -9,7 +9,7 @@ export class PrismaService
   constructor() {
     if (process.env.NODE_ENV === 'development') {
       super({
-        log: ['query', 'info', 'warn', 'error'],
+        // log: ['query', 'info', 'warn', 'error'],
       });
     } else {
       super({});
