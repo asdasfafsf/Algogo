@@ -6,4 +6,6 @@ export default registerAs('kakaoOAuthConfig', () => ({
   callbackURL: process.env.KAKAO_OAUTH_CALLBACK_URL,
   authorizationURL: process.env.KAKAO_OAUTH_AUTHORIZATION_URL,
   tokenURL: process.env.KAKAO_OAUTH_TOKEN_URL,
+  connectCallbackURL: process.env.KAKAO_OAUTH_CONNECT_CALLBACK_URL,
+  disconnectCallbackURL: process.env.KAKAO_OAUTH_DISCONNECT_CALLBACK_URL,
 }));

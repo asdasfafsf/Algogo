@@ -1,15 +1,15 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { PassportStrategy } from '@nestjs/passport';
-import { Strategy } from 'passport-oauth2';
 import { ConfigType } from '@nestjs/config';
 import kakaoOAuthConfig from '../config/kakaoOAuthConfig';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
 import { OAuthProvider } from '../common/enums/OAuthProviderEnum';
 import { CustomLogger } from '../logger/custom-logger';
+import CustomOAuthStrategy from './custom-oauth.strategy';
+import { Strategy } from 'passport-oauth2';
 
 @Injectable()
-export class KakaoOAuthStrategy extends PassportStrategy(
+export class KakaoOAuthStrategy extends CustomOAuthStrategy(
   Strategy,
   OAuthProvider.KAKAO,
 ) {
@@ -22,7 +22,6 @@ export class KakaoOAuthStrategy extends PassportStrategy(
     super({
       ...oauthConfig,
       scope: 'openid',
-      passReqToCallback: true,
     });
     this.logger.silly('KakaoOauthStrategy initialized', oauthConfig);
   }
@@ -49,8 +48,10 @@ export class KakaoOAuthStrategy extends PassportStrategy(
     };
   }
 
-  async getUserInfo(accessToken: string): Promise<any> {
-    this.logger.silly('Getting user info with access token', {});
+  private async getUserInfo(accessToken: string): Promise<any> {
+    this.logger.silly('Fetching Kakao user info with access token', {
+      accessToken,
+    });
 
     const url = 'https://kapi.kakao.com/v1/oidc/userinfo';
     const headers = {
@@ -62,12 +63,12 @@ export class KakaoOAuthStrategy extends PassportStrategy(
         this.httpService.get(url, { headers }),
       );
 
-      this.logger.silly('kakao getUserInfo', {
+      this.logger.silly('Kakao user info fetched', {
         data: response.data,
       });
       return response.data;
     } catch (error) {
-      this.logger.error('Error fetching user info', { error });
+      this.logger.error('Error fetching Kakao user info', { error });
       throw error;
     }
   }
