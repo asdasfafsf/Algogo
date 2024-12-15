@@ -24,26 +24,26 @@ export default function CustomOAuthStrategy(
     readonly config: OAuthConfig;
 
     constructor(config: OAuthConfig) {
-      super({ ...config, callbackURL: '' });
+      super({ ...config, callbackURL: '', passToReqCallback: true });
 
       this.config = config;
     }
 
     authenticate(req: Request, options: any) {
       const newOptions = { ...options, ...this.config };
-      const requestUrl = req.baseUrl;
+      const requestUrl = req.originalUrl;
       const callbackURL = this.getCallbackUrl(requestUrl);
       newOptions.callbackURL = callbackURL;
 
-      console.log('옵션', newOptions);
-
+      console.log('야야야', requestUrl);
+      console.log(newOptions);
       super.authenticate(req, newOptions);
     }
 
     getCallbackUrl(requestUrl: string): string {
-      if (requestUrl.includes('/connect/')) {
+      if (requestUrl.includes('connect')) {
         return this.config.connectCallbackURL;
-      } else if (requestUrl.includes('/disconnect/')) {
+      } else if (requestUrl.includes('disconnect')) {
         return this.config.disconnectCallbackURL;
       }
       return this.config.callbackURL;
