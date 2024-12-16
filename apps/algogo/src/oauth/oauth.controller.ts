@@ -25,6 +25,7 @@ import { CustomLogger } from '../logger/custom-logger';
 import { RequestOAuthCallbackDto } from './dto/RequestOAuthCallbackDto';
 import { RequestOAuthDto } from './dto/RequestOAuthDto';
 import { AuthGuard } from '../auth/auth.guard';
+import { AllExceptionsFilter } from '@libs/filter/src';
 
 @ApiTags('OAuth API')
 @Controller('v1/oauth')
@@ -33,6 +34,39 @@ export class OauthController {
     private readonly oauthService: OauthService,
     private readonly logger: CustomLogger,
   ) {}
+
+  @ApiOperation({
+    summary: '임시 인증 쿠키 발급',
+    description: 'OAuth 인증 페이지 접근을 위해 임시 인증 쿠키를 발급합니다.',
+  })
+  @ApiBearerAuth('accessToken')
+  @ApiResponse({
+    status: 200,
+    description: '쿠키 발급 성공',
+    schema: {
+      example: true,
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: '인증 실패',
+  })
+  @Get('/cookie')
+  @UseGuards(AuthGuard)
+  @UseFilters(AllExceptionsFilter)
+  async getCoookie(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const token = req.headers['authorization'];
+    res.cookie('authorization', token, {
+      httpOnly: process.env.NODE_ENV === 'development' ? undefined : true,
+      secure: process.env.NODE_ENV === 'development' ? false : true,
+      sameSite: process.env.NODE_ENV === 'development' ? 'lax' : undefined,
+      maxAge: 60 * 1000,
+    });
+    return;
+  }
 
   @ApiOperation({
     summary: 'OAuth Page로 이동',
@@ -49,7 +83,6 @@ export class OauthController {
   })
   @Get(':provider')
   @UseGuards(DynamicOAuthGuard)
-  @UseFilters(OAuthExceptionFilter)
   async oauth(
     @Param('provider') provider: OAuthProvider,
     @Query() requestOAuthCallbackDto: RequestOAuthCallbackDto,
@@ -84,16 +117,18 @@ export class OauthController {
     });
     const requestOAuthDto = { ...(req.user as RequestOAuthDto), ip };
     const uuid = await this.oauthService.login(requestOAuthDto);
-    res.cookie('token', uuid, {
-      httpOnly: process.env.NODE_ENV === 'development' ? undefined : true,
-      secure: process.env.NODE_ENV === 'development' ? false : true,
-      sameSite: process.env.NODE_ENV === 'development' ? 'lax' : undefined,
-    });
-    res.redirect(
-      process.env.NODE_ENV === 'development'
-        ? 'http://localhost:5173/oauth/token/'
-        : 'https://www.algogo.co.kr/oauth/token',
-    );
+
+    return res
+      .cookie('token', uuid, {
+        httpOnly: process.env.NODE_ENV === 'development' ? undefined : true,
+        secure: process.env.NODE_ENV === 'development' ? false : true,
+        sameSite: process.env.NODE_ENV === 'development' ? 'lax' : undefined,
+      })
+      .redirect(
+        process.env.NODE_ENV === 'development'
+          ? 'http://localhost:5173/oauth/token/'
+          : 'https://www.algogo.co.kr/oauth/token',
+      );
   }
 
   @Get(':provider/connect')
@@ -116,45 +151,23 @@ export class OauthController {
   async addCallback(
     @Param('provider') provider: OAuthProvider,
     @Query() requestOAuthCallbackDto: RequestOAuthCallbackDto,
-    @Req() req: Request,
+    @Req() req: AuthRequest,
     @Res() res: Response,
   ) {
-    const requestOAuthDto = { ...(req.user as RequestOAuthDto) };
-    console.log(req.user);
+    const userNo = req.userNo;
+    const requestOAuthDto = {
+      ...(req.user as RequestOAuthDto),
+      userNo,
+      provider,
+    };
     this.logger.silly('provider', requestOAuthDto);
     this.logger.silly('dto', requestOAuthCallbackDto);
-    this.oauthService.connectOAuthProvider(requestOAuthDto);
-  }
+    await this.oauthService.connectOAuthProvider(requestOAuthDto);
 
-  @ApiOperation({
-    summary: '임시 인증 쿠키 발급',
-    description: 'OAuth 인증 페이지 접근을 위해 임시 인증 쿠키를 발급합니다.',
-  })
-  @ApiBearerAuth('accessToken')
-  @ApiResponse({
-    status: 200,
-    description: '쿠키 발급 성공',
-    schema: {
-      example: true,
-    },
-  })
-  @ApiResponse({
-    status: 401,
-    description: '인증 실패',
-  })
-  @Get('/cookie')
-  @UseGuards(AuthGuard)
-  async getCoookie(
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const token = req.headers['authorization'];
-    res.cookie('authorization', token, {
-      httpOnly: process.env.NODE_ENV === 'development' ? undefined : true,
-      secure: process.env.NODE_ENV === 'development' ? false : true,
-      sameSite: process.env.NODE_ENV === 'development' ? 'lax' : undefined,
-      maxAge: 60 * 1000,
-    });
-    return true;
+    res.redirect(
+      process.env.NODE_ENV === 'development'
+        ? 'http://localhost:5173/me/'
+        : 'https://www.algogo.co.kr/me',
+    );
   }
 }

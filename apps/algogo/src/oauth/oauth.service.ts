@@ -1,4 +1,4 @@
-import { RequestOAuthDto } from '@libs/core/dto/RequestOAuthDto';
+import { RequestOAuthDto } from './dto/RequestOAuthDto';
 import {
   ConflictException,
   Injectable,
@@ -7,6 +7,7 @@ import {
 import { AuthService } from '../auth/auth.service';
 import { OauthRepository } from './oauth.repository';
 import { CustomLogger } from '../logger/custom-logger';
+import { RequestOAuthConnectDto } from './dto/RequestOAuthConnectDto';
 
 @Injectable()
 export class OauthService {
@@ -43,12 +44,29 @@ export class OauthService {
     }
   }
 
-  async connectOAuthProvider(requestOAuthDto: RequestOAuthDto) {
+  async connectOAuthProvider(requestOAuthDto: RequestOAuthConnectDto) {
     const { id, provider } = requestOAuthDto;
     const userOAuth = await this.oauthRepository.getUserOAuth(id, provider);
 
+    // 동일한 계정으로 이미 연동 됨
     if (userOAuth) {
       throw new ConflictException('이미 연동 된 계정입니다.');
     }
+
+    this.logger.silly('complete duplicate your oauth', {});
+    const { userNo } = requestOAuthDto;
+
+    const myUserOAuth = await this.oauthRepository.getMyOAuth(userNo, provider);
+
+    this.logger.silly('complete duplicate my oauth', {});
+    if (myUserOAuth) {
+      throw new ConflictException(
+        '이미 연동 된 유형입니다. 연동 해제 후 이용해주세요.',
+      );
+    }
+
+    this.logger.silly('start connect oauth', {});
+
+    await this.oauthRepository.addOAuthProvider(requestOAuthDto);
   }
 }

@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { RequestOAuthDto } from '@libs/core/dto/RequestOAuthDto';
+import { RequestOAuthDto } from './dto/RequestOAuthDto';
+import { OAuthProvider } from '../common/enums/OAuthProviderEnum';
+import { RequestOAuthConnectDto } from './dto/RequestOAuthConnectDto';
 
 @Injectable()
 export class OauthRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async getUserOAuth(id: string, provider: 'google' | 'github' | 'kakao') {
+  async getUserOAuth(id: string, provider: OAuthProvider) {
     return await this.prismaService.userOAuth.findUnique({
       select: {
         userNo: true,
@@ -18,6 +20,33 @@ export class OauthRepository {
         },
       },
     });
+  }
+
+  async getMyOAuth(userNo: number, provider: OAuthProvider) {
+    return await this.prismaService.userOAuth.findFirst({
+      select: {
+        userNo: true,
+      },
+      where: {
+        userNo,
+        provider,
+      },
+    });
+  }
+
+  async addOAuthProvider(requestOAuthConnectDto: RequestOAuthConnectDto) {
+    const { userNo, provider, id } = requestOAuthConnectDto;
+
+    const createdUserOAuth = await this.prismaService.userOAuth.create({
+      select: { userNo: true },
+      data: {
+        id,
+        provider,
+        userNo,
+      },
+    });
+
+    return createdUserOAuth;
   }
 
   async insertUser(requestOAuthDto: RequestOAuthDto) {

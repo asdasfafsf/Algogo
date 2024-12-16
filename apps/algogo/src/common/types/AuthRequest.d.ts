@@ -1,3 +1,3 @@
-type AuthRequest = Request & {
+type AuthRequest = express.Request & {
   userNo: number;
 };

@@ -1,15 +1,16 @@
 import {
   IsString,
   IsOptional,
-  IsIn,
   IsEmail,
   IsNotEmpty,
+  IsEnum,
 } from 'class-validator';
+import { OAuthProvider } from '../../common/enums/OAuthProviderEnum';
 
 export class RequestOAuthDto {
-  @IsIn(['google', 'github', 'kakao'])
+  @IsEnum(OAuthProvider)
   @IsNotEmpty()
-  provider: 'google' | 'github' | 'kakao';
+  provider: OAuthProvider;
 
   @IsOptional()
   @IsString()
@@ -27,6 +28,5 @@ export class RequestOAuthDto {
   @IsNotEmpty()
   accessToken: string;
 
-  userNo?: number;
   ip?: string;
 }

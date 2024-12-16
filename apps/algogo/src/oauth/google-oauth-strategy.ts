@@ -3,7 +3,7 @@ import googleOAuthConfig from '../config/googleOAuthConfig';
 import { ConfigType } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
-import { RequestOAuthDto } from '@libs/core/dto/RequestOAuthDto';
+import { RequestOAuthDto } from './dto/RequestOAuthDto';
 import { OAuthProvider } from '../common/enums/OAuthProviderEnum';
 import { CustomLogger } from '../logger/custom-logger';
 import CustomOAuthStrategy from './custom-oauth.strategy';
