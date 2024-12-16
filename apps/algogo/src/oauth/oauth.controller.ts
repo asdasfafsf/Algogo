@@ -14,7 +14,13 @@ import { DynamicOAuthGuard } from './dynamic-oauth.guard';
 import { Request, Response } from 'express';
 import { OAuthExceptionFilter } from './oauth-exception.filter';
 import { OAuthProvider } from '../common/enums/OAuthProviderEnum';
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CustomLogger } from '../logger/custom-logger';
 import { RequestOAuthCallbackDto } from './dto/RequestOAuthCallbackDto';
 import { RequestOAuthDto } from './dto/RequestOAuthDto';
@@ -118,5 +124,37 @@ export class OauthController {
     this.logger.silly('provider', requestOAuthDto);
     this.logger.silly('dto', requestOAuthCallbackDto);
     this.oauthService.connectOAuthProvider(requestOAuthDto);
+  }
+
+  @ApiOperation({
+    summary: '임시 인증 쿠키 발급',
+    description: 'OAuth 인증 페이지 접근을 위해 임시 인증 쿠키를 발급합니다.',
+  })
+  @ApiBearerAuth('accessToken')
+  @ApiResponse({
+    status: 200,
+    description: '쿠키 발급 성공',
+    schema: {
+      example: true,
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: '인증 실패',
+  })
+  @Get('/cookie')
+  @UseGuards(AuthGuard)
+  async getCoookie(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const token = req.headers['authorization'];
+    res.cookie('authorization', token, {
+      httpOnly: process.env.NODE_ENV === 'development' ? undefined : true,
+      secure: process.env.NODE_ENV === 'development' ? false : true,
+      sameSite: process.env.NODE_ENV === 'development' ? 'lax' : undefined,
+      maxAge: 60 * 1000,
+    });
+    return true;
   }
 }
