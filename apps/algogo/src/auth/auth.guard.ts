@@ -15,6 +15,7 @@ import {
   NO_JWT_MESSAGE,
 } from '../common/constants/ErrorMessage';
 import { CustomLogger } from '../logger/custom-logger';
+import { Request } from 'express';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -111,7 +112,18 @@ export class AuthGuard implements CanActivate {
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request?.headers['authorization']?.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
+    const [typeFromHeader, tokenFromHeader] =
+      request?.headers['authorization']?.split(' ') ?? [];
+    if (typeFromHeader === 'Bearer' && tokenFromHeader) {
+      return tokenFromHeader;
+    }
+
+    const [typeFromCookie, tokenFromCookie] =
+      request?.cookies?.authorization?.split(' ') ?? [];
+    if (typeFromCookie === 'Bearer' && tokenFromCookie) {
+      return tokenFromCookie;
+    }
+
+    return undefined;
   }
 }
