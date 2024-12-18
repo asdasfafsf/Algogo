@@ -172,14 +172,28 @@ export class OauthController {
       userNo,
       provider,
     };
-    this.logger.silly('provider', requestOAuthDto);
-    this.logger.silly('dto', requestOAuthCallbackDto);
-    await this.oauthService.connectOAuthProvider(requestOAuthDto);
 
-    res.redirect(
-      process.env.NODE_ENV === 'development'
-        ? 'http://localhost:5173/me/'
-        : 'https://www.algogo.co.kr/me',
-    );
+    const oauthState =
+      await this.oauthService.getOAuthStateWithLogined(requestOAuthDto);
+
+    if (oauthState === OAuthState.NEW) {
+      this.logger.silly('provider', requestOAuthDto);
+      this.logger.silly('dto', requestOAuthCallbackDto);
+      await this.oauthService.connectOAuthProvider(requestOAuthDto);
+
+      res.redirect(
+        process.env.NODE_ENV === 'development'
+          ? 'http://localhost:5173/me/'
+          : 'https://www.algogo.co.kr/me',
+      );
+    } else if (oauthState === OAuthState.CONNECTED_AND_ACTIVE) {
+      throw new ConflictException('이미 연동되어 있는 계정입니다.');
+    } else if (oauthState === OAuthState.CONNECTED_TO_OTHER_ACCOUNT) {
+      throw new ConflictException(
+        '이미 다른 계정에 연동되어 있습니다. 연동 해제 후 진행해주세요.',
+      );
+    } else if (oauthState === OAuthState.DISCONNECTED_FROM_OTHER_ACCOUNT) {
+      // 다른 사람이 해지한 계정
+    }
   }
 }

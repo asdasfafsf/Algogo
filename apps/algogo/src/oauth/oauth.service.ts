@@ -25,16 +25,13 @@ export class OauthService {
   ): Promise<(typeof OAuthState)[keyof typeof OAuthState]> {
     const { id, provider } = requestOAuthDto;
 
-    // 해당 provider와 id가 연동되어있는 상태인지 확인
     const oauth = await this.oauthRepository.getOAuth(id, provider);
 
     if (!oauth) {
-      // 연동된 기록이 없는 계정
       return OAuthState.NEW;
     }
 
     if (oauth.isActive === true) {
-      // 연결 되어있고 이미 활성화 중 즉 사용중인 계정
       return OAuthState.CONNECTED_TO_OTHER_ACCOUNT;
     }
     return OAuthState.DISCONNECTED_FROM_OTHER_ACCOUNT;
@@ -44,11 +41,9 @@ export class OauthService {
     requestOAuthConnectDto: RequestOAuthConnectDto,
   ) {
     const { userNo, id, provider } = requestOAuthConnectDto;
-    // 해당 provider와 id가 연동되어있는 상태인지 확인
     const oauth = await this.oauthRepository.getOAuth(id, provider);
 
     if (!oauth) {
-      // 연동된 기록이 없는 계정
       return OAuthState.NEW;
     }
 
