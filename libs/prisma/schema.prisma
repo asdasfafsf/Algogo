@@ -24,6 +24,10 @@ model User {
     state          UserState @default(ACTIVE) @map("USER_STATE")
     emailVerified  Boolean   @default(false) @map("USER_EMAIL_VERIFIED")
 
+    createdAt DateTime @default(now()) @map("USER_CREATED_AT")
+    updatedAt DateTime @default(now()) @map("USER_UPDATED_AT")
+    loginedAt DateTime @default(now()) @map("USER_LOGINED_AT")
+
     socialList       UserSocial[]       @relation("UserToUserSocial")
     oauthList        UserOAuth[]        @relation("UserToUserOauth")
     problemStateList UserProblemState[] @relation("UserToUserProblemState")
@@ -32,25 +36,31 @@ model User {
 }
 
 model UserOAuth {
-    userNo   Int    @map("USER_NO")
-    provider String @map("USER_OAUTH_PROVIDER")
-    id       String @map("USER_OAUTH_ID")
+    userNo    Int      @map("USER_NO")
+    provider  String   @map("USER_OAUTH_PROVIDER")
+    id        String   @map("USER_OAUTH_ID")
+    isActive  Boolean  @default(true) @map("USER_OAUTH_IS_ACTIVE")
+    createdAt DateTime @default(now()) @map("USER_OAUTH_CREATED_AT")
+    updatedAt DateTime @default(now()) @map("USER_OAUTH_UPDATED_AT")
 
     User User @relation("UserToUserOauth", fields: [userNo], references: [no])
 
     @@unique([id, provider])
+    @@unique([userNo, provider])
     @@index([userNo])
     @@index([id, provider])
     @@map("USER_OAUTH")
 }
 
 model UserSocial {
-    provider String @map("USER_SOCIAL_PROVIDER")
-    User     User   @relation("UserToUserSocial", fields: [userNo], references: [no])
-    userNo   Int    @map("USER_NO")
-    content  String @map("USER_SOCIAL_CONTENT")
+    provider  String   @map("USER_SOCIAL_PROVIDER")
+    User      User     @relation("UserToUserSocial", fields: [userNo], references: [no])
+    userNo    Int      @map("USER_NO")
+    content   String   @map("USER_SOCIAL_CONTENT")
+    createdAt DateTime @default(now()) @map("USER_SOCIAL_CREATED_AT")
+    updatedAt DateTime @default(now()) @map("USER_SOCIAL_UPDATED_AT")
 
-    @@unique([provider, userNo])
+    @@unique([userNo, provider])
     @@index([userNo, provider])
     @@map("USER_SOCIAL")
 }
@@ -76,6 +86,9 @@ model Problem {
     submitCount       Int      @map("PROBLEM_SUBMIT_COUNT")
     timeout           Int      @map("PROBLEM_TIMEOUT")
     memoryLimit       Int      @map("PROBLEM_MEMORY_LIMIT")
+
+    createdAt DateTime @default(now()) @map("PROBLEM_CREATED_AT")
+    updatedAt DateTime @default(now()) @map("PROBLEM_UPDATED_AT")
 
     typeList        ProblemType[]        @relation("ProblemToProblemType")
     contentList     ProblemContent[]     @relation("ProblemToProblemContent")

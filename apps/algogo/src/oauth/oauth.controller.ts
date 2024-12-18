@@ -8,6 +8,7 @@ import {
   Res,
   UseFilters,
   HttpStatus,
+  ConflictException,
 } from '@nestjs/common';
 import { OauthService } from './oauth.service';
 import { DynamicOAuthGuard } from './dynamic-oauth.guard';
@@ -26,6 +27,7 @@ import { RequestOAuthCallbackDto } from './dto/RequestOAuthCallbackDto';
 import { RequestOAuthDto } from './dto/RequestOAuthDto';
 import { AuthGuard } from '../auth/auth.guard';
 import { AllExceptionsFilter } from '@libs/filter/src';
+import { OAuthState } from './constants/OAuthState';
 
 @ApiTags('OAuth API')
 @Controller('v1/oauth')
@@ -43,9 +45,6 @@ export class OauthController {
   @ApiResponse({
     status: 200,
     description: '쿠키 발급 성공',
-    schema: {
-      example: true,
-    },
   })
   @ApiResponse({
     status: 401,
@@ -116,19 +115,32 @@ export class OauthController {
       ip,
     });
     const requestOAuthDto = { ...(req.user as RequestOAuthDto), ip };
-    const uuid = await this.oauthService.login(requestOAuthDto);
+    const oauthState = await this.oauthService.getOAuthState(requestOAuthDto);
 
-    return res
-      .cookie('token', uuid, {
-        httpOnly: process.env.NODE_ENV === 'development' ? undefined : true,
-        secure: process.env.NODE_ENV === 'development' ? false : true,
-        sameSite: process.env.NODE_ENV === 'development' ? 'lax' : undefined,
-      })
-      .redirect(
-        process.env.NODE_ENV === 'development'
-          ? 'http://localhost:5173/oauth/token/'
-          : 'https://www.algogo.co.kr/oauth/token',
+    if (oauthState === OAuthState.NEW) {
+      // 신규 가입일 경우 로그인을 진행한다.
+      const uuid = await this.oauthService.login(requestOAuthDto);
+
+      return res
+        .cookie('token', uuid, {
+          httpOnly: process.env.NODE_ENV === 'development' ? undefined : true,
+          secure: process.env.NODE_ENV === 'development' ? false : true,
+          sameSite: process.env.NODE_ENV === 'development' ? 'lax' : undefined,
+        })
+        .redirect(
+          process.env.NODE_ENV === 'development'
+            ? 'http://localhost:5173/oauth/token/'
+            : 'https://www.algogo.co.kr/oauth/token',
+        );
+    } else if (oauthState === OAuthState.CONNECTED_TO_OTHER_ACCOUNT) {
+      throw new ConflictException(
+        '이미 연동되어 있는 계정입니다. 연동 해제 후 진행해주세요',
       );
+    } else if (oauthState === OAuthState.DISCONNECTED_FROM_OTHER_ACCOUNT) {
+      throw new ConflictException(
+        '이미 해제 이력이 있는 계정입니다. 계속 진행할까요?',
+      );
+    }
   }
 
   @Get(':provider/connect')

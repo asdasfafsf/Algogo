@@ -8,24 +8,46 @@ import { RequestOAuthConnectDto } from './dto/RequestOAuthConnectDto';
 export class OauthRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async getUserOAuth(id: string, provider: OAuthProvider) {
+  async getOAuth(id: string, provider: string) {
     return await this.prismaService.userOAuth.findUnique({
       select: {
         userNo: true,
+        isActive: true,
       },
       where: {
         id_provider: {
           id,
           provider,
         },
+        isActive: true,
+      },
+    });
+  }
+  async getActiveUserOAuth(id: string, provider: OAuthProvider) {
+    return await this.prismaService.userOAuth.findUnique({
+      select: {
+        userNo: true,
+        isActive: true,
+      },
+      where: {
+        id_provider: {
+          id,
+          provider,
+        },
+        isActive: true,
       },
     });
   }
 
-  async getMyOAuth(userNo: number, provider: OAuthProvider) {
+  async getUserOAuth(
+    userNo: number,
+    provider: OAuthProvider,
+    isActive: boolean = false,
+  ) {
     return await this.prismaService.userOAuth.findFirst({
       select: {
         userNo: true,
+        isActive,
       },
       where: {
         userNo,
@@ -37,16 +59,27 @@ export class OauthRepository {
   async addOAuthProvider(requestOAuthConnectDto: RequestOAuthConnectDto) {
     const { userNo, provider, id } = requestOAuthConnectDto;
 
-    const createdUserOAuth = await this.prismaService.userOAuth.create({
+    const upsertedUserOAuth = await this.prismaService.userOAuth.upsert({
       select: { userNo: true },
-      data: {
+      where: {
+        userNo_provider: {
+          userNo,
+          provider,
+        },
+      },
+      update: {
+        id,
+        isActive: true,
+      },
+      create: {
         id,
         provider,
         userNo,
+        isActive: true,
       },
     });
 
-    return createdUserOAuth;
+    return upsertedUserOAuth;
   }
 
   async insertUser(requestOAuthDto: RequestOAuthDto) {
@@ -62,6 +95,8 @@ export class OauthRepository {
           emailVerified: false,
           profilePhoto: '',
           lastLoginDate: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
       });
 
@@ -72,6 +107,8 @@ export class OauthRepository {
           id,
           userNo: no,
           provider,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
       });
 
@@ -79,5 +116,27 @@ export class OauthRepository {
     });
 
     return user;
+  }
+
+  async disconnectOAuth(userNo: number, provider: OAuthProvider) {
+    console.log('??너는왜오류안남십탱아');
+    const res = await this.prismaService.userOAuth.update({
+      select: {
+        userNo: true,
+        provider: true,
+      },
+      data: {
+        isActive: false,
+        updatedAt: new Date(),
+      },
+      where: {
+        userNo_provider: {
+          userNo,
+          provider,
+        },
+      },
+    });
+    console.log('???무슨일이세요');
+    console.log(res);
   }
 }
