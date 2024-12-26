@@ -17,25 +17,18 @@ export class ProblemsService {
   async getProblemSummaryList(
     requestProblemSummaryDto: RequestProblemSummaryListDto,
   ): Promise<ResponseProblemSummaryListDto> {
-    const { pageNo, pageSize, typeList, levelList, filter, title, sort } =
+    const { pageNo, pageSize, typeList, levelList, title, sort } =
       requestProblemSummaryDto;
 
     try {
-      const problemSummary =
-        filter === 0
-          ? await this.problemsRepository.getProblemList(
-              pageNo,
-              pageSize,
-              sort,
-              levelList,
-              typeList,
-            )
-          : await this.problemsRepository.getProblemListFromTitle(
-              pageNo,
-              pageSize,
-              sort,
-              title,
-            );
+      const problemSummary = await this.problemsRepository.getProblemList(
+        pageNo,
+        pageSize,
+        sort,
+        levelList,
+        typeList,
+        title || null,
+      );
 
       return {
         ...problemSummary,

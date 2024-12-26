@@ -49,6 +49,7 @@ export class ProblemsRepository {
     sort: ProblemSort,
     levelList?: number[],
     typeList?: ProblemType[],
+    title?: string,
   ) {
     const totalCount = await this.prismaService.problem.count({
       where: {
@@ -80,6 +81,7 @@ export class ProblemsRepository {
         typeList: true,
       },
       where: {
+        ...(title ? { title: { contains: title } } : null),
         ...(typeList && typeList.length > 0
           ? { typeList: { some: { name: { in: typeList } } } }
           : {}),

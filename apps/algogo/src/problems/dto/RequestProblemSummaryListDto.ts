@@ -3,7 +3,6 @@ import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { ProblemType } from 'apps/algogo/src/common/enums/ProblemTypeEnum';
 import { ProblemSort } from '../enum/ProblemSortEnum';
-import { ProblemSearchFilter } from '../enum/ProblemSearchFilterEnum';
 
 export class RequestProblemSummaryListDto {
   @Transform(({ value }) => (value !== undefined ? Number(value) : 1))
@@ -60,15 +59,6 @@ export class RequestProblemSummaryListDto {
     each: true,
   })
   typeList?: ProblemType[];
-
-  @IsOptional()
-  @ApiProperty({
-    description: '문제 이름으로 검색할지 조건으로 검색할지 필터',
-    default: 0,
-    enum: ProblemSearchFilter,
-    required: false,
-  })
-  filter: ProblemSearchFilter = 0;
 
   @IsOptional()
   @IsEnum(ProblemSort)
