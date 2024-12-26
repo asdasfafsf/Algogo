@@ -2,7 +2,6 @@ import { RequestOAuthDto } from './dto/RequestOAuthDto';
 import {
   ConflictException,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
@@ -20,20 +19,21 @@ export class OauthService {
     private readonly oauthRepository: OauthRepository,
   ) {}
 
-  async getOAuthState(
-    requestOAuthDto: RequestOAuthDto,
-  ): Promise<(typeof OAuthState)[keyof typeof OAuthState]> {
+  async getOAuthState(requestOAuthDto: RequestOAuthDto) {
     const { id, provider } = requestOAuthDto;
 
-    const oauth = await this.oauthRepository.getOAuth(id, provider);
+    const oauthList = await this.oauthRepository.getOAuthList(id, provider);
 
-    if (!oauth) {
+    if (!oauthList?.length) {
       return OAuthState.NEW;
     }
 
-    if (oauth.isActive === true) {
+    const target = oauthList.find((elem) => elem.isActive);
+
+    if (target) {
       return OAuthState.CONNECTED_TO_OTHER_ACCOUNT;
     }
+
     return OAuthState.DISCONNECTED_FROM_OTHER_ACCOUNT;
   }
 
@@ -41,21 +41,28 @@ export class OauthService {
     requestOAuthConnectDto: RequestOAuthConnectDto,
   ) {
     const { userNo, id, provider } = requestOAuthConnectDto;
-    const oauth = await this.oauthRepository.getOAuth(id, provider);
+    const oauthList = await this.oauthRepository.getOAuthList(id, provider);
 
-    if (!oauth) {
+    if (!oauthList?.length) {
       return OAuthState.NEW;
     }
 
-    if (oauth.userNo === userNo) {
-      if (oauth.isActive === true) {
-        return OAuthState.CONNECTED_AND_ACTIVE;
-      }
-      return OAuthState.CONNECTED_AND_INACTIVE;
+    const isConnectedToOther = oauthList.some(
+      (elem) => elem.isActive && elem.userNo !== userNo,
+    );
+
+    if (isConnectedToOther) {
+      return OAuthState.CONNECTED_TO_OTHER_ACCOUNT;
     }
 
-    if (oauth.isActive === true) {
-      return OAuthState.CONNECTED_TO_OTHER_ACCOUNT;
+    const mine = oauthList.find((elem) => elem.userNo === userNo);
+
+    if (mine) {
+      if (mine.isActive) {
+        return OAuthState.CONNECTED_AND_ACTIVE;
+      } else {
+        return OAuthState.CONNECTED_AND_INACTIVE;
+      }
     }
 
     return OAuthState.DISCONNECTED_FROM_OTHER_ACCOUNT;
@@ -63,23 +70,23 @@ export class OauthService {
 
   async login(requestOAuthDto: RequestOAuthDto) {
     this.logger.silly('start login', requestOAuthDto);
-    const { id, provider } = requestOAuthDto;
 
     try {
-      const userOAuth = await this.oauthRepository.getActiveUserOAuth(
-        id,
-        provider,
-      );
+      const oauthState = await this.getOAuthState(requestOAuthDto);
       let userNo = -1;
-      if (!userOAuth) {
+
+      if (oauthState === OAuthState.NEW) {
         const user = await this.oauthRepository.insertUser(requestOAuthDto);
         userNo = user.no;
+      } else if (oauthState === OAuthState.CONNECTED_TO_OTHER_ACCOUNT) {
+        const { id, provider } = requestOAuthDto;
+        const user = await this.oauthRepository.getOAuth(id, provider, true);
+        userNo = user.userNo;
       } else {
-        userNo = userOAuth.userNo;
-      }
-
-      if (userNo === -1 || !userNo) {
-        throw new InternalServerErrorException('oauth error');
+        const { id, provider } = requestOAuthDto;
+        const user = await this.oauthRepository.getOAuth(id, provider, true);
+        userNo = user.userNo;
+        // throw new ConflictException('연동해제된 계정입니다. 계속 진행할까요?');
       }
 
       const uuid = await this.authService.generateLoginToken(userNo);
@@ -95,10 +102,7 @@ export class OauthService {
 
   async connectOAuthProvider(requestOAuthDto: RequestOAuthConnectDto) {
     const { id, provider } = requestOAuthDto;
-    const userOAuth = await this.oauthRepository.getActiveUserOAuth(
-      id,
-      provider,
-    );
+    const userOAuth = await this.oauthRepository.getOAuth(id, provider, true);
 
     this.logger.silly('complete duplicate your oauth', userOAuth);
     // 동일한 계정으로 이미 연동 됨
@@ -112,7 +116,6 @@ export class OauthService {
     const myUserOAuth = await this.oauthRepository.getUserOAuth(
       userNo,
       provider,
-      true,
     );
 
     this.logger.silly('complete duplicate my oauth', myUserOAuth);

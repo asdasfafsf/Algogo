@@ -16,7 +16,7 @@ datasource db {
 model User {
     no             Int       @id @default(autoincrement()) @map("USER_NO")
     uuid           String    @unique @default(uuid()) @map("USER_UUID")
-    email          String    @unique @map("USER_EMAIL")
+    email          String    @map("USER_EMAIL")
     name           String    @map("USER_NAME")
     profilePhoto   String    @map("USER_PROFILE_PHOTO")
     registeredDate DateTime  @default(now()) @map("USER_REGISTERED_DATE")
@@ -45,8 +45,7 @@ model UserOAuth {
 
     User User @relation("UserToUserOauth", fields: [userNo], references: [no])
 
-    @@unique([id, provider])
-    @@unique([userNo, provider])
+    @@unique([userNo, id, provider])
     @@index([userNo])
     @@index([id, provider])
     @@map("USER_OAUTH")
@@ -68,6 +67,7 @@ model UserSocial {
 model Problem {
     no                Int      @id @default(autoincrement()) @map("PROBLEM_NO")
     uuid              String   @unique @default(uuid()) @map("PROBLEM_UUID")
+    isSpecialJudge    Boolean  @default(false) @map("PROBLEM_IS_SPECIAL_JUDGE")
     source            String   @map("PROBLEM_SOURCE")
     sourceId          String   @map("PROBLEM_SOURCE_ID")
     sourceUrl         String   @map("PROBLEM_SOURCE_URL")

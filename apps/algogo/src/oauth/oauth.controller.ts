@@ -115,32 +115,19 @@ export class OauthController {
       ip,
     });
     const requestOAuthDto = { ...(req.user as RequestOAuthDto), ip };
-    const oauthState = await this.oauthService.getOAuthState(requestOAuthDto);
+    const uuid = await this.oauthService.login(requestOAuthDto);
 
-    if (oauthState === OAuthState.NEW) {
-      // 신규 가입일 경우 로그인을 진행한다.
-      const uuid = await this.oauthService.login(requestOAuthDto);
-
-      return res
-        .cookie('token', uuid, {
-          httpOnly: process.env.NODE_ENV === 'development' ? undefined : true,
-          secure: process.env.NODE_ENV === 'development' ? false : true,
-          sameSite: process.env.NODE_ENV === 'development' ? 'lax' : undefined,
-        })
-        .redirect(
-          process.env.NODE_ENV === 'development'
-            ? 'http://localhost:5173/oauth/token/'
-            : 'https://www.algogo.co.kr/oauth/token',
-        );
-    } else if (oauthState === OAuthState.CONNECTED_TO_OTHER_ACCOUNT) {
-      throw new ConflictException(
-        '이미 연동되어 있는 계정입니다. 연동 해제 후 진행해주세요',
+    return res
+      .cookie('token', uuid, {
+        httpOnly: process.env.NODE_ENV === 'development' ? undefined : true,
+        secure: process.env.NODE_ENV === 'development' ? false : true,
+        sameSite: process.env.NODE_ENV === 'development' ? 'lax' : undefined,
+      })
+      .redirect(
+        process.env.NODE_ENV === 'development'
+          ? 'http://localhost:5173/oauth/token/'
+          : 'https://www.algogo.co.kr/oauth/token',
       );
-    } else if (oauthState === OAuthState.DISCONNECTED_FROM_OTHER_ACCOUNT) {
-      throw new ConflictException(
-        '이미 해제 이력이 있는 계정입니다. 계속 진행할까요?',
-      );
-    }
   }
 
   @Get(':provider/connect')
@@ -176,14 +163,20 @@ export class OauthController {
     const oauthState =
       await this.oauthService.getOAuthStateWithLogined(requestOAuthDto);
 
-    if (oauthState === OAuthState.NEW) {
+    this.logger.silly('oauthState', {
+      oauthState,
+    });
+    if (
+      oauthState === OAuthState.NEW ||
+      oauthState === OAuthState.CONNECTED_AND_INACTIVE
+    ) {
       this.logger.silly('provider', requestOAuthDto);
       this.logger.silly('dto', requestOAuthCallbackDto);
       await this.oauthService.connectOAuthProvider(requestOAuthDto);
 
       res.redirect(
         process.env.NODE_ENV === 'development'
-          ? 'http://localhost:5173/me/'
+          ? 'http://localhost:5173/me'
           : 'https://www.algogo.co.kr/me',
       );
     } else if (oauthState === OAuthState.CONNECTED_AND_ACTIVE) {
@@ -194,6 +187,9 @@ export class OauthController {
       );
     } else if (oauthState === OAuthState.DISCONNECTED_FROM_OTHER_ACCOUNT) {
       // 다른 사람이 해지한 계정
+      throw new ConflictException(
+        '이미 다른 계정에 연동되어 있습니다. 연동 해제 후 진행해주세요.',
+      );
     }
   }
 }

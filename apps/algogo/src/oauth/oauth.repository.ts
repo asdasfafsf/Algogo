@@ -8,33 +8,28 @@ import { RequestOAuthConnectDto } from './dto/RequestOAuthConnectDto';
 export class OauthRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async getOAuth(id: string, provider: string) {
-    return await this.prismaService.userOAuth.findUnique({
+  async getOAuthList(id: string, provider: string) {
+    return await this.prismaService.userOAuth.findMany({
       select: {
         userNo: true,
         isActive: true,
       },
       where: {
-        id_provider: {
-          id,
-          provider,
-        },
-        isActive: true,
+        id,
+        provider,
       },
     });
   }
-  async getActiveUserOAuth(id: string, provider: OAuthProvider) {
-    return await this.prismaService.userOAuth.findUnique({
+
+  async getOAuth(id: string, provider: OAuthProvider, isActive?: boolean) {
+    return await this.prismaService.userOAuth.findFirst({
       select: {
         userNo: true,
-        isActive: true,
       },
       where: {
-        id_provider: {
-          id,
-          provider,
-        },
-        isActive: true,
+        id,
+        provider,
+        isActive,
       },
     });
   }
@@ -42,7 +37,7 @@ export class OauthRepository {
   async getUserOAuth(
     userNo: number,
     provider: OAuthProvider,
-    isActive: boolean = false,
+    isActive?: boolean,
   ) {
     return await this.prismaService.userOAuth.findFirst({
       select: {
@@ -62,8 +57,9 @@ export class OauthRepository {
     const upsertedUserOAuth = await this.prismaService.userOAuth.upsert({
       select: { userNo: true },
       where: {
-        userNo_provider: {
+        userNo_id_provider: {
           userNo,
+          id,
           provider,
         },
       },
@@ -120,23 +116,16 @@ export class OauthRepository {
 
   async disconnectOAuth(userNo: number, provider: OAuthProvider) {
     console.log('??너는왜오류안남십탱아');
-    const res = await this.prismaService.userOAuth.update({
-      select: {
-        userNo: true,
-        provider: true,
-      },
+    await this.prismaService.userOAuth.updateMany({
       data: {
         isActive: false,
         updatedAt: new Date(),
       },
       where: {
-        userNo_provider: {
-          userNo,
-          provider,
-        },
+        userNo: userNo,
+        provider: provider,
+        isActive: true,
       },
     });
-    console.log('???무슨일이세요');
-    console.log(res);
   }
 }

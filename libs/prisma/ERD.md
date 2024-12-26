@@ -9,7 +9,7 @@ erDiagram
 "USER" {
   Int USER_NO PK
   String USER_UUID UK
-  String USER_EMAIL UK
+  String USER_EMAIL
   String USER_NAME
   String USER_PROFILE_PHOTO
   DateTime USER_REGISTERED_DATE
@@ -38,6 +38,7 @@ erDiagram
 "PROBLEM" {
   Int PROBLEM_NO PK
   String PROBLEM_UUID UK
+  Boolean PROBLEM_IS_SPECIAL_JUDGE
   String PROBLEM_SOURCE
   String PROBLEM_SOURCE_ID
   String PROBLEM_SOURCE_URL
@@ -129,6 +130,7 @@ erDiagram
 **Properties**
   - `PROBLEM_NO`: 
   - `PROBLEM_UUID`: 
+  - `PROBLEM_IS_SPECIAL_JUDGE`: 
   - `PROBLEM_SOURCE`: 
   - `PROBLEM_SOURCE_ID`: 
   - `PROBLEM_SOURCE_URL`: 
