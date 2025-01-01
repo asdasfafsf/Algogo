@@ -18,6 +18,17 @@ export default class RequestProblemReportDto {
     description: '문의 내용',
   })
   @IsString({
+    message: '문의 제목을 입력해주세요.',
+  })
+  @IsNotEmpty({
+    message: '문의 제목을 입력해주세요.',
+  })
+  title: string;
+
+  @ApiProperty({
+    description: '문의 내용',
+  })
+  @IsString({
     message: '문의 내용을 입력해주세요.',
   })
   @IsNotEmpty({

@@ -36,7 +36,10 @@ export class ProblemsReportController {
     @Req() req: AuthRequest,
     @Body() requestProblemReportDto: RequestProblemReportDto,
   ) {
-    const { user } = req;
+    const { userNo } = req;
+    const reportDto = { ...requestProblemReportDto, userNo };
+    await this.problemsReportService.reportProblem(reportDto);
+
     return null;
   }
 }
