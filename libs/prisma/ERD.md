@@ -81,6 +81,14 @@ erDiagram
   Int problemNo FK
   Int state
 }
+"ProblemReport" {
+  Int userNo FK
+  Int problemNo FK
+  Int PROBLEM_REPORT_NO PK
+  String PROBLEM_REPORT_TITLE
+  String PROBLEM_REPORT_CONTENT
+  ProblemReportState state
+}
 "USER_OAUTH" }o--|| "USER" : User
 "USER_SOCIAL" }o--|| "USER" : User
 "PROBLEM_CONTENT" }o--|| "PROBLEM" : Problem
@@ -88,6 +96,8 @@ erDiagram
 "PROBLEM_INPUT_OUTPUT" }o--|| "PROBLEM" : Problem
 "USER_PROBLEM_STATE" }o--|| "USER" : User
 "USER_PROBLEM_STATE" }o--|| "PROBLEM" : Problem
+"ProblemReport" }o--|| "USER" : User
+"ProblemReport" }o--|| "PROBLEM" : Problem
 ```
 
 ### `USER`
@@ -179,4 +189,14 @@ erDiagram
 **Properties**
   - `userNo`: 
   - `problemNo`: 
+  - `state`: 
+
+### `ProblemReport`
+
+**Properties**
+  - `userNo`: 
+  - `problemNo`: 
+  - `PROBLEM_REPORT_NO`: 
+  - `PROBLEM_REPORT_TITLE`: 
+  - `PROBLEM_REPORT_CONTENT`: 
   - `state`: 

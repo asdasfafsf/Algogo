@@ -31,6 +31,7 @@ model User {
     socialList       UserSocial[]       @relation("UserToUserSocial")
     oauthList        UserOAuth[]        @relation("UserToUserOauth")
     problemStateList UserProblemState[] @relation("UserToUserProblemState")
+    ProblemReport    ProblemReport[]    @relation("UserToProblemReport")
 
     @@map("USER")
 }
@@ -94,6 +95,7 @@ model Problem {
     contentList     ProblemContent[]     @relation("ProblemToProblemContent")
     inputOutputList ProblemInputOutput[] @relation("ProblemToProblemInputOutput")
     userList        UserProblemState[]   @relation("ProblemToUserProblemState")
+    ProblemReport   ProblemReport[]      @relation("ProblemToProblemReport")
 
     @@unique([source, sourceId])
     @@index([source, sourceId])
@@ -149,4 +151,26 @@ enum UserState {
     DORMANT // 휴면
     ACTIVE // 활동
     SUSPENDED // 정지
+}
+
+model ProblemReport {
+    userNo    Int
+    problemNo Int
+    no        Int                @id @default(autoincrement()) @map("PROBLEM_REPORT_NO")
+    title     String             @map("PROBLEM_REPORT_TITLE") @db.VarChar(600)
+    content   String             @map("PROBLEM_REPORT_CONTENT") @db.VarChar(2000)
+    createdAt DateTime           @default(now())
+    state     ProblemReportState
+
+    User    User    @relation("UserToProblemReport", fields: [userNo], references: [no])
+    Problem Problem @relation("ProblemToProblemReport", fields: [problemNo], references: [no])
+
+    @@index([userNo, problemNo, no])
+}
+
+enum ProblemReportState {
+    PENDING
+    PROGRESS
+    RESOLVED
+    REJECT
 }
