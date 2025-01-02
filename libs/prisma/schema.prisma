@@ -96,6 +96,7 @@ model Problem {
     userList        UserProblemState[]   @relation("ProblemToUserProblemState")
 
     @@unique([source, sourceId])
+    @@index([source, sourceId])
     @@map("PROBLEM")
 }
 

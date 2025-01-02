@@ -75,6 +75,10 @@ export class OauthService {
       const oauthState = await this.getOAuthState(requestOAuthDto);
       let userNo = -1;
 
+      this.logger.silly('oauthState: ', {
+        oauthState,
+      });
+
       if (oauthState === OAuthState.NEW) {
         const user = await this.oauthRepository.insertUser(requestOAuthDto);
         userNo = user.no;
@@ -83,12 +87,15 @@ export class OauthService {
         const user = await this.oauthRepository.getOAuth(id, provider, true);
         userNo = user.userNo;
       } else {
+        this.logger.silly('start state5', requestOAuthDto);
         const { id, provider } = requestOAuthDto;
-        const user = await this.oauthRepository.getOAuth(id, provider, true);
+        const user = await this.oauthRepository.getOAuth(id, provider, false);
         userNo = user.userNo;
+        await this.oauthRepository.updateUserOAuth(userNo, id, provider, true);
         // throw new ConflictException('연동해제된 계정입니다. 계속 진행할까요?');
       }
 
+      this.logger.silly('start token');
       const uuid = await this.authService.generateLoginToken(userNo);
       return uuid;
     } catch (e) {

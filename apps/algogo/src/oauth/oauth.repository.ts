@@ -31,6 +31,9 @@ export class OauthRepository {
         provider,
         isActive,
       },
+      orderBy: {
+        updatedAt: 'desc',
+      },
     });
   }
 
@@ -47,6 +50,30 @@ export class OauthRepository {
       where: {
         userNo,
         provider,
+      },
+    });
+  }
+
+  async updateUserOAuth(
+    userNo: number,
+    id: string,
+    provider: OAuthProvider,
+    isActive: boolean,
+  ) {
+    return await this.prismaService.userOAuth.update({
+      select: {
+        userNo: true,
+      },
+      data: {
+        isActive,
+        updatedAt: new Date(),
+      },
+      where: {
+        userNo_id_provider: {
+          userNo,
+          id,
+          provider,
+        },
       },
     });
   }
