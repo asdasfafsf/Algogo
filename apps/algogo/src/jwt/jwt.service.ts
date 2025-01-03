@@ -52,7 +52,7 @@ export class JwtService {
     }
   }
 
-  async decode(token: string) {
+  async decode(token: string): Promise<JwtToken> {
     try {
       return this.nestJwtService.decode(token);
     } catch (e) {

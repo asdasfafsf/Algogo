@@ -2,6 +2,7 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { RedisService } from '../redis/redis.service';
 import { JwtService } from '../jwt/jwt.service';
@@ -12,6 +13,8 @@ import * as crypto from 'crypto';
 import ResponseTokenDto from '@libs/core/dto/ResponseTokenDto';
 import JwtConfig from '../config/jwtConfig';
 import { CustomLogger } from '../logger/custom-logger';
+import { AuthRepository } from './auth.repository';
+import { INVALID_JWT_MESSAGE } from '../common/constants/ErrorMessage';
 
 @Injectable()
 export class AuthService {
@@ -24,6 +27,7 @@ export class AuthService {
     @Inject(JwtConfig.KEY)
     private readonly jwtConfig: ConfigType<typeof JwtConfig>,
     private readonly logger: CustomLogger,
+    private readonly authRepository: AuthRepository,
   ) {}
 
   async getLoginToken(uuid: string): Promise<ResponseTokenDto> {
@@ -42,6 +46,19 @@ export class AuthService {
     this.logger.silly('OAuthService getLoginToken #1', {});
     await this.redisService.del(`login_${uuid}_access`);
     await this.redisService.del(`login_${uuid}_refresh`);
+
+    const decodedAccessToken = await this.jwtService.decode(accessToken);
+
+    this.logger.silly('decodedAccessToken', {
+      accessToken,
+      decodedAccessToken,
+    });
+
+    this.redisService.set(
+      accessToken,
+      JSON.stringify(decodedAccessToken),
+      decodedAccessToken.exp - decodedAccessToken.iat,
+    );
 
     this.logger.silly('OAuthService getLoginToken Complete from redis', {});
 
@@ -62,18 +79,6 @@ export class AuthService {
       this.jwtConfig.jwtRefreshTokenExpiresIn,
     );
 
-    const encryptedAccessToken = this.cryptoService.encryptAES(
-      this.encryptConfig.key,
-      this.encryptConfig.iv,
-      `${this.encryptConfig.tag}_${accessToken}`,
-    );
-
-    const encryptedRefreshToken = this.cryptoService.encryptAES(
-      this.encryptConfig.key,
-      this.encryptConfig.iv,
-      `${refreshToken}_${this.encryptConfig.tag}`,
-    );
-
     while (true) {
       const newUuid = await this.redisService.get(uuid);
 
@@ -84,18 +89,49 @@ export class AuthService {
       uuid = await this.generateRandom(userNo.toString());
     }
 
-    await this.redisService.set(
-      `login_${uuid}_access`,
-      encryptedAccessToken,
-      30,
-    );
-    await this.redisService.set(
-      `login_${uuid}_refresh`,
-      encryptedRefreshToken,
-      30,
-    );
+    await this.redisService.set(`login_${uuid}_access`, accessToken, 30);
+    await this.redisService.set(`login_${uuid}_refresh`, refreshToken, 30);
 
     return uuid;
+  }
+
+  async decodeJwt(encryptedToken: string) {
+    const data = await this.redisService.get(encryptedToken);
+
+    if (data) {
+      return JSON.parse(data) as JwtToken;
+    }
+
+    let decryptedToken = this.cryptoService.decryptAES(
+      this.encryptConfig.key,
+      this.encryptConfig.iv,
+      encryptedToken,
+    );
+
+    if (!decryptedToken.includes(this.encryptConfig.tag)) {
+      decryptedToken = this.cryptoService.decryptAES(
+        this.encryptConfig.prevKey,
+        this.encryptConfig.prevIv,
+        encryptedToken,
+      );
+
+      if (!decryptedToken.includes(this.encryptConfig.prevTag)) {
+        throw new UnauthorizedException(INVALID_JWT_MESSAGE);
+      }
+    }
+
+    if (!decryptedToken) {
+      throw new UnauthorizedException(INVALID_JWT_MESSAGE);
+    }
+    const decodedToken = await this.jwtService.decode(decryptedToken);
+
+    if (!decodedToken.userNo) {
+      throw new UnauthorizedException(INVALID_JWT_MESSAGE);
+    }
+
+    await this.authRepository.getUser(decodedToken.userNo);
+
+    return decodedToken;
   }
 
   private async generateRandom(data: string) {
