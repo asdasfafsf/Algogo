@@ -87,6 +87,7 @@ erDiagram
   Int PROBLEM_REPORT_NO PK
   String PROBLEM_REPORT_TITLE
   String PROBLEM_REPORT_CONTENT
+  DateTime createdAt
   ProblemReportState state
 }
 "USER_OAUTH" }o--|| "USER" : User
@@ -199,4 +200,5 @@ erDiagram
   - `PROBLEM_REPORT_NO`: 
   - `PROBLEM_REPORT_TITLE`: 
   - `PROBLEM_REPORT_CONTENT`: 
+  - `createdAt`: 
   - `state`: 
