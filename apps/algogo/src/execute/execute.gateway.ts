@@ -23,7 +23,6 @@ import { Cron } from '@nestjs/schedule';
 import { CustomLogger } from '../logger/custom-logger';
 import { RequestWsAuthDto } from './dto/RequestWsAuthDto';
 import { OnEvent } from '@nestjs/event-emitter';
-import { CryptoService } from '../crypto/crypto.service';
 
 class AuthSocket extends Socket {
   messageCount: number;
@@ -42,38 +41,19 @@ export class ExecuteGateway {
     @Inject(WsConfig.KEY)
     private readonly wsConfig: ConfigType<typeof WsConfig>,
     private readonly redisService: RedisService,
-    private readonly cryptoServoce: CryptoService,
   ) {}
 
   @WebSocketServer()
   private server: Server;
 
-  private auth(socket: AuthSocket) {
-    return new Promise<boolean>(async (resolve) => {
-      setTimeout(() => {
-        if (socket.disconnected) {
-          resolve(false);
-        }
-
-        if (!socket.token) {
-          socket.disconnect();
-          resolve(false);
-        }
-
-        if (!socket.userNo) {
-          socket.disconnect();
-          resolve(false);
-        }
-
-        resolve(false);
-      }, 5000);
-    });
-  }
-
   async handleConnection(socket: AuthSocket) {
     this.logger.silly(`start connection socket id : ${socket.id}`);
-    const isOk = await this.auth(socket);
 
+    const timeout = setTimeout(async () => {
+      await this.redisService.unsubscribe(socket.id);
+    }, 5000);
+    const isOk = await this.redisService.subscribe(socket.id);
+    clearTimeout(timeout);
     if (!isOk) {
       return;
     }
@@ -126,17 +106,21 @@ export class ExecuteGateway {
         getClient: () => socket,
       }),
     };
+
     const isOk = await this.wsAuthGurad.canActivate(
       context as ExecutionContext,
     );
 
     if (!isOk) {
+      this.logger.silly('아니 님아');
+      this.redisService.publish(socket.id, 'FAIL');
       socket.disconnect();
     }
 
+    this.redisService.publish(socket.id, 'OK');
     this.logger.silly('success auth');
 
-    return true;
+    socket.emit('auth', 'OK');
   }
 
   @UsePipes(
@@ -151,9 +135,19 @@ export class ExecuteGateway {
     @MessageBody() requestExecuteDto: any,
     @ConnectedSocket() socket: AuthSocket,
   ) {
+    if (socket.messageCount > 5) {
+      return {
+        code: '9999',
+        result: '동시 요청 허용 갯수를 초과하였습니다.',
+        processTime: 0,
+        memory: 0,
+      };
+    }
+
     const { id } = socket;
     const requestRunDto = { id, ...requestExecuteDto };
-
+    socket.lastRequestTime = new Date().getTime();
+    socket.messageCount++;
     this.logger.silly('execute', requestRunDto);
 
     try {
@@ -167,6 +161,8 @@ export class ExecuteGateway {
         processTime: 0,
         memory: 0,
       };
+    } finally {
+      socket.messageCount--;
     }
   }
 

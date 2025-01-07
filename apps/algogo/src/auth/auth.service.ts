@@ -43,11 +43,19 @@ export class AuthService {
       );
     }
 
-    this.logger.silly('OAuthService getLoginToken #1', {});
+    this.logger.silly('OAuthService getLoginToken #1', {
+      accessToken,
+    });
     await this.redisService.del(`login_${uuid}_access`);
     await this.redisService.del(`login_${uuid}_refresh`);
 
-    const decodedAccessToken = await this.jwtService.decode(accessToken);
+    const decodedAccessToken = await this.jwtService.decode(
+      this.cryptoService.decryptAES(
+        this.encryptConfig.key,
+        this.encryptConfig.iv,
+        accessToken,
+      ),
+    );
 
     this.logger.silly('decodedAccessToken', {
       accessToken,
@@ -89,8 +97,24 @@ export class AuthService {
       uuid = await this.generateRandom(userNo.toString());
     }
 
-    await this.redisService.set(`login_${uuid}_access`, accessToken, 30);
-    await this.redisService.set(`login_${uuid}_refresh`, refreshToken, 30);
+    await this.redisService.set(
+      `login_${uuid}_access`,
+      this.cryptoService.encryptAES(
+        this.encryptConfig.key,
+        this.encryptConfig.iv,
+        accessToken,
+      ),
+      30,
+    );
+    await this.redisService.set(
+      `login_${uuid}_refresh`,
+      this.cryptoService.encryptAES(
+        this.encryptConfig.key,
+        this.encryptConfig.iv,
+        refreshToken,
+      ),
+      30,
+    );
 
     return uuid;
   }
