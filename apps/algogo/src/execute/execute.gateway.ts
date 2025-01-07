@@ -111,6 +111,11 @@ export class ExecuteGateway {
       context as ExecutionContext,
     );
 
+    this.logger.silly('token', {
+      token,
+      isOk,
+    });
+
     if (!isOk) {
       this.logger.silly('아니 님아');
       this.redisService.publish(socket.id, 'FAIL');

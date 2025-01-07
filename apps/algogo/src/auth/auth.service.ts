@@ -126,23 +126,17 @@ export class AuthService {
       return JSON.parse(data) as JwtToken;
     }
 
-    let decryptedToken = this.cryptoService.decryptAES(
+    this.logger.silly('encryptedToken', {
+      encryptedToken,
+    });
+
+    const decryptedToken = this.cryptoService.decryptAES(
       this.encryptConfig.key,
       this.encryptConfig.iv,
       encryptedToken,
     );
 
-    if (!decryptedToken.includes(this.encryptConfig.tag)) {
-      decryptedToken = this.cryptoService.decryptAES(
-        this.encryptConfig.prevKey,
-        this.encryptConfig.prevIv,
-        encryptedToken,
-      );
-
-      if (!decryptedToken.includes(this.encryptConfig.prevTag)) {
-        throw new UnauthorizedException(INVALID_JWT_MESSAGE);
-      }
-    }
+    this.logger.silly('decryptedToken', { decryptedToken });
 
     if (!decryptedToken) {
       throw new UnauthorizedException(INVALID_JWT_MESSAGE);
