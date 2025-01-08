@@ -197,6 +197,6 @@ export class ExecuteGateway {
   async subscribeExecute(payload: any) {
     this.logger.silly('execute result', payload);
     const { id } = payload;
-    this.server.to(id).emit('execute', payload);
+    this.server.to(id).emit('executeResult', { ...payload, id: undefined });
   }
 }
