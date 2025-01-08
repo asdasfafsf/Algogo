@@ -19,12 +19,17 @@ export class WsAuthGuard implements CanActivate {
         throw new WsException('토큰이 없습니다.');
       }
 
+      this.logger.silly('token', {
+        encryptedToken,
+      });
+
       const decodedToken = await this.authService.decodeJwt(encryptedToken);
       const { userNo } = decodedToken;
 
       client.userNo = userNo;
       return true;
     } catch (e) {
+      this.logger.silly('error', e);
       return false;
     }
   }
