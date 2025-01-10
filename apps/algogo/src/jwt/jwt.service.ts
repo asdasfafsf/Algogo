@@ -19,17 +19,21 @@ export class JwtService {
     private readonly config: ConfigType<typeof jwtConfig>,
   ) {}
 
-  async sign(payload: any, expiresIn?: number) {
+  async sign(
+    payload: any,
+    expiresIn?: number,
+    secret: string = this.config.jwtSecret,
+  ) {
     return await this.nestJwtService.signAsync(payload, {
-      secret: this.config.jwtSecret,
+      secret,
       expiresIn,
     });
   }
 
-  async verify(token: string) {
+  async verify(token: string, secret: string = this.config.jwtSecret) {
     try {
       await this.nestJwtService.verifyAsync(token, {
-        secret: this.config.jwtSecret,
+        secret,
       });
 
       return;

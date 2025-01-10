@@ -1,7 +1,10 @@
 import {
+  BadRequestException,
+  ForbiddenException,
   Inject,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { RedisService } from '../redis/redis.service';
@@ -10,7 +13,7 @@ import EncryptConfig from '../config/encryptConfig';
 import { ConfigType } from '@nestjs/config';
 import { CryptoService } from '../crypto/crypto.service';
 import * as crypto from 'crypto';
-import ResponseTokenDto from '@libs/core/dto/ResponseTokenDto';
+import ResponseTokenDto from './dto/ResponseTokenDto';
 import JwtConfig from '../config/jwtConfig';
 import { CustomLogger } from '../logger/custom-logger';
 import { AuthRepository } from './auth.repository';
@@ -43,24 +46,10 @@ export class AuthService {
       );
     }
 
-    this.logger.silly('OAuthService getLoginToken #1', {
-      accessToken,
-    });
     await this.redisService.del(`login_${uuid}_access`);
     await this.redisService.del(`login_${uuid}_refresh`);
 
-    const decodedAccessToken = await this.jwtService.decode(
-      this.cryptoService.decryptAES(
-        this.encryptConfig.key,
-        this.encryptConfig.iv,
-        accessToken,
-      ),
-    );
-
-    this.logger.silly('decodedAccessToken', {
-      accessToken,
-      decodedAccessToken,
-    });
+    const decodedAccessToken = await this.jwtService.decode(accessToken);
 
     this.redisService.set(
       accessToken,
@@ -68,22 +57,40 @@ export class AuthService {
       decodedAccessToken.exp - decodedAccessToken.iat,
     );
 
+    const decodedRefreshToken = await this.jwtService.decode(refreshToken);
+
+    this.redisService.set(
+      `${decodedRefreshToken.userNo}_ref`,
+      refreshToken,
+      decodedRefreshToken.exp - decodedRefreshToken.iat,
+    );
+
     this.logger.silly('OAuthService getLoginToken Complete from redis', {});
 
     return {
-      accessToken,
-      refreshToken,
+      accessToken: this.cryptoService.encryptAES(
+        this.encryptConfig.key,
+        this.encryptConfig.iv,
+        accessToken,
+      ),
+      refreshToken: this.cryptoService.encryptAES(
+        this.encryptConfig.key,
+        this.encryptConfig.iv,
+        refreshToken,
+      ),
     };
   }
 
   async generateLoginToken(userNo: number) {
     let uuid = await this.generateRandom(userNo.toString());
+    const tmpUuid = await this.generateRandom(uuid);
+
     const accessToken = await this.jwtService.sign(
       { userNo, uuid },
       this.jwtConfig.jwtAccessTokenExpiresIn,
     );
     const refreshToken = await this.jwtService.sign(
-      { uuid, userNo },
+      { uuid, userNo, tmpUuid },
       this.jwtConfig.jwtRefreshTokenExpiresIn,
     );
 
@@ -97,24 +104,8 @@ export class AuthService {
       uuid = await this.generateRandom(userNo.toString());
     }
 
-    await this.redisService.set(
-      `login_${uuid}_access`,
-      this.cryptoService.encryptAES(
-        this.encryptConfig.key,
-        this.encryptConfig.iv,
-        accessToken,
-      ),
-      30,
-    );
-    await this.redisService.set(
-      `login_${uuid}_refresh`,
-      this.cryptoService.encryptAES(
-        this.encryptConfig.key,
-        this.encryptConfig.iv,
-        refreshToken,
-      ),
-      30,
-    );
+    await this.redisService.set(`login_${uuid}_access`, accessToken, 30);
+    await this.redisService.set(`login_${uuid}_refresh`, refreshToken, 30);
 
     return uuid;
   }
@@ -150,6 +141,81 @@ export class AuthService {
     await this.authRepository.getUser(decodedToken.userNo);
 
     return decodedToken;
+  }
+
+  async refreshToken(token: string) {
+    const decryptedToken = this.cryptoService.decryptAES(
+      this.encryptConfig.key,
+      this.encryptConfig.iv,
+      token,
+    );
+    const decodedToken = await this.jwtService.decode(decryptedToken);
+    const { userNo } = decodedToken;
+    const savedToken = await this.redisService.get(`${userNo}_ref`);
+
+    if (savedToken !== decryptedToken) {
+      throw new ForbiddenException(
+        '유효하지 않은 토큰입니다. 다시 로그인해주세요.',
+      );
+    }
+
+    const user = await this.authRepository.getUser(userNo);
+
+    if (!user) {
+      throw new NotFoundException('찾을 수 없는 회원입니다.');
+    }
+
+    if (user?.state !== 'ACTIVE') {
+      throw new BadRequestException('활동가능한 상태가 아닙니다.');
+    }
+
+    let uuid = await this.generateRandom(userNo.toString());
+    while (true) {
+      const newUuid = await this.redisService.get(uuid);
+
+      if (!newUuid) {
+        break;
+      }
+
+      uuid = await this.generateRandom(userNo.toString());
+    }
+
+    const tmpUuid = await this.generateRandom(userNo.toString());
+    const accessToken = await this.jwtService.sign(
+      { uuid, userNo },
+      this.jwtConfig.jwtAccessTokenExpiresIn,
+    );
+    const refreshToken = await this.jwtService.sign(
+      { userNo, uuid, tmpUuid },
+      this.jwtConfig.jwtRefreshTokenExpiresIn,
+    );
+
+    const decodedAccessToken = await this.jwtService.decode(accessToken);
+    const decodedRefreshToken = await this.jwtService.decode(refreshToken);
+
+    this.redisService.set(
+      accessToken,
+      JSON.stringify(decodedAccessToken),
+      decodedAccessToken.exp - decodedAccessToken.iat,
+    );
+    this.redisService.set(
+      `${userNo}_ref`,
+      refreshToken,
+      decodedRefreshToken.exp - decodedRefreshToken.iat,
+    );
+
+    return {
+      accessToken: this.cryptoService.encryptAES(
+        this.encryptConfig.key,
+        this.encryptConfig.iv,
+        accessToken,
+      ),
+      refreshToken: this.cryptoService.encryptAES(
+        this.encryptConfig.key,
+        this.encryptConfig.iv,
+        refreshToken,
+      ),
+    };
   }
 
   private async generateRandom(data: string) {

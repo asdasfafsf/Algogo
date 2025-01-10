@@ -45,4 +45,17 @@ export class AuthController {
 
     return tokens;
   }
+
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '토큰 발급  성공',
+    type: ResponseTokenDto,
+  })
+  @Get('/refresh-token')
+  async refresh(@Req() request: AuthRequest) {
+    const { headers } = request;
+    if (!headers['Authorization']) {
+      throw new BadRequestException('토큰이 없습니다.');
+    }
+  }
 }
