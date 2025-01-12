@@ -42,8 +42,8 @@ describe('S3Service', () => {
     // s3Config를 사용하여 S3 버킷 및 지역 정보 가져오기
     const bucketName = s3Configuration.bucketName;
     const region = s3Configuration.region;
-    const fileUrl = `https://${bucketName}.s3.${region}.amazonaws.com/test/test.txt`;
-
+    const endpoint = s3Configuration.endpoint;
+    const fileUrl = `${endpoint}/${bucketName}/test/test.txt`;
     // S3에서 파일을 가져와서 내용 확인
     const response = await firstValueFrom(httpService.get(fileUrl));
     const content = response.data;

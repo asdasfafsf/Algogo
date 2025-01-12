@@ -11,6 +11,8 @@ export class S3Service {
   ) {
     this.s3Client = new S3Client({
       region: this.config.region,
+      forcePathStyle: true,
+      endpoint: this.config.endpoint,
       credentials: {
         accessKeyId: this.config.accessKey,
         secretAccessKey: this.config.secretKey,
@@ -29,7 +31,7 @@ export class S3Service {
 
     await this.s3Client.send(command);
 
-    const fileUrl = `https://${this.config.bucketName}.s3.${this.config.region}.amazonaws.com/${Key}`;
+    const fileUrl = `${this.config.endpoint}/${this.config.bucketName}/${Key}`;
     return fileUrl;
   }
 }

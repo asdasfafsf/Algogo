@@ -5,4 +5,5 @@ export default registerAs('s3Config', () => ({
   accessKey: process.env.S3_ACCESS_KEY,
   bucketName: process.env.S3_PROBLEM_BUCKET_NAME,
   region: process.env.S3_REGION,
+  endpoint: process.env.S3_ENDPOINT,
 }));
