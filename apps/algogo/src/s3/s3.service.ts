@@ -29,7 +29,7 @@ export class S3Service {
 
     await this.s3Client.send(command);
 
-    const fileUrl = `https://${this.config.bucketName}.s3.${this.config.region}.amazonaws.com/${Key}`;
+    const fileUrl = `https://www.algogo.com/${this.config.bucketName}/${Key}`;
     return fileUrl;
   }
 }
