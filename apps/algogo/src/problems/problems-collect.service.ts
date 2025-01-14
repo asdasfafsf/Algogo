@@ -44,12 +44,49 @@ export class ProblemsCollectService {
 
     try {
       const res = await this.prismaService.$transaction(async (tx) => {
-        const inserted = await tx.problem.create({
-          data: {
+        const inserted = await tx.problem.upsert({
+          where: {
+            source_sourceId: {
+              sourceId: data.sourceId,
+              source: data.source,
+            },
+          },
+          update: {
             title: data.title,
             level: data.level,
             levelText: data.levelText,
             updatedDate: new Date(),
+            input: data.input,
+            output: data.output,
+            limit: data.limit,
+            answerCount: data.answerCount,
+            answerRate: data.answerRate,
+            answerPeopleCount: data.answerPeopleCount,
+            submitCount: data.submitCount,
+            timeout: data.timeout,
+            memoryLimit: data.memoryLimit,
+            source: data.source,
+            sourceId: data.sourceId,
+            sourceUrl: data.sourceUrl,
+            contentList: {
+              deleteMany: {}, // 기존 데이터 삭제
+              create: contentList, // 새 데이터 삽입
+            },
+            typeList: {
+              deleteMany: {}, // 기존 데이터 삭제
+              create: data.typeList.map((name) => ({ name })), // 새 데이터 삽입
+            },
+            inputOutputList: {
+              deleteMany: {}, // 기존 데이터 삭제
+              create: data.inputOutputList, // 새 데이터 삽입
+            },
+          },
+          create: {
+            title: data.title,
+            level: data.level,
+            levelText: data.levelText,
+            updatedDate: new Date(),
+            updatedAt: new Date(),
             input: data.input,
             output: data.output,
             limit: data.limit,
@@ -73,7 +110,6 @@ export class ProblemsCollectService {
             },
           },
         });
-
         return inserted;
       });
 
@@ -106,7 +142,7 @@ export class ProblemsCollectService {
 
           this.logger.silly(
             `${ProblemsCollectService.name} s3Upload_${index}`,
-            s3Result,
+            { s3Result },
           );
 
           if (!s3Result) {
