@@ -34,9 +34,6 @@ export default function CustomOAuthStrategy(
       const requestUrl = req.originalUrl;
       const callbackURL = this.getCallbackUrl(requestUrl);
       newOptions.callbackURL = callbackURL;
-
-      console.log('야야야', requestUrl);
-      console.log(newOptions);
       super.authenticate(req, newOptions);
     }
 

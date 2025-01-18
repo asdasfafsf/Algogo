@@ -83,7 +83,7 @@ export class AuthService {
       const newUuid = await this.redisService.get(uuid);
       const newToken = await this.redisService.get(`login_${uuid}_access`);
 
-      if (!newUuid && newToken) {
+      if (!newUuid && !newToken) {
         break;
       }
 
@@ -108,13 +108,25 @@ export class AuthService {
     if (!decryptedToken) {
       throw new UnauthorizedException(INVALID_JWT_MESSAGE);
     }
+    await this.jwtService.verify(decryptedToken);
     const decodedToken = await this.jwtService.decode(decryptedToken);
 
+    this.logger.silly('decodedToken', { decodedToken });
     if (!decodedToken.userNo) {
       throw new UnauthorizedException(INVALID_JWT_MESSAGE);
     }
+    this.logger.silly('start get USer');
 
-    await this.authRepository.getUser(decodedToken.userNo);
+    const user = await this.authRepository.getUser(decodedToken.userNo);
+
+    this.logger.silly('end get User');
+    if (!user) {
+      throw new NotFoundException('일치하는 회원이 없습니다.');
+    }
+
+    if (user.state !== 'ACTIVE') {
+      throw new UnauthorizedException('활동가능한 상태가 아닙니다.');
+    }
 
     return decodedToken;
   }

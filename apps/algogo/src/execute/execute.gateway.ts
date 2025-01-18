@@ -23,12 +23,14 @@ import { Cron } from '@nestjs/schedule';
 import { CustomLogger } from '../logger/custom-logger';
 import { RequestWsAuthDto } from './dto/RequestWsAuthDto';
 import { OnEvent } from '@nestjs/event-emitter';
+import { TokenExpiredError } from '@nestjs/jwt';
 
 class AuthSocket extends Socket {
   messageCount: number;
   userNo: string;
   token: string;
   lastRequestTime: number;
+  authErrorCount: number;
 }
 
 @WebSocketGateway()
@@ -51,10 +53,14 @@ export class ExecuteGateway {
 
     const timeout = setTimeout(async () => {
       await this.redisService.unsubscribe(socket.id);
+      socket.disconnect();
     }, 5000);
-    const isOk = await this.redisService.subscribe(socket.id);
+    const authResult = await this.redisService.subscribe(socket.id);
     clearTimeout(timeout);
-    if (!isOk) {
+
+    if (authResult === 'UNAUTHORIZED') {
+      this.logger.silly('disconnect');
+      socket.disconnect();
       return;
     }
 
@@ -98,34 +104,38 @@ export class ExecuteGateway {
     @MessageBody() requestWsAuthDto: RequestWsAuthDto,
     @ConnectedSocket() socket: AuthSocket,
   ) {
-    const { token } = requestWsAuthDto;
-    socket.token = token;
+    try {
+      const { token } = requestWsAuthDto;
+      socket.token = token;
 
-    const context = {
-      switchToWs: () => ({
-        getClient: () => socket,
-      }),
-    };
+      if (!socket.authErrorCount) {
+        socket.authErrorCount = 0;
+      }
 
-    const isOk = await this.wsAuthGurad.canActivate(
-      context as ExecutionContext,
-    );
+      const context = {
+        switchToWs: () => ({
+          getClient: () => socket,
+        }),
+      };
 
-    this.logger.silly('token', {
-      token,
-      isOk,
-    });
+      await this.wsAuthGurad.canActivate(context as ExecutionContext);
 
-    if (!isOk) {
-      this.logger.silly('아니 님아');
-      this.redisService.publish(socket.id, 'FAIL');
-      socket.disconnect();
+      this.logger.silly('token', {
+        token,
+      });
+
+      this.redisService.publish(socket.id, 'OK');
+      this.logger.silly('success auth');
+
+      socket.emit('auth', 'OK');
+    } catch (e) {
+      if (e instanceof TokenExpiredError) {
+        this.logger.silly('disconnect');
+        socket.emit('auth', 'UNAUTHORIZED');
+        this.redisService.publish(socket.id, 'UNAUTHORIZED');
+        socket.disconnect();
+      }
     }
-
-    this.redisService.publish(socket.id, 'OK');
-    this.logger.silly('success auth');
-
-    socket.emit('auth', 'OK');
   }
 
   @UsePipes(
@@ -159,7 +169,15 @@ export class ExecuteGateway {
       const response = await this.executeService.run(requestRunDto);
       return response;
     } catch (e) {
-      this.logger.error(e.message);
+      if (e instanceof TokenExpiredError) {
+        return {
+          code: '9999',
+          result: 'TOKEN_EXPIRED',
+          processTime: 0,
+          memory: 0,
+        };
+      }
+
       return {
         code: '9999',
         result: '예외 오류',

@@ -39,7 +39,7 @@ export class JwtService {
       return;
     } catch (error) {
       if (error instanceof TokenExpiredError) {
-        new UnauthorizedException(EXPIRRED_JWT_MESSAGE);
+        throw new UnauthorizedException(EXPIRRED_JWT_MESSAGE);
       }
     }
 
@@ -49,9 +49,9 @@ export class JwtService {
       });
     } catch (error) {
       if (error instanceof TokenExpiredError) {
-        new UnauthorizedException(EXPIRRED_JWT_MESSAGE);
+        throw new UnauthorizedException(EXPIRRED_JWT_MESSAGE);
       } else if (error instanceof JsonWebTokenError) {
-        new UnauthorizedException(INVALID_JWT_MESSAGE);
+        throw new UnauthorizedException(INVALID_JWT_MESSAGE);
       }
     }
   }
@@ -60,7 +60,7 @@ export class JwtService {
     try {
       return this.nestJwtService.decode(token);
     } catch (e) {
-      new UnauthorizedException(INVALID_JWT_MESSAGE);
+      throw new UnauthorizedException(INVALID_JWT_MESSAGE);
     }
   }
 }

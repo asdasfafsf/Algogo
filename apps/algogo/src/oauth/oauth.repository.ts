@@ -142,7 +142,6 @@ export class OauthRepository {
   }
 
   async disconnectOAuth(userNo: number, provider: OAuthProvider) {
-    console.log('??너는왜오류안남십탱아');
     await this.prismaService.userOAuth.updateMany({
       data: {
         isActive: false,

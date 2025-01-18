@@ -30,7 +30,7 @@ export class WsAuthGuard implements CanActivate {
       return true;
     } catch (e) {
       this.logger.silly('error', e);
-      return false;
+      throw e;
     }
   }
 
