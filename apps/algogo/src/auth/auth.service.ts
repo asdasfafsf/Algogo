@@ -18,6 +18,7 @@ import JwtConfig from '../config/jwtConfig';
 import { CustomLogger } from '../logger/custom-logger';
 import { AuthRepository } from './auth.repository';
 import { INVALID_JWT_MESSAGE } from '../common/constants/ErrorMessage';
+import { JwtInvalidTokenException } from '../jwt/errors/JwtInvalidTokenException';
 
 @Injectable()
 export class AuthService {
@@ -106,14 +107,14 @@ export class AuthService {
     this.logger.silly('decryptedToken', { decryptedToken });
 
     if (!decryptedToken) {
-      throw new UnauthorizedException(INVALID_JWT_MESSAGE);
+      throw new JwtInvalidTokenException();
     }
     await this.jwtService.verify(decryptedToken);
     const decodedToken = await this.jwtService.decode(decryptedToken);
 
     this.logger.silly('decodedToken', { decodedToken });
     if (!decodedToken.userNo) {
-      throw new UnauthorizedException(INVALID_JWT_MESSAGE);
+      throw new JwtInvalidTokenException();
     }
     this.logger.silly('start get USer');
 
