@@ -12,6 +12,7 @@ export class WsAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext) {
     try {
+      this.logger.silly('start auth wsguard');
       const client = context.switchToWs().getClient();
       const encryptedToken = this.extractTokenFromClient(client);
 
@@ -30,7 +31,7 @@ export class WsAuthGuard implements CanActivate {
       return true;
     } catch (e) {
       this.logger.silly('error', e);
-      return false;
+      throw e;
     }
   }
 

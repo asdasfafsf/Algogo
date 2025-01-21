@@ -18,6 +18,7 @@ import JwtConfig from '../config/jwtConfig';
 import { CustomLogger } from '../logger/custom-logger';
 import { AuthRepository } from './auth.repository';
 import { INVALID_JWT_MESSAGE } from '../common/constants/ErrorMessage';
+import { JwtInvalidTokenException } from '../jwt/errors/JwtInvalidTokenException';
 
 @Injectable()
 export class AuthService {
@@ -46,24 +47,9 @@ export class AuthService {
       );
     }
 
+    await this.redisService.set(`${uuid}`, refreshToken);
     await this.redisService.del(`login_${uuid}_access`);
     await this.redisService.del(`login_${uuid}_refresh`);
-
-    const decodedAccessToken = await this.jwtService.decode(accessToken);
-
-    this.redisService.set(
-      accessToken,
-      JSON.stringify(decodedAccessToken),
-      decodedAccessToken.exp - decodedAccessToken.iat,
-    );
-
-    const decodedRefreshToken = await this.jwtService.decode(refreshToken);
-
-    this.redisService.set(
-      `${decodedRefreshToken.userNo}_ref`,
-      refreshToken,
-      decodedRefreshToken.exp - decodedRefreshToken.iat,
-    );
 
     this.logger.silly('OAuthService getLoginToken Complete from redis', {});
 
@@ -96,8 +82,9 @@ export class AuthService {
 
     while (true) {
       const newUuid = await this.redisService.get(uuid);
+      const newToken = await this.redisService.get(`login_${uuid}_access`);
 
-      if (!newUuid) {
+      if (!newUuid && !newToken) {
         break;
       }
 
@@ -111,16 +98,6 @@ export class AuthService {
   }
 
   async decodeJwt(encryptedToken: string) {
-    const data = await this.redisService.get(encryptedToken);
-
-    if (data) {
-      return JSON.parse(data) as JwtToken;
-    }
-
-    this.logger.silly('encryptedToken', {
-      encryptedToken,
-    });
-
     const decryptedToken = this.cryptoService.decryptAES(
       this.encryptConfig.key,
       this.encryptConfig.iv,
@@ -130,15 +107,27 @@ export class AuthService {
     this.logger.silly('decryptedToken', { decryptedToken });
 
     if (!decryptedToken) {
-      throw new UnauthorizedException(INVALID_JWT_MESSAGE);
+      throw new JwtInvalidTokenException();
     }
+    await this.jwtService.verify(decryptedToken);
     const decodedToken = await this.jwtService.decode(decryptedToken);
 
+    this.logger.silly('decodedToken', { decodedToken });
     if (!decodedToken.userNo) {
-      throw new UnauthorizedException(INVALID_JWT_MESSAGE);
+      throw new JwtInvalidTokenException();
+    }
+    this.logger.silly('start get USer');
+
+    const user = await this.authRepository.getUser(decodedToken.userNo);
+
+    this.logger.silly('end get User');
+    if (!user) {
+      throw new NotFoundException('일치하는 회원이 없습니다.');
     }
 
-    await this.authRepository.getUser(decodedToken.userNo);
+    if (user.state !== 'ACTIVE') {
+      throw new UnauthorizedException('활동가능한 상태가 아닙니다.');
+    }
 
     return decodedToken;
   }
@@ -150,8 +139,10 @@ export class AuthService {
       token,
     );
     const decodedToken = await this.jwtService.decode(decryptedToken);
-    const { userNo } = decodedToken;
-    const savedToken = await this.redisService.get(`${userNo}_ref`);
+    const { uuid, userNo } = decodedToken;
+    const savedToken = await this.redisService.get(`${uuid}`);
+
+    await this.redisService.del(uuid);
 
     if (savedToken !== decryptedToken) {
       throw new ForbiddenException(
@@ -169,37 +160,31 @@ export class AuthService {
       throw new BadRequestException('활동가능한 상태가 아닙니다.');
     }
 
-    let uuid = await this.generateRandom(userNo.toString());
+    let newUuid = await this.generateRandom(userNo.toString());
     while (true) {
-      const newUuid = await this.redisService.get(uuid);
+      const tmpUuid = await this.redisService.get(newUuid);
 
-      if (!newUuid) {
+      if (!tmpUuid) {
         break;
       }
 
-      uuid = await this.generateRandom(userNo.toString());
+      newUuid = await this.generateRandom(userNo.toString());
     }
 
     const tmpUuid = await this.generateRandom(userNo.toString());
     const accessToken = await this.jwtService.sign(
-      { uuid, userNo },
+      { uuid: newUuid, userNo },
       this.jwtConfig.jwtAccessTokenExpiresIn,
     );
     const refreshToken = await this.jwtService.sign(
-      { userNo, uuid, tmpUuid },
+      { userNo, uuid: newUuid, tmpUuid },
       this.jwtConfig.jwtRefreshTokenExpiresIn,
     );
 
-    const decodedAccessToken = await this.jwtService.decode(accessToken);
     const decodedRefreshToken = await this.jwtService.decode(refreshToken);
 
     this.redisService.set(
-      accessToken,
-      JSON.stringify(decodedAccessToken),
-      decodedAccessToken.exp - decodedAccessToken.iat,
-    );
-    this.redisService.set(
-      `${userNo}_ref`,
+      newUuid,
       refreshToken,
       decodedRefreshToken.exp - decodedRefreshToken.iat,
     );

@@ -10,6 +10,7 @@ import {
   ExecutionContext,
   Inject,
   Injectable,
+  UseFilters,
   UseGuards,
   UsePipes,
   ValidationPipe,
@@ -23,12 +24,15 @@ import { Cron } from '@nestjs/schedule';
 import { CustomLogger } from '../logger/custom-logger';
 import { RequestWsAuthDto } from './dto/RequestWsAuthDto';
 import { OnEvent } from '@nestjs/event-emitter';
+import CustomHttpException from '../common/errors/CustomHttpException';
+import { ExecuteWsExceptionFilter } from './filter/execute-ws-exception.filter';
 
 class AuthSocket extends Socket {
   messageCount: number;
   userNo: string;
   token: string;
   lastRequestTime: number;
+  authErrorCount: number;
 }
 
 @WebSocketGateway()
@@ -51,12 +55,10 @@ export class ExecuteGateway {
 
     const timeout = setTimeout(async () => {
       await this.redisService.unsubscribe(socket.id);
+      socket.disconnect();
     }, 5000);
-    const isOk = await this.redisService.subscribe(socket.id);
+    await this.redisService.subscribe(socket.id);
     clearTimeout(timeout);
-    if (!isOk) {
-      return;
-    }
 
     this.logger.silly(`connected id : ${socket.id}`);
 
@@ -80,7 +82,7 @@ export class ExecuteGateway {
   }
 
   async handleDisconnect(socket: AuthSocket) {
-    this.logger.silly('disconnect');
+    this.logger.silly('handleDisConnect');
     const { userNo } = socket;
 
     const savedSocketId = await this.redisService.get(
@@ -98,34 +100,45 @@ export class ExecuteGateway {
     @MessageBody() requestWsAuthDto: RequestWsAuthDto,
     @ConnectedSocket() socket: AuthSocket,
   ) {
-    const { token } = requestWsAuthDto;
-    socket.token = token;
+    try {
+      this.logger.silly('requestWsAuthDto', requestWsAuthDto);
+      const { token } = requestWsAuthDto;
+      socket.token = token;
 
-    const context = {
-      switchToWs: () => ({
-        getClient: () => socket,
-      }),
-    };
+      const context = {
+        switchToWs: () => ({
+          getClient: () => socket,
+        }),
+      };
 
-    const isOk = await this.wsAuthGurad.canActivate(
-      context as ExecutionContext,
-    );
+      this.logger.silly('start auth');
+      await this.wsAuthGurad.canActivate(context as ExecutionContext);
+      this.logger.silly('auth success');
 
-    this.logger.silly('token', {
-      token,
-      isOk,
-    });
+      this.logger.silly('token', {
+        token,
+      });
 
-    if (!isOk) {
-      this.logger.silly('아니 님아');
-      this.redisService.publish(socket.id, 'FAIL');
-      socket.disconnect();
+      this.redisService.publish(socket.id, 'OK');
+      this.logger.silly('success auth');
+
+      socket.emit('auth', {
+        code: '0000',
+        result: '',
+      });
+    } catch (e) {
+      if (e instanceof CustomHttpException) {
+        const response = e.getResponse() as CustomError;
+        const { code, message } = response;
+        socket.emit('auth', {
+          code,
+          message,
+          result: '',
+        });
+        this.redisService.publish(socket.id, 'TOKEN_EXPIRED');
+        socket.disconnect();
+      }
     }
-
-    this.redisService.publish(socket.id, 'OK');
-    this.logger.silly('success auth');
-
-    socket.emit('auth', 'OK');
   }
 
   @UsePipes(
@@ -135,31 +148,32 @@ export class ExecuteGateway {
     }),
   )
   @UseGuards(WsAuthGuard)
+  @UseFilters(ExecuteWsExceptionFilter)
   @SubscribeMessage('execute')
   async handleExecute(
     @MessageBody() requestExecuteDto: any,
     @ConnectedSocket() socket: AuthSocket,
   ) {
-    if (socket.messageCount > 5) {
-      return {
-        code: '9999',
-        result: '동시 요청 허용 갯수를 초과하였습니다.',
-        processTime: 0,
-        memory: 0,
-      };
-    }
-
     const { id } = socket;
     const requestRunDto = { id, ...requestExecuteDto };
     socket.lastRequestTime = new Date().getTime();
-    socket.messageCount++;
     this.logger.silly('execute', requestRunDto);
 
     try {
       const response = await this.executeService.run(requestRunDto);
       return response;
     } catch (e) {
-      this.logger.error(e.message);
+      if (e instanceof CustomHttpException) {
+        const response = e.getResponse() as CustomError;
+        const { code, message } = response;
+        return {
+          code,
+          result: message,
+          processTime: 0,
+          memory: 0,
+        };
+      }
+
       return {
         code: '9999',
         result: '예외 오류',
@@ -167,7 +181,6 @@ export class ExecuteGateway {
         memory: 0,
       };
     } finally {
-      socket.messageCount--;
     }
   }
 
@@ -186,6 +199,7 @@ export class ExecuteGateway {
 
         if (socket) {
           if (currentDateTime - socket.lastRequestTime > 60 * 59) {
+            this.logger.silly('Clearing socket connection');
             socket.disconnect();
           }
         }

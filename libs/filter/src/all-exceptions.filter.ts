@@ -8,6 +8,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
+import CustomHttpException from 'apps/algogo/src/common/errors/CustomHttpException';
 import { Logger } from 'winston';
 
 @Injectable()
@@ -33,7 +34,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
     let errorMessage = '정의되지 않은 오류가 발생하였습니다.';
-    if (exception instanceof HttpException) {
+    let errorCode = '';
+    if (exception instanceof CustomHttpException) {
+      const customError = exception.getResponse() as CustomError;
+      errorCode = customError.code; 
+      errorMessage = customError.message;
+    } else if (exception instanceof HttpException) {
       const response = exception.getResponse();
       if (typeof response === 'object' && response['message']) {
         if (Array.isArray(response['message'])) {
@@ -62,17 +68,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
         errorMessage,
         headers: request.headers,
       });
-    } else {
-      this.logger.silly('error', {
-        ip: request.ip,
-        url: request.url,
-        errorMessage,
-      });
-    }
+    } 
 
     const responseBody = {
       statusCode,
-      errorCode: '',
+      errorCode,
       errorMessage,
     };
 
