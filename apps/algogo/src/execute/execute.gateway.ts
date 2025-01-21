@@ -57,9 +57,8 @@ export class ExecuteGateway {
       await this.redisService.unsubscribe(socket.id);
       socket.disconnect();
     }, 5000);
-    const authResult = await this.redisService.subscribe(socket.id);
+    await this.redisService.subscribe(socket.id);
     clearTimeout(timeout);
-
 
     this.logger.silly(`connected id : ${socket.id}`);
 
@@ -106,7 +105,6 @@ export class ExecuteGateway {
       const { token } = requestWsAuthDto;
       socket.token = token;
 
-
       const context = {
         switchToWs: () => ({
           getClient: () => socket,
@@ -150,7 +148,6 @@ export class ExecuteGateway {
     }),
   )
   @UseGuards(WsAuthGuard)
-
   @UseFilters(ExecuteWsExceptionFilter)
   @SubscribeMessage('execute')
   async handleExecute(
@@ -166,9 +163,8 @@ export class ExecuteGateway {
       const response = await this.executeService.run(requestRunDto);
       return response;
     } catch (e) {
-
       if (e instanceof CustomHttpException) {
-        const response = e.getResponse() as CustomError;;
+        const response = e.getResponse() as CustomError;
         const { code, message } = response;
         return {
           code,
@@ -203,6 +199,7 @@ export class ExecuteGateway {
 
         if (socket) {
           if (currentDateTime - socket.lastRequestTime > 60 * 59) {
+            this.logger.silly('Clearing socket connection');
             socket.disconnect();
           }
         }
