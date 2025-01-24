@@ -1,4 +1,4 @@
 type CustomError = {
-    code: string;
-    message: string;
-}
+  code: string;
+  message: string;
+};

@@ -52,6 +52,10 @@ export class MeService {
 
     const me = await this.meRepository.updateMe(updateMeDto);
 
+    if (file) {
+      await this.s3Service.removeObject(me.profilePhoto);
+    }
+
     return {
       ...me,
       socialList: me.socialList.map(({ provider, content }) => ({
