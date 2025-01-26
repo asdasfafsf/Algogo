@@ -37,7 +37,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     let errorCode = '';
     if (exception instanceof CustomHttpException) {
       const customError = exception.getResponse() as CustomError;
-      errorCode = customError.code; 
+      errorCode = customError.code;
       errorMessage = customError.message;
     } else if (exception instanceof HttpException) {
       const response = exception.getResponse();
@@ -68,7 +68,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         errorMessage,
         headers: request.headers,
       });
-    } 
+    }
 
     const responseBody = {
       statusCode,
