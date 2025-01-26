@@ -90,6 +90,14 @@ erDiagram
   DateTime createdAt
   ProblemReportState state
 }
+"ProblemCollectionLog" {
+  Int PROBLEM_COLLECTION_LOG_NO PK
+  Int USER_NO FK
+  DateTime PROBLEM_COLLECTION_LOG_CREATED_AT
+  String PROBLEM_COLLECTION_LOG_URL
+  String PROBLEM_COLLECTION_LOG_STATE
+  String PROBLEM_COLLECTION_LOG_CAUSE "nullable"
+}
 "USER_OAUTH" }o--|| "USER" : User
 "USER_SOCIAL" }o--|| "USER" : User
 "PROBLEM_CONTENT" }o--|| "PROBLEM" : Problem
@@ -99,6 +107,7 @@ erDiagram
 "USER_PROBLEM_STATE" }o--|| "PROBLEM" : Problem
 "ProblemReport" }o--|| "USER" : User
 "ProblemReport" }o--|| "PROBLEM" : Problem
+"ProblemCollectionLog" }o--|| "USER" : User
 ```
 
 ### `USER`
@@ -202,3 +211,13 @@ erDiagram
   - `PROBLEM_REPORT_CONTENT`: 
   - `createdAt`: 
   - `state`: 
+
+### `ProblemCollectionLog`
+
+**Properties**
+  - `PROBLEM_COLLECTION_LOG_NO`: 
+  - `USER_NO`: 
+  - `PROBLEM_COLLECTION_LOG_CREATED_AT`: 
+  - `PROBLEM_COLLECTION_LOG_URL`: 
+  - `PROBLEM_COLLECTION_LOG_STATE`: 
+  - `PROBLEM_COLLECTION_LOG_CAUSE`: 

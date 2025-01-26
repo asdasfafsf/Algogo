@@ -31,8 +31,8 @@ model User {
     socialList       UserSocial[]       @relation("UserToUserSocial")
     oauthList        UserOAuth[]        @relation("UserToUserOauth")
     problemStateList UserProblemState[] @relation("UserToUserProblemState")
-    ProblemReport    ProblemReport[]    @relation("UserToProblemReport")
-
+    problemReportList    ProblemReport[]    @relation("UserToProblemReport")
+    problemCollectionLogList ProblemCollectionLog[] @relation("UserToProblemCollectionLog")
     @@map("USER")
 }
 
@@ -95,7 +95,8 @@ model Problem {
     contentList     ProblemContent[]     @relation("ProblemToProblemContent")
     inputOutputList ProblemInputOutput[] @relation("ProblemToProblemInputOutput")
     userList        UserProblemState[]   @relation("ProblemToUserProblemState")
-    ProblemReport   ProblemReport[]      @relation("ProblemToProblemReport")
+    problemReportList   ProblemReport[]      @relation("ProblemToProblemReport")
+
 
     @@unique([source, sourceId])
     @@index([source, sourceId])
@@ -126,8 +127,8 @@ model ProblemType {
 
 model ProblemInputOutput {
     order     Int     @map("PROBLEM_INPUT_OUTPUT_ORDER")
-    input     String  @map("PROBLEM_INPUT") @db.VarChar(600)
-    output    String  @map("PROBLEM_OUTPUT") @db.VarChar(600)
+    input     String  @map("PROBLEM_INPUT") @db.VarChar(1000)
+    output    String  @map("PROBLEM_OUTPUT") @db.VarChar(1000)
     Problem   Problem @relation("ProblemToProblemInputOutput", fields: [problemNo], references: [no], onUpdate: Cascade, onDelete: Cascade)
     problemNo Int     @map("PROBLEM_NO")
 
@@ -173,4 +174,19 @@ enum ProblemReportState {
     PROGRESS
     RESOLVED
     REJECT
+}
+
+
+model ProblemCollectionLog {
+    no Int @id @default(autoincrement()) @map("PROBLEM_COLLECTION_LOG_NO")
+    userNo Int @map("USER_NO") 
+    createdAt DateTime @default(now()) @map("PROBLEM_COLLECTION_LOG_CREATED_AT")
+    url String @db.VarChar(600) @map("PROBLEM_COLLECTION_LOG_URL")
+    state String @map("PROBLEM_COLLECTION_LOG_STATE")
+    cause String? @map("PROBLEM_COLLECTION_LOG_CAUSE")
+    User User @relation("UserToProblemCollectionLog", fields: [userNo], references: [no])
+
+
+    @@index([createdAt])
+    @@index([userNo, createdAt])
 }

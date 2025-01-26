@@ -1,9 +1,10 @@
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { ApiBadRequestErrorResponse } from "../common/decorators/swagger/ApiBadRequestErrorResponse";
-import { Body, Controller, HttpStatus, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, HttpStatus, Post, Req, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "../auth/auth.guard";
 import { RequestProblemCollectDto } from "./dto/RequestProblemCollectDto";
 import { ApiGlobalErrorResponses } from "../common/decorators/swagger/ApiGlobalErrorResponse";
+import { ProblemsCollectService } from "./problems-collect.service";
 
 @ApiTags('문제 수집 관련 API')
 @ApiBearerAuth()
@@ -12,7 +13,7 @@ import { ApiGlobalErrorResponses } from "../common/decorators/swagger/ApiGlobalE
 @UseGuards(AuthGuard)
 @Controller('api/v1/problems/collect')
 export class ProblemsCollectController {
-    constructor() {
+    constructor(private readonly problemsCollectService: ProblemsCollectService) {
 
     }
 
@@ -69,8 +70,14 @@ export class ProblemsCollectController {
       },
     })
     @Post('/')
-    async collectProblem(@Body()requestProblemCollectDto: RequestProblemCollectDto) {
-
-      return '';
+    async collectProblem(@Body()requestProblemCollectDto: RequestProblemCollectDto, @Req() req: AuthRequest) {
+      const { url } = requestProblemCollectDto;
+      const { userNo } = req;
+      
+      const uuid = await this.problemsCollectService.collect({
+        url,
+        userNo
+      });
+      return uuid;
     }
 }
