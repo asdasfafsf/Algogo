@@ -42,7 +42,7 @@ export class S3Service {
   async removeObject(Key: string) {
     const command = new DeleteObjectCommand({
       Bucket: this.config.bucketName,
-      Key,
+      Key: Key.replace(this.config.endpoint, ''),
     });
 
     await this.s3Client.send(command);
