@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ResponseProblemDto } from '@libs/core/dto/ResponseProblemDto';
+import { Prisma } from '@prisma/client';
 @Injectable()
 export class ProblemsCollectRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async upsertProblem(data: ResponseProblemDto, tx?: PrismaService) {
+  async upsertProblem(data: ResponseProblemDto, tx?: Prisma.TransactionClient) {
     return await (tx ?? this.prismaService).problem.upsert({
       where: {
         source_sourceId: {
@@ -74,9 +75,26 @@ export class ProblemsCollectRepository {
     });
   }
 
+  async getProblem({source, sourceId}: {source: string, sourceId: string}, tx?: Prisma.TransactionClient) {
+    const problem = await (tx ?? this.prismaService).problem.findUnique({
+        select: {
+            updatedAt: true
+        },
+        where: {
+            source_sourceId: {
+                source,
+                sourceId
+            }
+        }
+    });
+
+    return problem;
+  }
+
+
   async insertCollectionLog(
     log: { userNo: number; url: string; state: string; cause?: string },
-    tx?: PrismaService,
+    tx?: Prisma.TransactionClient,
   ) {
     const { userNo, url, state, cause } = log;
     await (tx ?? this.prismaService).problemCollectionLog.create({

@@ -7,6 +7,7 @@ import { CrawlerService } from '../crawler/crawler.service';
 import { ResponseProblemContent } from '@libs/core/dto/ResponseProblemContent';
 import { ImageService } from '../image/image.service';
 import { S3Service } from '../s3/s3.service';
+import { TooManyProblemsCollectException } from './errors/ToManyProblemsCollectException';
 @Injectable()
 export class ProblemsCollectService {
   constructor(
@@ -22,30 +23,34 @@ export class ProblemsCollectService {
       `problemCollectCount_${userNo}`,
     );
     if (requestCount && Number(requestCount) >= 10) {
-      throw new ProblemUpdateLimitException();
+      throw new TooManyProblemsCollectException();
     }
 
-    const now = new Date();
-    const midnight = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate() + 1,
-    );
-    const secondsUntilMidnight = Math.floor(
-      (midnight.getTime() - now.getTime()) / 1000,
-    );
 
     await this.redisService.set(
       `problemCollectCount_${userNo}`,
       (Number(requestCount || 0) + 1).toString(),
-      secondsUntilMidnight,
+      this.getSecondsUntilMidnight(),
     );
 
-    const { site, sourceId } = this.parse(url);
-    const result = await this.crawlerService.getProblem(site, sourceId);
+    const { source, sourceId } = this.parse(url);
+
+    const oldProblem = await this.problemsCollectRepository.getProblem({source, sourceId});
+
+    if (oldProblem) {
+        const now = new Date();
+        const updatedAt = oldProblem.updatedAt;
+
+        if (now.getDate() === updatedAt.getDate()) {
+            throw new ProblemUpdateLimitException();
+        }
+    }
+
+
+    const result = await this.crawlerService.getProblem(source, sourceId);
     const contentList = await this.postProcess(
       result.data.contentList,
-      site,
+      source,
       sourceId,
     );
 
@@ -63,11 +68,25 @@ export class ProblemsCollectService {
     return problem.uuid;
   }
 
+  private getSecondsUntilMidnight() {
+    const now = new Date();
+    const midnight = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + 1,
+    );
+    const secondsUntilMidnight = Math.floor(
+      (midnight.getTime() - now.getTime()) / 1000,
+    );
+
+    return secondsUntilMidnight;
+  }
+
   private parse(url: string) {
     if (url.includes('https://www.acmicpc.net/problem/')) {
       const sourceId = url.split('problem/')[1].split('/')[0].trim();
 
-      return { site: 'BOJ', sourceId };
+      return { source: 'BOJ', sourceId };
     }
 
     throw new ProblemSiteNotFoundException();
