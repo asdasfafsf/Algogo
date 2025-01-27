@@ -10,7 +10,7 @@ import { S3Service } from '../s3/s3.service';
 @Injectable()
 export class ProblemsCollectService {
   constructor(
-    private readonly ProblemsCollectRepository: ProblemsCollectRepository,
+    private readonly problemsCollectRepository: ProblemsCollectRepository,
     private readonly redisService: RedisService,
     private readonly crawlerService: CrawlerService,
     private readonly imageService: ImageService,
@@ -49,12 +49,18 @@ export class ProblemsCollectService {
       sourceId,
     );
 
-    await this.ProblemsCollectRepository.upsertProblem({
+    const problem = await this.problemsCollectRepository.upsertProblem({
       ...result.data,
       contentList,
     });
+    await this.problemsCollectRepository.insertCollectionLog({
+      userNo,
+      url,
+      state: '0',
+      cause: '',
+    });
 
-    return '';
+    return problem.uuid;
   }
 
   private parse(url: string) {

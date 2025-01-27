@@ -6,7 +6,7 @@ export class ProblemsCollectRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
   async upsertProblem(data: ResponseProblemDto, tx?: PrismaService) {
-    await (tx ?? this.prismaService).problem.upsert({
+    return await (tx ?? this.prismaService).problem.upsert({
       where: {
         source_sourceId: {
           sourceId: data.sourceId,
@@ -74,5 +74,21 @@ export class ProblemsCollectRepository {
     });
   }
 
-  async insertCollectionLog(log, tx?: PrismaService) {}
+  async insertCollectionLog(
+    log: { userNo: number; url: string; state: string; cause?: string },
+    tx?: PrismaService,
+  ) {
+    const { userNo, url, state, cause } = log;
+    await (tx ?? this.prismaService).problemCollectionLog.create({
+      select: {
+        state: true,
+      },
+      data: {
+        userNo,
+        url,
+        state,
+        cause,
+      },
+    });
+  }
 }
