@@ -28,11 +28,12 @@ model User {
     updatedAt DateTime @default(now()) @map("USER_UPDATED_AT")
     loginedAt DateTime @default(now()) @map("USER_LOGINED_AT")
 
-    socialList       UserSocial[]       @relation("UserToUserSocial")
-    oauthList        UserOAuth[]        @relation("UserToUserOauth")
-    problemStateList UserProblemState[] @relation("UserToUserProblemState")
-    problemReportList    ProblemReport[]    @relation("UserToProblemReport")
+    socialList               UserSocial[]           @relation("UserToUserSocial")
+    oauthList                UserOAuth[]            @relation("UserToUserOauth")
+    problemStateList         UserProblemState[]     @relation("UserToUserProblemState")
+    problemReportList        ProblemReport[]        @relation("UserToProblemReport")
     problemCollectionLogList ProblemCollectionLog[] @relation("UserToProblemCollectionLog")
+
     @@map("USER")
 }
 
@@ -91,12 +92,11 @@ model Problem {
     createdAt DateTime @default(now()) @map("PROBLEM_CREATED_AT")
     updatedAt DateTime @default(now()) @map("PROBLEM_UPDATED_AT")
 
-    typeList        ProblemType[]        @relation("ProblemToProblemType")
-    contentList     ProblemContent[]     @relation("ProblemToProblemContent")
-    inputOutputList ProblemInputOutput[] @relation("ProblemToProblemInputOutput")
-    userList        UserProblemState[]   @relation("ProblemToUserProblemState")
-    problemReportList   ProblemReport[]      @relation("ProblemToProblemReport")
-
+    typeList          ProblemType[]        @relation("ProblemToProblemType")
+    contentList       ProblemContent[]     @relation("ProblemToProblemContent")
+    inputOutputList   ProblemInputOutput[] @relation("ProblemToProblemInputOutput")
+    userList          UserProblemState[]   @relation("ProblemToUserProblemState")
+    problemReportList ProblemReport[]      @relation("ProblemToProblemReport")
 
     @@unique([source, sourceId])
     @@index([source, sourceId])
@@ -176,16 +176,14 @@ enum ProblemReportState {
     REJECT
 }
 
-
 model ProblemCollectionLog {
-    no Int @id @default(autoincrement()) @map("PROBLEM_COLLECTION_LOG_NO")
-    userNo Int @map("USER_NO") 
+    no        Int      @id @default(autoincrement()) @map("PROBLEM_COLLECTION_LOG_NO")
+    userNo    Int      @map("USER_NO")
     createdAt DateTime @default(now()) @map("PROBLEM_COLLECTION_LOG_CREATED_AT")
-    url String @db.VarChar(600) @map("PROBLEM_COLLECTION_LOG_URL")
-    state String @map("PROBLEM_COLLECTION_LOG_STATE")
-    cause String? @map("PROBLEM_COLLECTION_LOG_CAUSE")
-    User User @relation("UserToProblemCollectionLog", fields: [userNo], references: [no])
-
+    url       String   @map("PROBLEM_COLLECTION_LOG_URL") @db.VarChar(600)
+    state     String   @map("PROBLEM_COLLECTION_LOG_STATE")
+    cause     String?  @map("PROBLEM_COLLECTION_LOG_CAUSE")
+    User      User     @relation("UserToProblemCollectionLog", fields: [userNo], references: [no])
 
     @@index([createdAt])
     @@index([userNo, createdAt])
