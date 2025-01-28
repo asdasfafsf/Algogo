@@ -8,7 +8,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
-import CustomHttpException from 'apps/algogo/src/common/errors/CustomHttpException';
+import { CustomHttpException } from 'apps/algogo/src/common/errors/CustomHttpException';
 import { Logger } from 'winston';
 
 @Injectable()
