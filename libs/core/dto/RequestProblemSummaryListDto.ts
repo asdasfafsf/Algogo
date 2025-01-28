@@ -27,7 +27,14 @@ export class RequestProblemSummaryListDto {
   })
   pageSize?: number = 10;
 
-  @IsOptional() // levelList가 선택 항목이 되도록 추가
+  @IsOptional()
+  @ApiProperty({
+    description: '문제 이름으로 검색할 때 필요한 파라미터',
+    required: false,
+  })
+  title?: string;
+
+  @IsOptional()
   @Transform(({ value }) => (Array.isArray(value) ? value.map(Number) : []))
   @ApiProperty({
     description: '해당하는 난이도에 대한 문제를 가져옴',
@@ -38,7 +45,7 @@ export class RequestProblemSummaryListDto {
   })
   levelList?: number[];
 
-  @IsOptional() // typeList가 선택 항목이 되도록 추가
+  @IsOptional()
   @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
   @ApiProperty({
     description: '해당하는 문제 유형에 대한 문제를 가져옴',
@@ -48,7 +55,15 @@ export class RequestProblemSummaryListDto {
   })
   @IsIn(Object.values(ProblemType), {
     message: '올바른 문제 유형이 아닙니다',
-    each: true, // 배열 내 각각의 값에 대해 검사
+    each: true,
   })
   typeList?: ProblemType[];
+
+  @IsOptional()
+  @ApiProperty({
+    description: '문제 이름으로 검색할지 조건으로 검색할지 필터',
+    default: 0,
+    required: false,
+  })
+  filter: 0 | 1 = 0;
 }

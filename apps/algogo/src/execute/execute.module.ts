@@ -7,6 +7,8 @@ import { ConfigModule, ConfigType } from '@nestjs/config';
 import bullmqConfig from '../config/bullmqConfig';
 import { ExecuteGateway } from './execute.gateway';
 import { ScheduleModule } from '@nestjs/schedule';
+import { CryptoModule } from '../crypto/crypto.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -28,8 +30,19 @@ import { ScheduleModule } from '@nestjs/schedule';
         },
       }),
     }),
+    BullModule.registerFlowProducerAsync({
+      inject: [bullmqConfig.KEY],
+      useFactory: (config: ConfigType<typeof bullmqConfig>) => ({
+        name: config.queueName,
+        connection: {
+          ...config,
+        },
+      }),
+    }),
     ScheduleModule.forRoot(),
+    CryptoModule,
     AuthModule,
+    EventEmitterModule.forRoot(),
   ],
   controllers: [ExecuteController],
   providers: [ExecuteService, ExecuteGateway],

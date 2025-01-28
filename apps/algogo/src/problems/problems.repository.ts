@@ -1,18 +1,56 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProblemType } from '../common/enums/ProblemTypeEnum';
+import { ProblemSort } from './enum/ProblemSortEnum';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ProblemsRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
+  private getProblemOrderBy(
+    sort: ProblemSort,
+  ):
+    | Prisma.ProblemOrderByWithRelationInput
+    | Prisma.ProblemOrderByWithRelationInput[] {
+    const orderBy = [];
+
+    if (sort === ProblemSort.ANSWER_RATE_ASC) {
+      orderBy.push({
+        answerCount: 'asc',
+      });
+    } else if (sort === ProblemSort.ANSWER_RATE_DESC) {
+      orderBy.push({
+        answerCount: 'desc',
+      });
+    } else if (sort === ProblemSort.LEVEL_ASC) {
+      orderBy.push({
+        level: 'asc',
+      });
+    } else if (sort === ProblemSort.LEVEL_DESC) {
+      orderBy.push({
+        level: 'desc',
+      });
+    } else if (sort === ProblemSort.SUBMIT_COUNT_ASC) {
+      orderBy.push({
+        submitCount: 'asc',
+      });
+    } else if (sort === ProblemSort.SUBMIT_COUNT_DESC) {
+      orderBy.push({
+        submitCount: 'desc',
+      });
+    }
+
+    return orderBy;
+  }
   async getProblemList(
     pageNo: number,
     pageSize: number,
+    sort: ProblemSort,
     levelList?: number[],
     typeList?: ProblemType[],
+    title?: string,
   ) {
-    // 전체 문제 수를 계산
     const totalCount = await this.prismaService.problem.count({
       where: {
         ...(typeList && typeList.length > 0
@@ -24,7 +62,8 @@ export class ProblemsRepository {
       },
     });
 
-    // 문제 요약 리스트를 가져옴
+    const orderBy = this.getProblemOrderBy(sort);
+
     const problemSummaryList = await this.prismaService.problem.findMany({
       select: {
         no: false,
@@ -42,6 +81,7 @@ export class ProblemsRepository {
         typeList: true,
       },
       where: {
+        ...(title ? { title: { contains: title } } : null),
         ...(typeList && typeList.length > 0
           ? { typeList: { some: { name: { in: typeList } } } }
           : {}),
@@ -49,11 +89,61 @@ export class ProblemsRepository {
           ? { level: { in: levelList } }
           : {}),
       },
+      orderBy,
       skip: (pageNo - 1) * pageSize,
       take: pageSize,
     });
 
-    // 문제 목록과 페이지 관련 정보를 반환
+    return {
+      problemList: problemSummaryList,
+      totalCount,
+      pageSize,
+      pageNo,
+    };
+  }
+
+  async getProblemListFromTitle(
+    pageNo: number,
+    pageSize: number,
+    sort: ProblemSort,
+    title: string,
+  ) {
+    const totalCount = await this.prismaService.problem.count({
+      where: {
+        title: {
+          contains: title,
+        },
+      },
+    });
+
+    const orderBy = this.getProblemOrderBy(sort);
+
+    const problemSummaryList = await this.prismaService.problem.findMany({
+      select: {
+        no: false,
+        uuid: true,
+        title: true,
+        levelText: true,
+        answerCount: true,
+        submitCount: true,
+        answerRate: true,
+        answerPeopleCount: true,
+        source: true,
+        sourceId: true,
+        sourceUrl: true,
+        level: true,
+        typeList: true,
+      },
+      where: {
+        title: {
+          contains: title,
+        },
+      },
+      orderBy,
+      skip: (pageNo - 1) * pageSize,
+      take: pageSize,
+    });
+
     return {
       problemList: problemSummaryList,
       totalCount,

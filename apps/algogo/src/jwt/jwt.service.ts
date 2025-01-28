@@ -1,4 +1,4 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   JsonWebTokenError,
   JwtService as NestJwtService,
@@ -6,10 +6,8 @@ import {
 } from '@nestjs/jwt';
 import jwtConfig from '../config/jwtConfig';
 import { ConfigType } from '@nestjs/config';
-import {
-  EXPIRRED_JWT_MESSAGE,
-  INVALID_JWT_MESSAGE,
-} from '../common/constants/ErrorMessage';
+import { JwtTokenExpiredException } from './errors/JwtTokenExpiredException';
+import { JwtInvalidTokenException } from './errors/JwtInvalidTokenException';
 
 @Injectable()
 export class JwtService {
@@ -19,23 +17,27 @@ export class JwtService {
     private readonly config: ConfigType<typeof jwtConfig>,
   ) {}
 
-  async sign(payload: any, expiresIn?: number) {
+  async sign(
+    payload: any,
+    expiresIn?: number,
+    secret: string = this.config.jwtSecret,
+  ) {
     return await this.nestJwtService.signAsync(payload, {
-      secret: this.config.jwtSecret,
+      secret,
       expiresIn,
     });
   }
 
-  async verify(token: string) {
+  async verify(token: string, secret: string = this.config.jwtSecret) {
     try {
       await this.nestJwtService.verifyAsync(token, {
-        secret: this.config.jwtSecret,
+        secret,
       });
 
       return;
     } catch (error) {
       if (error instanceof TokenExpiredError) {
-        new UnauthorizedException(EXPIRRED_JWT_MESSAGE);
+        throw new JwtTokenExpiredException();
       }
     }
 
@@ -45,18 +47,18 @@ export class JwtService {
       });
     } catch (error) {
       if (error instanceof TokenExpiredError) {
-        new UnauthorizedException(EXPIRRED_JWT_MESSAGE);
+        throw new JwtTokenExpiredException();
       } else if (error instanceof JsonWebTokenError) {
-        new UnauthorizedException(INVALID_JWT_MESSAGE);
+        throw new JwtInvalidTokenException();
       }
     }
   }
 
-  async decode(token: string) {
+  async decode(token: string): Promise<JwtToken> {
     try {
       return this.nestJwtService.decode(token);
     } catch (e) {
-      new UnauthorizedException(INVALID_JWT_MESSAGE);
+      throw new JwtInvalidTokenException();
     }
   }
 }

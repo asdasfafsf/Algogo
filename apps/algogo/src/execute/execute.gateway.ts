@@ -6,12 +6,11 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { ExecuteService } from './execute.service';
-import { RequestExecuteDto } from '@libs/core/dto/RequestExecuteDto';
 import {
-  BadRequestException,
-  HttpStatus,
+  ExecutionContext,
   Inject,
   Injectable,
+  UseFilters,
   UseGuards,
   UsePipes,
   ValidationPipe,
@@ -23,11 +22,17 @@ import WsConfig from '../config/wsConfig';
 import { ConfigType } from '@nestjs/config';
 import { Cron } from '@nestjs/schedule';
 import { CustomLogger } from '../logger/custom-logger';
+import { RequestWsAuthDto } from './dto/RequestWsAuthDto';
+import { OnEvent } from '@nestjs/event-emitter';
+import CustomHttpException from '../common/errors/CustomHttpException';
+import { ExecuteWsExceptionFilter } from './filter/execute-ws-exception.filter';
 
 class AuthSocket extends Socket {
   messageCount: number;
   userNo: string;
+  token: string;
   lastRequestTime: number;
+  authErrorCount: number;
 }
 
 @WebSocketGateway()
@@ -46,14 +51,14 @@ export class ExecuteGateway {
   private server: Server;
 
   async handleConnection(socket: AuthSocket) {
-    this.logger.silly('start connection');
+    this.logger.silly(`start connection socket id : ${socket.id}`);
 
-    const context = { switchToWs: () => ({ getClient: () => socket }) };
-    const isAuthorized = await this.wsAuthGurad.canActivate(context as any);
-    if (!isAuthorized) {
+    const timeout = setTimeout(async () => {
+      await this.redisService.unsubscribe(socket.id);
       socket.disconnect();
-      return;
-    }
+    }, 5000);
+    await this.redisService.subscribe(socket.id);
+    clearTimeout(timeout);
 
     this.logger.silly(`connected id : ${socket.id}`);
 
@@ -77,7 +82,7 @@ export class ExecuteGateway {
   }
 
   async handleDisconnect(socket: AuthSocket) {
-    this.logger.silly('disconnect');
+    this.logger.silly('handleDisConnect');
     const { userNo } = socket;
 
     const savedSocketId = await this.redisService.get(
@@ -90,6 +95,52 @@ export class ExecuteGateway {
     }
   }
 
+  @SubscribeMessage('auth')
+  async handleAuth(
+    @MessageBody() requestWsAuthDto: RequestWsAuthDto,
+    @ConnectedSocket() socket: AuthSocket,
+  ) {
+    try {
+      this.logger.silly('requestWsAuthDto', requestWsAuthDto);
+      const { token } = requestWsAuthDto;
+      socket.token = token;
+
+      const context = {
+        switchToWs: () => ({
+          getClient: () => socket,
+        }),
+      };
+
+      this.logger.silly('start auth');
+      await this.wsAuthGurad.canActivate(context as ExecutionContext);
+      this.logger.silly('auth success');
+
+      this.logger.silly('token', {
+        token,
+      });
+
+      this.redisService.publish(socket.id, 'OK');
+      this.logger.silly('success auth');
+
+      socket.emit('auth', {
+        code: '0000',
+        result: '',
+      });
+    } catch (e) {
+      if (e instanceof CustomHttpException) {
+        const response = e.getResponse() as CustomError;
+        const { code, message } = response;
+        socket.emit('auth', {
+          code,
+          message,
+          result: '',
+        });
+        this.redisService.publish(socket.id, 'TOKEN_EXPIRED');
+        socket.disconnect();
+      }
+    }
+  }
+
   @UsePipes(
     new ValidationPipe({
       transform: true,
@@ -97,51 +148,39 @@ export class ExecuteGateway {
     }),
   )
   @UseGuards(WsAuthGuard)
+  @UseFilters(ExecuteWsExceptionFilter)
   @SubscribeMessage('execute')
   async handleExecute(
-    @MessageBody() requestExecuteDto: RequestExecuteDto,
+    @MessageBody() requestExecuteDto: any,
     @ConnectedSocket() socket: AuthSocket,
   ) {
-    socket.messageCount++;
-    const { messageCount } = socket;
-    const { seq } = requestExecuteDto;
-
-    if (messageCount >= 1) {
-      socket.messageCount--;
-      return {
-        seq,
-        status: HttpStatus.BAD_REQUEST,
-        message: '동시요청 제한 횟수를 초과하였습니다.',
-        data: '',
-      };
-    }
+    const { id } = socket;
+    const requestRunDto = { id, ...requestExecuteDto };
+    socket.lastRequestTime = new Date().getTime();
+    this.logger.silly('execute', requestRunDto);
 
     try {
-      socket.lastRequestTime = Math.floor(new Date().getTime() / 1000);
-      const response = await this.executeService.execute(requestExecuteDto);
-      socket.messageCount--;
-      return {
-        seq,
-        status: HttpStatus.OK,
-        message: '',
-        data: response,
-      };
+      const response = await this.executeService.run(requestRunDto);
+      return response;
     } catch (e) {
-      socket.messageCount--;
-      if (e instanceof BadRequestException) {
+      if (e instanceof CustomHttpException) {
+        const response = e.getResponse() as CustomError;
+        const { code, message } = response;
         return {
-          seq,
-          status: HttpStatus.BAD_REQUEST,
-          message: e.message,
-          data: '',
+          code,
+          result: message,
+          processTime: 0,
+          memory: 0,
         };
       }
+
       return {
-        seq,
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: '예외 오류',
-        data: '',
+        code: '9999',
+        result: '예외 오류',
+        processTime: 0,
+        memory: 0,
       };
+    } finally {
     }
   }
 
@@ -160,10 +199,18 @@ export class ExecuteGateway {
 
         if (socket) {
           if (currentDateTime - socket.lastRequestTime > 60 * 59) {
+            this.logger.silly('Clearing socket connection');
             socket.disconnect();
           }
         }
       }
     }
+  }
+
+  @OnEvent('execute')
+  async subscribeExecute(payload: any) {
+    this.logger.silly('execute result', payload);
+    const { id } = payload;
+    this.server.to(id).emit('executeResult', { ...payload, id: undefined });
   }
 }

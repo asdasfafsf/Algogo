@@ -1,23 +1,108 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { RequestOAuthDto } from '@libs/core/dto/RequestOAuthDto';
+import { RequestOAuthDto } from './dto/RequestOAuthDto';
+import { OAuthProvider } from '../common/enums/OAuthProviderEnum';
+import { RequestOAuthConnectDto } from './dto/RequestOAuthConnectDto';
 
 @Injectable()
 export class OauthRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async getUserOAuth(id: string, provider: 'google' | 'github' | 'kakao') {
-    return await this.prismaService.userOAuth.findUnique({
+  async getOAuthList(id: string, provider: string) {
+    return await this.prismaService.userOAuth.findMany({
+      select: {
+        userNo: true,
+        isActive: true,
+      },
+      where: {
+        id,
+        provider,
+      },
+    });
+  }
+
+  async getOAuth(id: string, provider: OAuthProvider, isActive?: boolean) {
+    return await this.prismaService.userOAuth.findFirst({
       select: {
         userNo: true,
       },
       where: {
-        id_provider: {
+        id,
+        provider,
+        isActive,
+      },
+      orderBy: {
+        updatedAt: 'desc',
+      },
+    });
+  }
+
+  async getUserOAuth(
+    userNo: number,
+    provider: OAuthProvider,
+    isActive?: boolean,
+  ) {
+    return await this.prismaService.userOAuth.findFirst({
+      select: {
+        userNo: true,
+        isActive,
+      },
+      where: {
+        userNo,
+        provider,
+      },
+    });
+  }
+
+  async updateUserOAuth(
+    userNo: number,
+    id: string,
+    provider: OAuthProvider,
+    isActive: boolean,
+  ) {
+    return await this.prismaService.userOAuth.update({
+      select: {
+        userNo: true,
+      },
+      data: {
+        isActive,
+        updatedAt: new Date(),
+      },
+      where: {
+        userNo_id_provider: {
+          userNo,
           id,
           provider,
         },
       },
     });
+  }
+
+  async addOAuthProvider(requestOAuthConnectDto: RequestOAuthConnectDto) {
+    const { userNo, provider, id } = requestOAuthConnectDto;
+
+    const upsertedUserOAuth = await this.prismaService.userOAuth.upsert({
+      select: { userNo: true },
+      where: {
+        userNo_id_provider: {
+          userNo,
+          id,
+          provider,
+        },
+      },
+      update: {
+        id,
+        isActive: true,
+      },
+      create: {
+        id,
+        provider,
+        userNo,
+        isActive: true,
+      },
+    });
+
+    return upsertedUserOAuth;
   }
 
   async insertUser(requestOAuthDto: RequestOAuthDto) {
@@ -33,6 +118,8 @@ export class OauthRepository {
           emailVerified: false,
           profilePhoto: '',
           lastLoginDate: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
       });
 
@@ -43,6 +130,8 @@ export class OauthRepository {
           id,
           userNo: no,
           provider,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
       });
 
@@ -50,5 +139,19 @@ export class OauthRepository {
     });
 
     return user;
+  }
+
+  async disconnectOAuth(userNo: number, provider: OAuthProvider) {
+    await this.prismaService.userOAuth.updateMany({
+      data: {
+        isActive: false,
+        updatedAt: new Date(),
+      },
+      where: {
+        userNo: userNo,
+        provider: provider,
+        isActive: true,
+      },
+    });
   }
 }

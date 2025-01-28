@@ -1,16 +1,19 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { PassportStrategy } from '@nestjs/passport';
-import { Strategy } from 'passport-oauth2';
 import googleOAuthConfig from '../config/googleOAuthConfig';
 import { ConfigType } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
-import { RequestOAuthDto } from '@libs/core/dto/RequestOAuthDto';
+import { RequestOAuthDto } from './dto/RequestOAuthDto';
 import { OAuthProvider } from '../common/enums/OAuthProviderEnum';
 import { CustomLogger } from '../logger/custom-logger';
+import CustomOAuthStrategy from './custom-oauth.strategy';
+import { Strategy } from 'passport-oauth2';
 
 @Injectable()
-export class GoogleOauthStrategy extends PassportStrategy(Strategy, 'google') {
+export class GoogleOauthStrategy extends CustomOAuthStrategy(
+  Strategy,
+  OAuthProvider.GOOGLE,
+) {
   constructor(
     @Inject(googleOAuthConfig.KEY)
     private readonly oauthConfig: ConfigType<typeof googleOAuthConfig>,
@@ -19,7 +22,7 @@ export class GoogleOauthStrategy extends PassportStrategy(Strategy, 'google') {
   ) {
     super({
       ...oauthConfig,
-      scope: ['profile', 'email'],
+      scope: ['profile', 'email'], // Google 전용 scope
     });
     this.logger.silly('GoogleOauthStrategy initialized', oauthConfig);
   }
@@ -46,8 +49,8 @@ export class GoogleOauthStrategy extends PassportStrategy(Strategy, 'google') {
     };
   }
 
-  async getUserInfo(accessToken: string): Promise<any> {
-    this.logger.silly('Getting user info with access token', { accessToken });
+  private async getUserInfo(accessToken: string): Promise<any> {
+    this.logger.silly('Fetching Google user info', { accessToken });
 
     const url = 'https://www.googleapis.com/oauth2/v3/userinfo';
     const headers = {
@@ -58,9 +61,10 @@ export class GoogleOauthStrategy extends PassportStrategy(Strategy, 'google') {
       const response = await lastValueFrom(
         this.httpService.get(url, { headers }),
       );
+      this.logger.silly('Google user info fetched', { data: response.data });
       return response.data;
     } catch (error) {
-      this.logger.error('Error fetching user info', { error });
+      this.logger.error('Error fetching Google user info', { error });
       throw error;
     }
   }

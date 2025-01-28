@@ -1,8 +1,11 @@
 import {
   BadRequestException,
+  Body,
   Controller,
   Get,
+  HttpCode,
   HttpStatus,
+  Post,
   Req,
   Res,
 } from '@nestjs/common';
@@ -16,12 +19,16 @@ import {
 } from '@nestjs/swagger';
 import ResponseTokenDto from './dto/ResponseTokenDto';
 import { ApiBadRequestErrorResponse } from '../common/decorators/swagger/ApiBadRequestErrorResponse';
+import { CustomLogger } from '../logger/custom-logger';
 
 @ApiTags('인증 관련 API')
 @ApiBadRequestErrorResponse()
 @Controller('api/v1/auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly logger: CustomLogger,
+    private readonly authService: AuthService,
+  ) {}
 
   @ApiResponse({
     status: HttpStatus.OK,
@@ -42,6 +49,24 @@ export class AuthController {
     }
     const tokens = await this.authService.getLoginToken(token);
     res.clearCookie('token');
+
+    return tokens;
+  }
+
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '토큰 발급  성공',
+    type: ResponseTokenDto,
+  })
+  @Post('/refresh')
+  @HttpCode(HttpStatus.OK)
+  async refresh(@Body() requestRefreshDto: { refreshToken: string }) {
+    this.logger.silly('AuthController refresh', {
+      requestRefreshDto,
+    });
+    const tokens = await this.authService.refreshToken(
+      requestRefreshDto.refreshToken,
+    );
 
     return tokens;
   }

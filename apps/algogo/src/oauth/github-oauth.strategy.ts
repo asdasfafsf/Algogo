@@ -1,15 +1,18 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { PassportStrategy } from '@nestjs/passport';
-import { Strategy } from 'passport-oauth2';
 import { ConfigType } from '@nestjs/config';
 import githubOAuthConfig from '../config/githubOAuthConfig';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
 import { OAuthProvider } from '../common/enums/OAuthProviderEnum';
+import CustomOAuthStrategy from './custom-oauth.strategy';
+import { Strategy } from 'passport-oauth2';
 import { CustomLogger } from '../logger/custom-logger';
 
 @Injectable()
-export class GithubOAuthStrategy extends PassportStrategy(Strategy, 'github') {
+export class GithubOAuthStrategy extends CustomOAuthStrategy(
+  Strategy,
+  OAuthProvider.GITHUB,
+) {
   constructor(
     @Inject(githubOAuthConfig.KEY)
     private readonly oauthConfig: ConfigType<typeof githubOAuthConfig>,
@@ -20,7 +23,7 @@ export class GithubOAuthStrategy extends PassportStrategy(Strategy, 'github') {
       ...oauthConfig,
       scope: 'openid',
     });
-    this.logger.silly('GithubOauthStrategy initialized', oauthConfig);
+    this.logger.silly('GithubOAuthStrategy initialized', oauthConfig);
   }
 
   async validate(
@@ -28,7 +31,7 @@ export class GithubOAuthStrategy extends PassportStrategy(Strategy, 'github') {
     refreshToken: string,
     profile: any,
   ): Promise<any> {
-    this.logger.silly('GithubOauthStrategy validate', {
+    this.logger.silly('GithubOAuthStrategy validate', {
       accessToken,
       refreshToken,
       profile,
@@ -46,7 +49,7 @@ export class GithubOAuthStrategy extends PassportStrategy(Strategy, 'github') {
     };
   }
 
-  async getUserInfo(accessToken: string): Promise<any> {
+  private async getUserInfo(accessToken: string): Promise<any> {
     this.logger.silly('Getting user info with access token', {});
 
     const url = 'https://api.github.com/user';
@@ -60,7 +63,7 @@ export class GithubOAuthStrategy extends PassportStrategy(Strategy, 'github') {
         this.httpService.get(url, { headers }),
       );
 
-      this.logger.silly('github getUserInfo', {
+      this.logger.silly('Github getUserInfo', {
         data: response.data,
       });
       return response.data;

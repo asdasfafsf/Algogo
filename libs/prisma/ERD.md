@@ -9,27 +9,36 @@ erDiagram
 "USER" {
   Int USER_NO PK
   String USER_UUID UK
-  String USER_EMAIL UK
+  String USER_EMAIL
   String USER_NAME
   String USER_PROFILE_PHOTO
   DateTime USER_REGISTERED_DATE
   DateTime USER_LAST_LOGIN_DATE
   UserState USER_STATE
   Boolean USER_EMAIL_VERIFIED
+  DateTime USER_CREATED_AT
+  DateTime USER_UPDATED_AT
+  DateTime USER_LOGINED_AT
 }
 "USER_OAUTH" {
   Int USER_NO FK
   String USER_OAUTH_PROVIDER
   String USER_OAUTH_ID
+  Boolean USER_OAUTH_IS_ACTIVE
+  DateTime USER_OAUTH_CREATED_AT
+  DateTime USER_OAUTH_UPDATED_AT
 }
 "USER_SOCIAL" {
   String USER_SOCIAL_PROVIDER
   Int USER_NO FK
   String USER_SOCIAL_CONTENT
+  DateTime USER_SOCIAL_CREATED_AT
+  DateTime USER_SOCIAL_UPDATED_AT
 }
 "PROBLEM" {
   Int PROBLEM_NO PK
   String PROBLEM_UUID UK
+  Boolean PROBLEM_IS_SPECIAL_JUDGE
   String PROBLEM_SOURCE
   String PROBLEM_SOURCE_ID
   String PROBLEM_SOURCE_URL
@@ -48,6 +57,8 @@ erDiagram
   Int PROBLEM_SUBMIT_COUNT
   Int PROBLEM_TIMEOUT
   Int PROBLEM_MEMORY_LIMIT
+  DateTime PROBLEM_CREATED_AT
+  DateTime PROBLEM_UPDATED_AT
 }
 "PROBLEM_CONTENT" {
   String PROBLEM_CONTENT
@@ -70,6 +81,23 @@ erDiagram
   Int problemNo FK
   Int state
 }
+"ProblemReport" {
+  Int userNo FK
+  Int problemNo FK
+  Int PROBLEM_REPORT_NO PK
+  String PROBLEM_REPORT_TITLE
+  String PROBLEM_REPORT_CONTENT
+  DateTime createdAt
+  ProblemReportState state
+}
+"ProblemCollectionLog" {
+  Int PROBLEM_COLLECTION_LOG_NO PK
+  Int USER_NO FK
+  DateTime PROBLEM_COLLECTION_LOG_CREATED_AT
+  String PROBLEM_COLLECTION_LOG_URL
+  String PROBLEM_COLLECTION_LOG_STATE
+  String PROBLEM_COLLECTION_LOG_CAUSE "nullable"
+}
 "USER_OAUTH" }o--|| "USER" : User
 "USER_SOCIAL" }o--|| "USER" : User
 "PROBLEM_CONTENT" }o--|| "PROBLEM" : Problem
@@ -77,6 +105,9 @@ erDiagram
 "PROBLEM_INPUT_OUTPUT" }o--|| "PROBLEM" : Problem
 "USER_PROBLEM_STATE" }o--|| "USER" : User
 "USER_PROBLEM_STATE" }o--|| "PROBLEM" : Problem
+"ProblemReport" }o--|| "USER" : User
+"ProblemReport" }o--|| "PROBLEM" : Problem
+"ProblemCollectionLog" }o--|| "USER" : User
 ```
 
 ### `USER`
@@ -91,6 +122,9 @@ erDiagram
   - `USER_LAST_LOGIN_DATE`: 
   - `USER_STATE`: 
   - `USER_EMAIL_VERIFIED`: 
+  - `USER_CREATED_AT`: 
+  - `USER_UPDATED_AT`: 
+  - `USER_LOGINED_AT`: 
 
 ### `USER_OAUTH`
 
@@ -98,6 +132,9 @@ erDiagram
   - `USER_NO`: 
   - `USER_OAUTH_PROVIDER`: 
   - `USER_OAUTH_ID`: 
+  - `USER_OAUTH_IS_ACTIVE`: 
+  - `USER_OAUTH_CREATED_AT`: 
+  - `USER_OAUTH_UPDATED_AT`: 
 
 ### `USER_SOCIAL`
 
@@ -105,12 +142,15 @@ erDiagram
   - `USER_SOCIAL_PROVIDER`: 
   - `USER_NO`: 
   - `USER_SOCIAL_CONTENT`: 
+  - `USER_SOCIAL_CREATED_AT`: 
+  - `USER_SOCIAL_UPDATED_AT`: 
 
 ### `PROBLEM`
 
 **Properties**
   - `PROBLEM_NO`: 
   - `PROBLEM_UUID`: 
+  - `PROBLEM_IS_SPECIAL_JUDGE`: 
   - `PROBLEM_SOURCE`: 
   - `PROBLEM_SOURCE_ID`: 
   - `PROBLEM_SOURCE_URL`: 
@@ -129,6 +169,8 @@ erDiagram
   - `PROBLEM_SUBMIT_COUNT`: 
   - `PROBLEM_TIMEOUT`: 
   - `PROBLEM_MEMORY_LIMIT`: 
+  - `PROBLEM_CREATED_AT`: 
+  - `PROBLEM_UPDATED_AT`: 
 
 ### `PROBLEM_CONTENT`
 
@@ -158,3 +200,24 @@ erDiagram
   - `userNo`: 
   - `problemNo`: 
   - `state`: 
+
+### `ProblemReport`
+
+**Properties**
+  - `userNo`: 
+  - `problemNo`: 
+  - `PROBLEM_REPORT_NO`: 
+  - `PROBLEM_REPORT_TITLE`: 
+  - `PROBLEM_REPORT_CONTENT`: 
+  - `createdAt`: 
+  - `state`: 
+
+### `ProblemCollectionLog`
+
+**Properties**
+  - `PROBLEM_COLLECTION_LOG_NO`: 
+  - `USER_NO`: 
+  - `PROBLEM_COLLECTION_LOG_CREATED_AT`: 
+  - `PROBLEM_COLLECTION_LOG_URL`: 
+  - `PROBLEM_COLLECTION_LOG_STATE`: 
+  - `PROBLEM_COLLECTION_LOG_CAUSE`: 

@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { RequestProblemSummaryListDto } from '@libs/core/dto/RequestProblemSummaryListDto';
 import { ProblemsRepository } from './problems.repository';
 import { ProblemType } from '../common/enums/ProblemTypeEnum';
 import { ResponseProblemDto } from './dto/ResponseProblemDto';
 import { ResponseProblemContentDto } from './dto/ResponseProblemContentDto';
 import { CustomLogger } from '../logger/custom-logger';
 import { ResponseProblemSummaryListDto } from './dto/ResponseProblemSummaryListDto';
+import { RequestProblemSummaryListDto } from './dto/RequestProblemSummaryListDto';
 
 @Injectable()
 export class ProblemsService {
@@ -17,14 +17,17 @@ export class ProblemsService {
   async getProblemSummaryList(
     requestProblemSummaryDto: RequestProblemSummaryListDto,
   ): Promise<ResponseProblemSummaryListDto> {
-    const { pageNo, pageSize, typeList, levelList } = requestProblemSummaryDto;
+    const { pageNo, pageSize, typeList, levelList, title, sort } =
+      requestProblemSummaryDto;
 
     try {
       const problemSummary = await this.problemsRepository.getProblemList(
         pageNo,
         pageSize,
+        sort,
         levelList,
         typeList,
+        title || null,
       );
 
       return {

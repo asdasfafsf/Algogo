@@ -1,5 +1,9 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  PutObjectCommand,
+  S3Client,
+  DeleteObjectCommand,
+} from '@aws-sdk/client-s3';
 import s3Config from '../config/s3Config';
 import { ConfigType } from '@nestjs/config';
 
@@ -11,6 +15,8 @@ export class S3Service {
   ) {
     this.s3Client = new S3Client({
       region: this.config.region,
+      forcePathStyle: true,
+      endpoint: this.config.endpoint,
       credentials: {
         accessKeyId: this.config.accessKey,
         secretAccessKey: this.config.secretKey,
@@ -29,7 +35,16 @@ export class S3Service {
 
     await this.s3Client.send(command);
 
-    const fileUrl = `https://${this.config.bucketName}.s3.${this.config.region}.amazonaws.com/${Key}`;
+    const fileUrl = `${this.config.endpoint}/${this.config.bucketName}/${Key}`;
     return fileUrl;
+  }
+
+  async removeObject(Key: string) {
+    const command = new DeleteObjectCommand({
+      Bucket: this.config.bucketName,
+      Key: Key.replace(this.config.endpoint, ''),
+    });
+
+    await this.s3Client.send(command);
   }
 }

@@ -21,7 +21,11 @@ export class MeRepository {
         },
         oauthList: {
           select: {
+            isActive: true,
             provider: true,
+          },
+          where: {
+            isActive: true,
           },
         },
       },
@@ -56,7 +60,7 @@ export class MeRepository {
           : socialList?.map(({ provider, content }) =>
               prisma.userSocial.upsert({
                 where: {
-                  provider_userNo: {
+                  userNo_provider: {
                     provider,
                     userNo,
                   },
@@ -89,6 +93,9 @@ export class MeRepository {
           oauthList: {
             select: {
               provider: true,
+            },
+            where: {
+              isActive: true,
             },
           },
         },

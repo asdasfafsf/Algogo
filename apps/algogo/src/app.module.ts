@@ -29,6 +29,8 @@ import { CryptoModule } from './crypto/crypto.module';
 import { ExecuteModule } from './execute/execute.module';
 import { MeModule } from './me/me.module';
 import { LoggerModule } from './logger/logger.module';
+import { ProblemsReportModule } from './problems-report/problems-report.module';
+import { ProblemsCollectModule } from './problems-collect/problems-collect.module';
 import googleOAuthConfig from './config/googleOAuthConfig';
 import kakaoOAuthConfig from './config/kakaoOAuthConfig';
 import githubOAuthConfig from './config/githubOAuthConfig';
@@ -92,6 +94,8 @@ import LoggerConfig from './config/LoggerConfig';
     ExecuteModule,
     MeModule,
     LoggerModule,
+    ProblemsReportModule,
+    ProblemsCollectModule,
   ],
 
   controllers: [AppController],

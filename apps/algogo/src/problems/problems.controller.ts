@@ -1,7 +1,6 @@
 import { Controller, Get, HttpStatus, Param, Query } from '@nestjs/common';
 import { ProblemsService } from './problems.service';
 import { ProblemsCollectService } from './problems-collect.service';
-import { RequestProblemSummaryListDto } from '@libs/core/dto/RequestProblemSummaryListDto';
 import {
   ApiExcludeEndpoint,
   ApiExtraModels,
@@ -15,6 +14,8 @@ import { ResponseProblemDto } from './dto/ResponseProblemDto';
 import { ResponseProblemSummaryListDto } from './dto/ResponseProblemSummaryListDto';
 import { ResponseDto } from '../common/dto/ResponseDto';
 import { CustomLogger } from '../logger/custom-logger';
+import { RequestProblemSummaryListDto } from './dto/RequestProblemSummaryListDto';
+import { ProblemSite } from './enum/ProblemSiteEnum';
 
 @ApiTags('문제 관련 API')
 @ApiBadRequestErrorResponse()
@@ -72,12 +73,5 @@ export class ProblemsController {
     @Param('problemUuid') uuid: string,
   ): Promise<ResponseProblemDto> {
     return await this.problemsService.getProblem(uuid);
-  }
-
-  @ApiExcludeEndpoint()
-  @Get('/collect/:site/:key')
-  async collectProblem(@Param('site') site: string, @Param('key') key: string) {
-    const res = await this.problemsCollectService.collectProblem(site, key);
-    return res;
   }
 }
