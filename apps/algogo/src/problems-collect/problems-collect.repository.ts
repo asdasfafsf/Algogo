@@ -75,22 +75,24 @@ export class ProblemsCollectRepository {
     });
   }
 
-  async getProblem({source, sourceId}: {source: string, sourceId: string}, tx?: Prisma.TransactionClient) {
+  async getProblem(
+    { source, sourceId }: { source: string; sourceId: string },
+    tx?: Prisma.TransactionClient,
+  ) {
     const problem = await (tx ?? this.prismaService).problem.findUnique({
-        select: {
-            updatedAt: true
+      select: {
+        updatedAt: true,
+      },
+      where: {
+        source_sourceId: {
+          source,
+          sourceId,
         },
-        where: {
-            source_sourceId: {
-                source,
-                sourceId
-            }
-        }
+      },
     });
 
     return problem;
   }
-
 
   async insertCollectionLog(
     log: { userNo: number; url: string; state: string; cause?: string },
@@ -108,5 +110,6 @@ export class ProblemsCollectRepository {
         cause,
       },
     });
+    ``;
   }
 }

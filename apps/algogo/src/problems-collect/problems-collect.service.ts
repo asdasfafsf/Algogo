@@ -26,7 +26,6 @@ export class ProblemsCollectService {
       throw new TooManyProblemsCollectException();
     }
 
-
     await this.redisService.set(
       `problemCollectCount_${userNo}`,
       (Number(requestCount || 0) + 1).toString(),
@@ -35,17 +34,19 @@ export class ProblemsCollectService {
 
     const { source, sourceId } = this.parse(url);
 
-    const oldProblem = await this.problemsCollectRepository.getProblem({source, sourceId});
+    const oldProblem = await this.problemsCollectRepository.getProblem({
+      source,
+      sourceId,
+    });
 
     if (oldProblem) {
-        const now = new Date();
-        const updatedAt = oldProblem.updatedAt;
+      const now = new Date();
+      const updatedAt = oldProblem.updatedAt;
 
-        if (now.getDate() === updatedAt.getDate()) {
-            throw new ProblemUpdateLimitException();
-        }
+      if (now.getDate() === updatedAt.getDate()) {
+        throw new ProblemUpdateLimitException();
+      }
     }
-
 
     const result = await this.crawlerService.getProblem(source, sourceId);
     const contentList = await this.postProcess(
