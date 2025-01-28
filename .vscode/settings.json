@@ -1,0 +1,7 @@
+{
+    "workbench.iconTheme": "material-icon-theme",
+    "editor.codeActionsOnSave": {
+        "source.fixAll": true,
+    },
+    "editor.formatOnSave":true,
+}

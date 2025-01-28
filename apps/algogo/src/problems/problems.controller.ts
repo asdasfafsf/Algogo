@@ -15,6 +15,7 @@ import { ResponseProblemSummaryListDto } from './dto/ResponseProblemSummaryListD
 import { ResponseDto } from '../common/dto/ResponseDto';
 import { CustomLogger } from '../logger/custom-logger';
 import { RequestProblemSummaryListDto } from './dto/RequestProblemSummaryListDto';
+import { ProblemSite } from './enum/ProblemSiteEnum';
 
 @ApiTags('문제 관련 API')
 @ApiBadRequestErrorResponse()
@@ -72,12 +73,5 @@ export class ProblemsController {
     @Param('problemUuid') uuid: string,
   ): Promise<ResponseProblemDto> {
     return await this.problemsService.getProblem(uuid);
-  }
-
-  @ApiExcludeEndpoint()
-  @Get('/collect/:site/:key')
-  async collectProblem(@Param('site') site: string, @Param('key') key: string) {
-    const res = await this.problemsCollectService.collectProblem(site, key);
-    return res;
   }
 }
