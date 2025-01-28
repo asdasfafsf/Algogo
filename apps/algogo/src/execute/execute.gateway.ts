@@ -24,7 +24,7 @@ import { Cron } from '@nestjs/schedule';
 import { CustomLogger } from '../logger/custom-logger';
 import { RequestWsAuthDto } from './dto/RequestWsAuthDto';
 import { OnEvent } from '@nestjs/event-emitter';
-import CustomHttpException from '../common/errors/CustomHttpException';
+import { CustomHttpException } from '../common/errors/CustomHttpException';
 import { ExecuteWsExceptionFilter } from './filter/execute-ws-exception.filter';
 
 class AuthSocket extends Socket {

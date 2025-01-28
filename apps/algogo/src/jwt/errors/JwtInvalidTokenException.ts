@@ -1,4 +1,4 @@
-import CustomUnauthorizedException from '../../common/errors/CustomUnAuthorizedException';
+import { CustomUnauthorizedException } from '../../common/errors/CustomUnAuthorizedException';
 
 export class JwtInvalidTokenException extends CustomUnauthorizedException {
   constructor() {
