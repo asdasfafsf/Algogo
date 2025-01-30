@@ -53,6 +53,9 @@ export class ExecuteService implements OnModuleInit {
       const flow = await this.flowProducer.add({
         name: 'run',
         queueName: this.config.queueName,
+        data: {
+          id,
+        },
         children: [
           {
             name: 'compile',
