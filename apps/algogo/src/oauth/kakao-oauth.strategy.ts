@@ -23,20 +23,9 @@ export class KakaoOAuthStrategy extends CustomOAuthStrategy(
       ...oauthConfig,
       scope: 'openid',
     });
-    this.logger.silly('KakaoOauthStrategy initialized', oauthConfig);
   }
 
-  async validate(
-    accessToken: string,
-    refreshToken: string,
-    profile: any,
-  ): Promise<any> {
-    this.logger.silly('KakaoOAuthStrategy validate', {
-      accessToken,
-      refreshToken,
-      profile,
-    });
-
+  async validate(accessToken: string): Promise<any> {
     const userInfo = await this.getUserInfo(accessToken);
     const { sub, nickname, email } = userInfo;
     return {
@@ -49,10 +38,6 @@ export class KakaoOAuthStrategy extends CustomOAuthStrategy(
   }
 
   private async getUserInfo(accessToken: string): Promise<any> {
-    this.logger.silly('Fetching Kakao user info with access token', {
-      accessToken,
-    });
-
     const url = 'https://kapi.kakao.com/v1/oidc/userinfo';
     const headers = {
       Authorization: `Bearer ${accessToken}`,
@@ -63,9 +48,6 @@ export class KakaoOAuthStrategy extends CustomOAuthStrategy(
         this.httpService.get(url, { headers }),
       );
 
-      this.logger.silly('Kakao user info fetched', {
-        data: response.data,
-      });
       return response.data;
     } catch (error) {
       this.logger.error('Error fetching Kakao user info', { error });

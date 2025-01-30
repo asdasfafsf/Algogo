@@ -61,9 +61,6 @@ export class AuthController {
   @Post('/refresh')
   @HttpCode(HttpStatus.OK)
   async refresh(@Body() requestRefreshDto: { refreshToken: string }) {
-    this.logger.silly('AuthController refresh', {
-      requestRefreshDto,
-    });
     const tokens = await this.authService.refreshToken(
       requestRefreshDto.refreshToken,
     );

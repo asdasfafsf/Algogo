@@ -23,20 +23,9 @@ export class GithubOAuthStrategy extends CustomOAuthStrategy(
       ...oauthConfig,
       scope: 'openid',
     });
-    this.logger.silly('GithubOAuthStrategy initialized', oauthConfig);
   }
 
-  async validate(
-    accessToken: string,
-    refreshToken: string,
-    profile: any,
-  ): Promise<any> {
-    this.logger.silly('GithubOAuthStrategy validate', {
-      accessToken,
-      refreshToken,
-      profile,
-    });
-
+  async validate(accessToken: string): Promise<any> {
     const userInfo = await this.getUserInfo(accessToken);
     const { id, name, email } = userInfo;
 
@@ -50,8 +39,6 @@ export class GithubOAuthStrategy extends CustomOAuthStrategy(
   }
 
   private async getUserInfo(accessToken: string): Promise<any> {
-    this.logger.silly('Getting user info with access token', {});
-
     const url = 'https://api.github.com/user';
     const headers = {
       Authorization: `Bearer ${accessToken}`,
@@ -63,9 +50,6 @@ export class GithubOAuthStrategy extends CustomOAuthStrategy(
         this.httpService.get(url, { headers }),
       );
 
-      this.logger.silly('Github getUserInfo', {
-        data: response.data,
-      });
       return response.data;
     } catch (error) {
       this.logger.error('Error fetching user info', { error });

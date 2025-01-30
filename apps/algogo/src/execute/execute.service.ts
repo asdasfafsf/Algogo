@@ -50,11 +50,6 @@ export class ExecuteService implements OnModuleInit {
         provider,
       } as RequestCompileDto;
 
-      this.logger.silly('run', {
-        id,
-        inputList,
-      });
-
       const flow = await this.flowProducer.add({
         name: 'run',
         queueName: this.config.queueName,
@@ -83,8 +78,6 @@ export class ExecuteService implements OnModuleInit {
         ],
       });
 
-      this.logger.silly('add end');
-
       const compileJob = flow.children.find(
         (elem) => elem.job.name === 'compile',
       )!.job;
@@ -92,8 +85,6 @@ export class ExecuteService implements OnModuleInit {
         this.queueEvents,
         2000,
       );
-
-      this.logger.silly('compile result', compileResult);
 
       if (compileResult.code !== '0000') {
         return {
@@ -111,7 +102,7 @@ export class ExecuteService implements OnModuleInit {
           this.queueEvents,
           5000,
         );
-        this.logger.silly('executeResult', executeResult);
+
         this.eventEmitter.emitAsync(`execute`, {
           ...executeResult,
           id,

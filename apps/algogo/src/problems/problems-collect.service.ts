@@ -25,8 +25,6 @@ export class ProblemsCollectService {
   async collectProblem(site: string, key: string) {
     const result = await this.crawlerService.getProblem(site, key);
 
-    this.logger.silly(`${ProblemsCollectService.name} collectProblem`, {});
-
     if (result.statusCode === HttpStatus.NOT_FOUND) {
       throw new NotFoundException('존재하지 않는 문제 입니다.');
     }
@@ -36,11 +34,6 @@ export class ProblemsCollectService {
 
     const data = result.data;
     const contentList = await this.postProcess(data.contentList, site, key);
-
-    this.logger.silly(
-      `${ProblemsCollectService.name} postprocess`,
-      contentList,
-    );
 
     try {
       const res = await this.prismaService.$transaction(async (tx) => {
@@ -139,11 +132,6 @@ export class ProblemsCollectService {
           const webp = await this.imageService.toWebp(buffer);
           const s3Key = `problems/${site}/${key}_${index}.webp`;
           const s3Result = await this.s3Service.upload(s3Key, webp);
-
-          this.logger.silly(
-            `${ProblemsCollectService.name} s3Upload_${index}`,
-            { s3Result },
-          );
 
           if (!s3Result) {
             this.logger.error(
