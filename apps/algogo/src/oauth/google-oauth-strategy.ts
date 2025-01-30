@@ -24,20 +24,9 @@ export class GoogleOauthStrategy extends CustomOAuthStrategy(
       ...oauthConfig,
       scope: ['profile', 'email'], // Google 전용 scope
     });
-    this.logger.silly('GoogleOauthStrategy initialized', oauthConfig);
   }
 
-  async validate(
-    accessToken: string,
-    refreshToken: string,
-    profile: any,
-  ): Promise<RequestOAuthDto> {
-    this.logger.silly('GoogleOAuthStrategy validate', {
-      accessToken,
-      refreshToken,
-      profile,
-    });
-
+  async validate(accessToken: string): Promise<RequestOAuthDto> {
     const userInfo = await this.getUserInfo(accessToken);
     const { sub, name, email } = userInfo;
     return {
@@ -50,8 +39,6 @@ export class GoogleOauthStrategy extends CustomOAuthStrategy(
   }
 
   private async getUserInfo(accessToken: string): Promise<any> {
-    this.logger.silly('Fetching Google user info', { accessToken });
-
     const url = 'https://www.googleapis.com/oauth2/v3/userinfo';
     const headers = {
       Authorization: `Bearer ${accessToken}`,
@@ -61,10 +48,8 @@ export class GoogleOauthStrategy extends CustomOAuthStrategy(
       const response = await lastValueFrom(
         this.httpService.get(url, { headers }),
       );
-      this.logger.silly('Google user info fetched', { data: response.data });
       return response.data;
     } catch (error) {
-      this.logger.error('Error fetching Google user info', { error });
       throw error;
     }
   }

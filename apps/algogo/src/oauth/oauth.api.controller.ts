@@ -87,10 +87,6 @@ export class OAuthApiController {
     @Param('provider') provider: OAuthProvider,
   ) {
     const { userNo } = req;
-    this.logger.silly('disconnectProvider', {
-      provider,
-      userNo,
-    });
     await this.oauthService.disconnectOAuth(userNo, provider);
     return null;
   }

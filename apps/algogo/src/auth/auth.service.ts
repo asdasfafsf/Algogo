@@ -17,7 +17,6 @@ import ResponseTokenDto from './dto/ResponseTokenDto';
 import JwtConfig from '../config/jwtConfig';
 import { CustomLogger } from '../logger/custom-logger';
 import { AuthRepository } from './auth.repository';
-import { INVALID_JWT_MESSAGE } from '../common/constants/ErrorMessage';
 import { JwtInvalidTokenException } from '../jwt/errors/JwtInvalidTokenException';
 
 @Injectable()
@@ -51,8 +50,6 @@ export class AuthService {
     await this.redisService.del(`login_${uuid}_access`);
     await this.redisService.del(`login_${uuid}_refresh`);
 
-    this.logger.silly('OAuthService getLoginToken Complete from redis', {});
-
     return {
       accessToken: this.cryptoService.encryptAES(
         this.encryptConfig.key,
@@ -69,16 +66,6 @@ export class AuthService {
 
   async generateLoginToken(userNo: number) {
     let uuid = await this.generateRandom(userNo.toString());
-    const tmpUuid = await this.generateRandom(uuid);
-
-    const accessToken = await this.jwtService.sign(
-      { userNo, uuid },
-      this.jwtConfig.jwtAccessTokenExpiresIn,
-    );
-    const refreshToken = await this.jwtService.sign(
-      { uuid, userNo, tmpUuid },
-      this.jwtConfig.jwtRefreshTokenExpiresIn,
-    );
 
     while (true) {
       const newUuid = await this.redisService.get(uuid);
@@ -90,6 +77,17 @@ export class AuthService {
 
       uuid = await this.generateRandom(userNo.toString());
     }
+
+    const tmpUuid = await this.generateRandom(uuid);
+
+    const accessToken = await this.jwtService.sign(
+      { userNo, uuid },
+      this.jwtConfig.jwtAccessTokenExpiresIn,
+    );
+    const refreshToken = await this.jwtService.sign(
+      { uuid, userNo, tmpUuid },
+      this.jwtConfig.jwtRefreshTokenExpiresIn,
+    );
 
     await this.redisService.set(`login_${uuid}_access`, accessToken, 30);
     await this.redisService.set(`login_${uuid}_refresh`, refreshToken, 30);
@@ -104,23 +102,17 @@ export class AuthService {
       encryptedToken,
     );
 
-    this.logger.silly('decryptedToken', { decryptedToken });
-
     if (!decryptedToken) {
       throw new JwtInvalidTokenException();
     }
     await this.jwtService.verify(decryptedToken);
     const decodedToken = await this.jwtService.decode(decryptedToken);
 
-    this.logger.silly('decodedToken', { decodedToken });
     if (!decodedToken.userNo) {
       throw new JwtInvalidTokenException();
     }
-    this.logger.silly('start get USer');
-
     const user = await this.authRepository.getUser(decodedToken.userNo);
 
-    this.logger.silly('end get User');
     if (!user) {
       throw new NotFoundException('일치하는 회원이 없습니다.');
     }

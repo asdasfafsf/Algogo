@@ -82,15 +82,7 @@ export class OauthController {
   })
   @Get(':provider')
   @UseGuards(DynamicOAuthGuard)
-  async oauth(
-    @Param('provider') provider: OAuthProvider,
-    @Query() requestOAuthCallbackDto: RequestOAuthCallbackDto,
-  ) {
-    this.logger.silly('OAuth callback reached', {
-      provider,
-      requestOAuthCallbackDto,
-    });
-  }
+  async oauth() {}
 
   @ApiOperation({
     summary: 'OAuth callback',
@@ -111,9 +103,6 @@ export class OauthController {
     @Res() res: Response,
   ) {
     const ip = req.clientIp ?? 'error';
-    this.logger.silly(`${provider}/callback ip`, {
-      ip,
-    });
     const requestOAuthDto = { ...(req.user as RequestOAuthDto), ip };
     const uuid = await this.oauthService.login(requestOAuthDto);
 
@@ -133,16 +122,7 @@ export class OauthController {
   @Get(':provider/connect')
   @UseGuards(DynamicOAuthGuard)
   @UseFilters(OAuthExceptionFilter)
-  async add(
-    @Param('provider') provider: OAuthProvider,
-    @Query() requestOAuthCallbackDto: RequestOAuthCallbackDto,
-  ) {
-    this.logger.silly('정말 여기 아무것도 안와?');
-    this.logger.silly('OAuth add reached', {
-      provider,
-      requestOAuthCallbackDto,
-    });
-  }
+  async add() {}
 
   @Get(':provider/connect/callback')
   @UseGuards(AuthGuard, DynamicOAuthGuard)
@@ -163,15 +143,10 @@ export class OauthController {
     const oauthState =
       await this.oauthService.getOAuthStateWithLogined(requestOAuthDto);
 
-    this.logger.silly('oauthState', {
-      oauthState,
-    });
     if (
       oauthState === OAuthState.NEW ||
       oauthState === OAuthState.CONNECTED_AND_INACTIVE
     ) {
-      this.logger.silly('provider', requestOAuthDto);
-      this.logger.silly('dto', requestOAuthCallbackDto);
       await this.oauthService.connectOAuthProvider(requestOAuthDto);
 
       res.redirect(

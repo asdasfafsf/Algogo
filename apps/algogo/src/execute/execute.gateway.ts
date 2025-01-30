@@ -51,16 +51,12 @@ export class ExecuteGateway {
   private server: Server;
 
   async handleConnection(socket: AuthSocket) {
-    this.logger.silly(`start connection socket id : ${socket.id}`);
-
     const timeout = setTimeout(async () => {
       await this.redisService.unsubscribe(socket.id);
       socket.disconnect();
     }, 5000);
     await this.redisService.subscribe(socket.id);
     clearTimeout(timeout);
-
-    this.logger.silly(`connected id : ${socket.id}`);
 
     const { userNo, id } = socket;
     const preSocketId = await this.redisService.get(
@@ -71,7 +67,6 @@ export class ExecuteGateway {
 
     if (preSocketId) {
       const prevSocket = this.server.sockets.sockets.get(preSocketId);
-      this.logger.silly(`prev socket id : ${prevSocket?.id}`);
       if (prevSocket?.connected) {
         prevSocket.disconnect();
       }
@@ -82,7 +77,6 @@ export class ExecuteGateway {
   }
 
   async handleDisconnect(socket: AuthSocket) {
-    this.logger.silly('handleDisConnect');
     const { userNo } = socket;
 
     const savedSocketId = await this.redisService.get(
@@ -90,7 +84,6 @@ export class ExecuteGateway {
     );
 
     if (!savedSocketId || savedSocketId === socket.id) {
-      this.logger.silly(`remove prev socket : ${savedSocketId}`);
       await this.redisService.del(`${this.wsConfig.wsTag}_${userNo}`);
     }
   }
@@ -101,7 +94,6 @@ export class ExecuteGateway {
     @ConnectedSocket() socket: AuthSocket,
   ) {
     try {
-      this.logger.silly('requestWsAuthDto', requestWsAuthDto);
       const { token } = requestWsAuthDto;
       socket.token = token;
 
@@ -111,17 +103,8 @@ export class ExecuteGateway {
         }),
       };
 
-      this.logger.silly('start auth');
       await this.wsAuthGurad.canActivate(context as ExecutionContext);
-      this.logger.silly('auth success');
-
-      this.logger.silly('token', {
-        token,
-      });
-
       this.redisService.publish(socket.id, 'OK');
-      this.logger.silly('success auth');
-
       socket.emit('auth', {
         code: '0000',
         result: '',
@@ -157,7 +140,6 @@ export class ExecuteGateway {
     const { id } = socket;
     const requestRunDto = { id, ...requestExecuteDto };
     socket.lastRequestTime = new Date().getTime();
-    this.logger.silly('execute', requestRunDto);
 
     try {
       const response = await this.executeService.run(requestRunDto);
@@ -186,8 +168,6 @@ export class ExecuteGateway {
 
   @Cron('0 * * * *')
   async clearConnection() {
-    this.logger.silly('Clearing all socket connections from Redis');
-
     const pattern = `${this.wsConfig.wsTag}_*`;
     const keys = await this.redisService.keys(pattern);
     const currentDateTime = Math.floor(new Date().getTime() / 1000);
@@ -199,7 +179,6 @@ export class ExecuteGateway {
 
         if (socket) {
           if (currentDateTime - socket.lastRequestTime > 60 * 59) {
-            this.logger.silly('Clearing socket connection');
             socket.disconnect();
           }
         }
@@ -209,7 +188,6 @@ export class ExecuteGateway {
 
   @OnEvent('execute')
   async subscribeExecute(payload: any) {
-    this.logger.silly('execute result', payload);
     const { id } = payload;
     this.server.to(id).emit('executeResult', { ...payload, id: undefined });
   }

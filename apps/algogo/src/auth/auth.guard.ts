@@ -19,16 +19,11 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const encryptedToken = this.extractTokenFromHeader(request);
 
-    this.logger.silly('auth guard 1');
     if (!encryptedToken) {
       throw new UnauthorizedException(NO_JWT_MESSAGE);
     }
 
-    this.logger.silly('auth guard 2');
     const decodedToken = await this.authService.decodeJwt(encryptedToken);
-    this.logger.silly('end decodeJWT', {
-      decodedToken,
-    });
     const { userNo } = decodedToken;
 
     request.userNo = Number(userNo);
