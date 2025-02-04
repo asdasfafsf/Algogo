@@ -19,6 +19,7 @@ export class ProblemsCollectRepository {
         level: data.level,
         levelText: data.levelText,
         updatedDate: new Date(),
+        updatedAt: new Date(),
         input: data.input,
         output: data.output,
         limit: data.limit,

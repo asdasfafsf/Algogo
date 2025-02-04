@@ -77,4 +77,10 @@ export class ResponseProblemDto {
     type: [ResponseProblemInputOutputDto],
   })
   inputOutputList: ResponseProblemInputOutputDto[];
+
+  @ApiProperty({
+    description: '마지막 업데이트 시간',
+    type: [Date],
+  })
+  updatedAt: Date;
 }
