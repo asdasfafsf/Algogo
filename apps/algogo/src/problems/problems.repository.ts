@@ -172,6 +172,7 @@ export class ProblemsRepository {
         source: true,
         sourceId: true,
         sourceUrl: true,
+        updatedAt: true,
         contentList: {
           select: {
             order: true,

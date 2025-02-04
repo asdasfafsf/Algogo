@@ -2,7 +2,6 @@ import { Controller, Get, HttpStatus, Param, Query } from '@nestjs/common';
 import { ProblemsService } from './problems.service';
 import { ProblemsCollectService } from './problems-collect.service';
 import {
-  ApiExcludeEndpoint,
   ApiExtraModels,
   ApiOperation,
   ApiResponse,
@@ -15,7 +14,6 @@ import { ResponseProblemSummaryListDto } from './dto/ResponseProblemSummaryListD
 import { ResponseDto } from '../common/dto/ResponseDto';
 import { CustomLogger } from '../logger/custom-logger';
 import { RequestProblemSummaryListDto } from './dto/RequestProblemSummaryListDto';
-import { ProblemSite } from './enum/ProblemSiteEnum';
 
 @ApiTags('문제 관련 API')
 @ApiBadRequestErrorResponse()

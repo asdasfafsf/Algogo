@@ -8,6 +8,7 @@ import { ResponseProblemContent } from '@libs/core/dto/ResponseProblemContent';
 import { ImageService } from '../image/image.service';
 import { S3Service } from '../s3/s3.service';
 import { TooManyProblemsCollectException } from './errors/ToManyProblemsCollectException';
+import { CustomLogger } from '../logger/custom-logger';
 @Injectable()
 export class ProblemsCollectService {
   constructor(
@@ -16,6 +17,7 @@ export class ProblemsCollectService {
     private readonly crawlerService: CrawlerService,
     private readonly imageService: ImageService,
     private readonly s3Service: S3Service,
+    private readonly logger: CustomLogger,
   ) {}
 
   async collect({ url, userNo }: { url: string; userNo: number }) {
