@@ -106,6 +106,9 @@ export class OauthController {
     const requestOAuthDto = { ...(req.user as RequestOAuthDto), ip };
     const uuid = await this.oauthService.login(requestOAuthDto);
 
+    const state = requestOAuthCallbackDto?.state;
+    const destination = state?.destination ?? '/';
+
     return res
       .cookie('token', uuid, {
         httpOnly: process.env.NODE_ENV === 'development' ? undefined : true,
@@ -114,8 +117,8 @@ export class OauthController {
       })
       .redirect(
         process.env.NODE_ENV === 'development'
-          ? 'http://localhost:5173/oauth/token/'
-          : 'https://www.algogo.co.kr/oauth/token',
+          ? `http://localhost:5173/oauth/token?destination=${destination}`
+          : `https://www.algogo.co.kr/oauth/token?destination=${destination}`,
       );
   }
 
