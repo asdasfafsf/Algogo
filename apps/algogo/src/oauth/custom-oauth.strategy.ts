@@ -32,8 +32,18 @@ export default function CustomOAuthStrategy(
     authenticate(req: Request, options: any) {
       const newOptions = { ...options, ...this.config };
       const requestUrl = req.originalUrl;
+      const { destination } = req.query;
       const callbackURL = this.getCallbackUrl(requestUrl);
+
+      if (destination) {
+        newOptions.state = JSON.stringify({
+          ...newOptions?.state,
+          destination,
+        });
+      }
+
       newOptions.callbackURL = callbackURL;
+
       super.authenticate(req, newOptions);
     }
 
