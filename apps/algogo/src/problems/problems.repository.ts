@@ -17,11 +17,11 @@ export class ProblemsRepository {
 
     if (sort === ProblemSort.ANSWER_RATE_ASC) {
       orderBy.push({
-        answerCount: 'asc',
+        answerRate: 'asc',
       });
     } else if (sort === ProblemSort.ANSWER_RATE_DESC) {
       orderBy.push({
-        answerCount: 'desc',
+        answerRate: 'desc',
       });
     } else if (sort === ProblemSort.LEVEL_ASC) {
       orderBy.push({
@@ -39,6 +39,14 @@ export class ProblemsRepository {
       orderBy.push({
         submitCount: 'desc',
       });
+    } else if (sort === ProblemSort.TITLE_ASC) {
+      orderBy.push({
+        title: 'asc',
+      });
+    } else if (sort === ProblemSort.TITLE_DESC) {
+      orderBy.push({
+        title: 'desc',
+      });
     }
 
     return orderBy;
@@ -51,6 +59,8 @@ export class ProblemsRepository {
     typeList?: ProblemType[],
     title?: string,
   ) {
+    const orderBy = this.getProblemOrderBy(sort);
+
     const totalCount = await this.prismaService.problem.count({
       where: {
         ...(typeList && typeList.length > 0
@@ -59,10 +69,10 @@ export class ProblemsRepository {
         ...(levelList && levelList.length > 0
           ? { level: { in: levelList } }
           : {}),
+        ...(title ? { title: { contains: title } } : null),
       },
+      orderBy,
     });
-
-    const orderBy = this.getProblemOrderBy(sort);
 
     const problemSummaryList = await this.prismaService.problem.findMany({
       select: {
