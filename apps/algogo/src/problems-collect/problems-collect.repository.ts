@@ -7,73 +7,104 @@ export class ProblemsCollectRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
   async upsertProblem(data: ResponseProblemDto, tx?: Prisma.TransactionClient) {
-    return await (tx ?? this.prismaService).problem.upsert({
-      where: {
-        source_sourceId: {
-          sourceId: data.sourceId,
+    try {
+      return await (tx ?? this.prismaService).problem.upsert({
+        where: {
+          source_sourceId: {
+            sourceId: data.sourceId,
+            source: data.source,
+          },
+        },
+        update: {
+          title: data.title,
+          level: data.level,
+          levelText: data.levelText,
+          updatedDate: new Date(),
+          updatedAt: new Date(),
+          input: data.input,
+          output: data.output,
+          limit: data.limit,
+          answerCount: data.answerCount,
+          answerRate: data.answerRate,
+          answerPeopleCount: data.answerPeopleCount,
+          submitCount: data.submitCount,
+          timeout: data.timeout,
+          memoryLimit: data.memoryLimit,
           source: data.source,
+          sourceId: data.sourceId,
+          sourceUrl: data.sourceUrl,
+          contentList: {
+            deleteMany: {},
+            create: data.contentList.map((content) => ({
+              order: content.order,
+              type: content.type,
+              content: content.content,
+              cellList: {
+                create: content.cellList.map((cell) => ({
+                  content: cell.content,
+                  rowIndex: cell.rowIndex,
+                  colIndex: cell.colIndex,
+                  isHeader: cell.isHeader,
+                })),
+              },
+            })),
+          },
+          typeList: {
+            deleteMany: {},
+            create: data.typeList.map((name) => ({ name })),
+          },
+          inputOutputList: {
+            deleteMany: {},
+            create: data.inputOutputList,
+          },
         },
-      },
-      update: {
-        title: data.title,
-        level: data.level,
-        levelText: data.levelText,
-        updatedDate: new Date(),
-        updatedAt: new Date(),
-        input: data.input,
-        output: data.output,
-        limit: data.limit,
-        answerCount: data.answerCount,
-        answerRate: data.answerRate,
-        answerPeopleCount: data.answerPeopleCount,
-        submitCount: data.submitCount,
-        timeout: data.timeout,
-        memoryLimit: data.memoryLimit,
-        source: data.source,
-        sourceId: data.sourceId,
-        sourceUrl: data.sourceUrl,
-        contentList: {
-          deleteMany: {}, // 기존 데이터 삭제
-          create: data.contentList, // 새 데이터 삽입
+        create: {
+          title: data.title,
+          level: data.level,
+          levelText: data.levelText,
+          updatedDate: new Date(),
+          updatedAt: new Date(),
+          input: data.input,
+          output: data.output,
+          limit: data.limit,
+          answerCount: data.answerCount,
+          answerRate: data.answerRate,
+          answerPeopleCount: data.answerPeopleCount,
+          submitCount: data.submitCount,
+          timeout: data.timeout,
+          memoryLimit: data.memoryLimit,
+          source: data.source,
+          sourceId: data.sourceId,
+          sourceUrl: data.sourceUrl,
+          contentList: {
+            create: data.contentList.map((content) => ({
+              order: content.order,
+              type: content.type,
+              content: content.content,
+              cellList: {
+                create: content.cellList.map((cell) => ({
+                  content: cell.content,
+                  rowIndex: cell.rowIndex,
+                  colIndex: cell.colIndex,
+                  isHeader: cell.isHeader,
+                })),
+              },
+            })),
+          },
+          typeList: {
+            create: data.typeList.map((name) => ({ name })),
+          },
+          inputOutputList: {
+            create: data.inputOutputList,
+          },
         },
-        typeList: {
-          deleteMany: {}, // 기존 데이터 삭제
-          create: data.typeList.map((name) => ({ name })), // 새 데이터 삽입
-        },
-        inputOutputList: {
-          deleteMany: {}, // 기존 데이터 삭제
-          create: data.inputOutputList, // 새 데이터 삽입
-        },
-      },
-      create: {
-        title: data.title,
-        level: data.level,
-        levelText: data.levelText,
-        updatedDate: new Date(),
-        updatedAt: new Date(),
-        input: data.input,
-        output: data.output,
-        limit: data.limit,
-        answerCount: data.answerCount,
-        answerRate: data.answerRate,
-        answerPeopleCount: data.answerPeopleCount,
-        submitCount: data.submitCount,
-        timeout: data.timeout,
-        memoryLimit: data.memoryLimit,
-        source: data.source,
-        sourceId: data.sourceId,
-        sourceUrl: data.sourceUrl,
-        contentList: {
-          create: data.contentList,
-        },
-        typeList: {
-          create: data.typeList.map((name) => ({ name })),
-        },
-        inputOutputList: {
-          create: data.inputOutputList,
-        },
-      },
-    });
+      });
+    } catch (e) {
+      console.log('야야야');
+      console.log(e);
+
+      throw new Error('야야야');
+    }
   }
 
   async getProblem(
@@ -111,6 +142,5 @@ export class ProblemsCollectRepository {
         cause,
       },
     });
-    ``;
   }
 }

@@ -1,6 +1,5 @@
 import { Controller, Get, HttpStatus, Param, Query } from '@nestjs/common';
 import { ProblemsService } from './problems.service';
-import { ProblemsCollectService } from './problems-collect.service';
 import {
   ApiExtraModels,
   ApiOperation,
@@ -21,7 +20,6 @@ import { RequestProblemSummaryListDto } from './dto/RequestProblemSummaryListDto
 @Controller('api/v1/problems')
 export class ProblemsController {
   constructor(
-    private readonly problemsCollectService: ProblemsCollectService,
     private readonly problemsService: ProblemsService,
     private readonly Logger: CustomLogger,
   ) {}

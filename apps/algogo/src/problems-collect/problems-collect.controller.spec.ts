@@ -11,7 +11,9 @@ describe('ProblemsCollectController', () => {
       providers: [ProblemsCollectService],
     }).compile();
 
-    controller = module.get<ProblemsCollectController>(ProblemsCollectController);
+    controller = module.get<ProblemsCollectController>(
+      ProblemsCollectController,
+    );
   });
 
   it('should be defined', () => {

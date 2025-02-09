@@ -188,6 +188,7 @@ export class ProblemsRepository {
             order: true,
             type: true,
             content: true,
+            cellList: true,
           },
           orderBy: {
             order: 'asc',
