@@ -104,15 +104,31 @@ model Problem {
 }
 
 model ProblemContent {
-    content   String  @map("PROBLEM_CONTENT") @db.VarChar(1000)
-    type      String  @map("PROBLEM_CONTENT_TYPE")
-    order     Int     @map("PROBLEM_CONTENT_ORDER")
-    problemNo Int     @map("PROBLEM_NO")
-    Problem   Problem @relation("ProblemToProblemContent", fields: [problemNo], references: [no], onUpdate: Cascade, onDelete: Cascade)
+    content   String               @map("PROBLEM_CONTENT") @db.VarChar(1000)
+    type      String               @map("PROBLEM_CONTENT_TYPE")
+    order     Int                  @map("PROBLEM_CONTENT_ORDER")
+    problemNo Int                  @map("PROBLEM_NO")
+    Problem   Problem              @relation("ProblemToProblemContent", fields: [problemNo], references: [no], onUpdate: Cascade, onDelete: Cascade)
+    cellList  ProblemContentCell[] @relation("ProblemContentToProblemContentCell")
 
     @@unique([problemNo, order])
     @@index([problemNo, order])
     @@map("PROBLEM_CONTENT")
+}
+
+model ProblemContentCell {
+    no                  Int            @id @default(autoincrement()) @map("PROBLEM_CONTENT_CELL_NO")
+    isHeader            Boolean        @default(false) @map("PROBLEM_CONTENT_CELL_IS_HEADER")
+    content             String         @map("PROBLEM_CONTENT_CELL_CONTENT") @db.VarChar(1000)
+    rowIndex            Int            @map("PROBLEM_CONTENT_CELL_ROW_INDEX")
+    colIndex            Int            @map("PROBLEM_CONTENT_CELL_COL_INDEX")
+    problemNo           Int            @map("PROBLEM_NO")
+    problemContentOrder Int            @map("PROBLEM_CONTENT_ORDER")
+    ProblemContent      ProblemContent @relation("ProblemContentToProblemContentCell", fields: [problemNo, problemContentOrder], references: [problemNo, order], onUpdate: Cascade, onDelete: Cascade)
+
+    @@unique([problemNo, problemContentOrder, no])
+    @@index([problemNo, problemContentOrder, no])
+    @@map("PROBLEM_CONTENT_CELL")
 }
 
 model ProblemType {
@@ -126,11 +142,11 @@ model ProblemType {
 }
 
 model ProblemInputOutput {
+    problemNo Int     @map("PROBLEM_NO")
     order     Int     @map("PROBLEM_INPUT_OUTPUT_ORDER")
     input     String  @map("PROBLEM_INPUT") @db.VarChar(1000)
     output    String  @map("PROBLEM_OUTPUT") @db.VarChar(1000)
     Problem   Problem @relation("ProblemToProblemInputOutput", fields: [problemNo], references: [no], onUpdate: Cascade, onDelete: Cascade)
-    problemNo Int     @map("PROBLEM_NO")
 
     @@unique([problemNo, order])
     @@index([problemNo])

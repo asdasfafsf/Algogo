@@ -57,6 +57,8 @@ export class ProblemsCollectService {
       sourceId,
     );
 
+    this.logger.silly('야야야', { contentList });
+
     const problem = await this.problemsCollectRepository.upsertProblem({
       ...result.data,
       contentList,
@@ -118,6 +120,7 @@ export class ProblemsCollectService {
             order: index,
             type: 'image',
             content: s3Result,
+            cellList: elem.cellList,
           };
         }
 
