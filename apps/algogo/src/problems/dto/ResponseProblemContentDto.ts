@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ProblemContentType } from '../enum/ProblemContentTypeEnum';
+import { ResponseProblemContentCellDto } from './ResponseProblemContentCellDto';
 
 export class ResponseProblemContentDto {
   @ApiProperty({
@@ -20,4 +21,11 @@ export class ResponseProblemContentDto {
     type: String,
   })
   content: string;
+
+  @ApiProperty({
+    description: '셀 리스트',
+    example: [{ rowIndex: 1, colIndex: 1, value: '1', isHeader: true }],
+    type: [ResponseProblemContentCellDto],
+  })
+  cellList: ResponseProblemContentCellDto[];
 }
