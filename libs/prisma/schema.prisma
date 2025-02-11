@@ -222,9 +222,10 @@ model CodeSetting {
 }
 
 model CodeDefaultTemplate {
-    no       Int    @id @default(autoincrement()) @map("CODE_DEFAULT_TEMPLATE_NO")
-    userNo   Int    @map("USER_NO")
-    language String @map("CODE_DEFAULT_TEMPLATE_LANGUAGE")
+    no             Int    @id @default(autoincrement()) @map("CODE_DEFAULT_TEMPLATE_NO")
+    codeTemplateNo Int    @map("CODE_TEMPLATE_NO")
+    userNo         Int    @map("USER_NO")
+    language       String @map("CODE_DEFAULT_TEMPLATE_LANGUAGE")
 
     @@unique([userNo, language])
     @@index([userNo])

@@ -84,8 +84,11 @@ export class CodeController {
     type: ResponseCodeTemplateResult,
   })
   @Get('/template')
-  async getTemplateList() {
-    return new ResponseCodeTemplateResult();
+  async getTemplateResult(@Req() req: AuthRequest) {
+    const { userNo } = req;
+    const { defaultList, templateList } =
+      await this.codeService.getCodeTemplate(userNo);
+    return { defaultList, templateList };
   }
 
   @ApiOperation({

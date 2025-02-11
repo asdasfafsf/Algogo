@@ -60,4 +60,60 @@ export class CodeRepository {
       },
     });
   }
+
+  async getCodeTemplate(userNo: number) {
+    const [defaultList, templateList] = await Promise.all([
+      this.prisma.codeDefaultTemplate
+        .findMany({
+          where: { userNo },
+          select: {
+            codeTemplateNo: true,
+          },
+        })
+        .then((defaults) =>
+          this.prisma.codeTemplate.findMany({
+            where: {
+              no: {
+                in: defaults.map((d) => d.codeTemplateNo),
+              },
+            },
+            select: {
+              language: true,
+              uuid: true,
+              name: true,
+              content: true,
+              description: true,
+            },
+          }),
+        ),
+
+      // 전체 템플릿 목록
+      this.prisma.codeTemplate.findMany({
+        where: { userNo },
+        select: {
+          uuid: true,
+          name: true,
+          language: true,
+        },
+      }),
+    ]);
+
+    return {
+      defaultList,
+      templateList,
+    };
+  }
+
+  async getCodeTemplateList(userNo: number) {
+    const codeTemplateList = await this.prisma.codeTemplate.findMany({
+      select: {
+        uuid: true,
+        name: true,
+        language: true,
+      },
+      where: { userNo },
+    });
+
+    return codeTemplateList;
+  }
 }

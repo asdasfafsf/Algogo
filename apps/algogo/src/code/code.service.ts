@@ -21,4 +21,8 @@ export class CodeService {
   ) {
     return this.codeRepository.upsertCodeSetting(dto);
   }
+
+  async getCodeTemplate(userNo: number) {
+    return this.codeRepository.getCodeTemplate(userNo);
+  }
 }
