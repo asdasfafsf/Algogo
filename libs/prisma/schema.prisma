@@ -249,11 +249,11 @@ model ProblemCode {
     userNo    Int      @map("USER_NO")
     problemNo Int      @map("PROBLEM_NO")
     language  String   @map("CODE_LANGUAGE")
-    content   String   @map("CODE_CONTENT") @db.VarChar(1000)
+    content   String   @map("CODE_CONTENT") @db.VarChar(40000)
     createdAt DateTime @default(now()) @map("CODE_CREATED_AT")
     updatedAt DateTime @default(now()) @map("CODE_UPDATED_AT")
 
-    @@unique([userNo, problemNo, language])
-    @@index([userNo, problemNo, language])
+    @@unique([userNo, problemNo])
+    @@index([userNo, problemNo])
     @@map("USER_PROBLEM_CODE")
 }

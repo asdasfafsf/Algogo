@@ -25,6 +25,7 @@ import ResponseCodeTemplate from './dto/ResponseCodeTemplate';
 import ResponseCodeTemplateResult from './dto/ResponseCodeTemplateResult';
 import RequestUpsertDefaultCodeTemplateDto from './dto/RequestUpsertDefaultCodeTemplateDto';
 import RequestUpsertCodeTemplateDto from './dto/RequestUpsertCodeTemplate';
+import RequestUpsertProblemCodeDto from './dto/RequestUpsertProblemCodeDto';
 
 @ApiGlobalErrorResponses()
 @ApiBadRequestErrorResponse()
@@ -174,8 +175,13 @@ export class CodeController {
     description: '문제 코드 조회 성공',
     type: String,
   })
-  @Get('/problem')
-  async getProblemCode() {
+  @Get('/problem/:problemUuid')
+  async getProblemCode(
+    @Req() req: AuthRequest,
+    @Param('problemUuid') problemUuid: string,
+  ) {
+    const { userNo } = req;
+    const dto = { userNo, problemUuid };
     return '';
   }
 
@@ -189,7 +195,12 @@ export class CodeController {
     type: String,
   })
   @Put('/problem')
-  async updateProblemCode() {
-    return '';
+  async saveProblemCode(
+    @Body() body: RequestUpsertProblemCodeDto,
+    @Req() req: AuthRequest,
+  ) {
+    const { userNo } = req;
+    const dto = { userNo, ...body };
+    return null;
   }
 }
