@@ -228,6 +228,7 @@ model CodeDefaultTemplate {
 
     @@unique([userNo, language])
     @@index([userNo])
+    @@map("CODE_DEFAULT_TEMPLATE")
 }
 
 model CodeTemplate {
@@ -242,18 +243,19 @@ model CodeTemplate {
     description String   @map("CODE_TEMPLATE_DESCRIPTION") @db.VarChar(1000)
 
     @@index([userNo, language])
+    @@map("CODE_TEMPLATE")
 }
 
 model ProblemCode {
-    no        Int      @id @default(autoincrement()) @map("CODE_NO")
+    no        Int      @id @default(autoincrement()) @map("PROBLEM_CODE_NO")
     userNo    Int      @map("USER_NO")
     problemNo Int      @map("PROBLEM_NO")
-    language  String   @map("CODE_LANGUAGE")
-    content   String   @map("CODE_CONTENT") @db.VarChar(40000)
-    createdAt DateTime @default(now()) @map("CODE_CREATED_AT")
-    updatedAt DateTime @default(now()) @map("CODE_UPDATED_AT")
+    language  String   @map("PROBLEM_CODE_LANGUAGE")
+    content   String   @map("PROBLEM_CODE_CONTENT") @db.Text()
+    createdAt DateTime @default(now()) @map("PROBLEM_CODE_CREATED_AT")
+    updatedAt DateTime @default(now()) @map("PROBLEM_CODE_UPDATED_AT")
 
     @@unique([userNo, problemNo])
     @@index([userNo, problemNo])
-    @@map("USER_PROBLEM_CODE")
+    @@map("PROBLEM_CODE")
 }
