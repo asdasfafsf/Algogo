@@ -31,5 +31,5 @@ export default class ResponseCodeTemplateSummary {
     description: '수정 일시',
     example: '2024-03-21T12:00:00Z',
   })
-  updateAt: Date;
+  updatedAt: Date;
 }

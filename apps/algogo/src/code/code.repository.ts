@@ -62,7 +62,7 @@ export class CodeRepository {
   }
 
   async getCodeTemplate(userNo: number) {
-    const [defaultList, templateList] = await Promise.all([
+    const [defaultList, summaryList] = await Promise.all([
       this.prisma.codeDefaultTemplate
         .findMany({
           where: { userNo },
@@ -83,6 +83,8 @@ export class CodeRepository {
               name: true,
               content: true,
               description: true,
+              createdAt: true,
+              updatedAt: true,
             },
           }),
         ),
@@ -94,13 +96,15 @@ export class CodeRepository {
           uuid: true,
           name: true,
           language: true,
+          createdAt: true,
+          updatedAt: true,
         },
       }),
     ]);
 
     return {
       defaultList,
-      templateList,
+      summaryList,
     };
   }
 

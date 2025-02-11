@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import ResponseCodeTemplate from './ResponseCodeTemplate';
 import ResponseCodeTemplateSummary from './ResponseCodeTemplateSummary';
 
-export default class ResponseCodeTemplateResult {
+export class ResponseCodeTemplateResult {
   @ApiProperty({
     type: [ResponseCodeTemplate],
     description: '기본 코드 템플릿 목록',

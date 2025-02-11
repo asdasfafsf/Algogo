@@ -22,7 +22,7 @@ import { ResponseCodeSettingDto } from './dto/ResponseCodeSettingDto';
 import { ApiGlobalErrorResponses } from '../common/decorators/swagger/ApiGlobalErrorResponse';
 import { ApiBadRequestErrorResponse } from '../common/decorators/swagger/ApiBadRequestErrorResponse';
 import ResponseCodeTemplate from './dto/ResponseCodeTemplate';
-import ResponseCodeTemplateResult from './dto/ResponseCodeTemplateResult';
+import { ResponseCodeTemplateResult } from './dto/ResponseCodeTemplateResult';
 import RequestUpsertDefaultCodeTemplateDto from './dto/RequestUpsertDefaultCodeTemplateDto';
 import RequestUpsertCodeTemplateDto from './dto/RequestUpsertCodeTemplate';
 import RequestUpsertProblemCodeDto from './dto/RequestUpsertProblemCodeDto';
@@ -86,9 +86,9 @@ export class CodeController {
   @Get('/template')
   async getTemplateResult(@Req() req: AuthRequest) {
     const { userNo } = req;
-    const { defaultList, templateList } =
+    const { defaultList, summaryList } =
       await this.codeService.getCodeTemplate(userNo);
-    return { defaultList, templateList };
+    return { defaultList, summaryList };
   }
 
   @ApiOperation({
