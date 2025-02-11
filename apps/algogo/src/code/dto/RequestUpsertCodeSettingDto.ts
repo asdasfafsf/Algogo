@@ -50,7 +50,6 @@ export default class RequestUpsertCodeSettingDto {
     example: 'on',
   })
   @IsOptional()
-  @Transform(({ value }) => parseInt(value, 10), { toClassOnly: true })
   @IsIn(['on', 'of', 'relative'], {
     message: '유효한 값은 "on", "of", "relative"입니다.',
   })
@@ -64,4 +63,16 @@ export default class RequestUpsertCodeSettingDto {
   @IsOptional()
   @IsEnum(LanguageProvider, { message: '유효한 언어가 아닙니다' })
   defaultLanguage?: LanguageProvider;
+
+  @ApiProperty({
+    description: '테마',
+    enum: ['vs-dark', 'light'],
+    required: false,
+    example: 'vs-dark',
+  })
+  @IsOptional()
+  @IsIn(['vs-dark', 'light'], {
+    message: '유효한 값은 "vs-dark", "light"입니다.',
+  })
+  theme?: 'vs-dark' | 'light';
 }

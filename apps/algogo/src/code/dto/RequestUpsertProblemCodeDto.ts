@@ -18,8 +18,8 @@ export default class RequestUpsertProblemCodeDto {
   })
   @IsString({ message: '문제 코드는 문자열이어야 합니다.' })
   @IsNotEmpty({ message: '문제 코드는 필수 입력값입니다.' })
-  @MaxBytes(40000, {
-    message: '문제 코드는 40,000 바이트를 초과할 수 없습니다.',
+  @MaxBytes(16383, {
+    message: '문제 코드는 16,383 바이트를 초과할 수 없습니다.',
   })
   content: string;
 

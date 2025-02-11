@@ -30,7 +30,7 @@ import RequestUpsertProblemCodeDto from './dto/RequestUpsertProblemCodeDto';
 @ApiGlobalErrorResponses()
 @ApiBadRequestErrorResponse()
 @ApiTags('Code API')
-@ApiBearerAuth()
+@ApiBearerAuth('Authorization')
 @UseGuards(AuthGuard)
 @Controller('api/v1/code')
 export class CodeController {
@@ -45,9 +45,14 @@ export class CodeController {
     description: '코드 설정 조회 성공',
     type: ResponseCodeSettingDto,
   })
+  @ApiResponse({
+    status: 404,
+    description: '코드 설정을 찾을 수 없음',
+  })
   @Get('/setting')
-  async getCodeSetting() {
-    return new ResponseCodeSettingDto();
+  async getCodeSetting(@Req() req: AuthRequest) {
+    const codeSetting = await this.codeService.getCodeSetting(req.userNo);
+    return codeSetting;
   }
 
   @ApiOperation({
@@ -65,7 +70,8 @@ export class CodeController {
   ) {
     const { userNo } = req;
     const dto = { userNo, ...requestUpsertCodeSettingDto };
-    return new ResponseCodeSettingDto();
+    await this.codeService.upsertCodeSetting(dto);
+    return null;
   }
 
   @ApiOperation({
