@@ -212,7 +212,7 @@ model CodeSetting {
     problemContentRate Int      @default(100) @map("CODE_PROBLEM_CONTENT_RATE")
     theme              String   @default("vs-dark") @map("CODE_THEME")
     tabSize            Int      @default(4) @map("CODE_TAB_SIZE")
-    lineNumber         Boolean  @default(true) @map("CODE_LINE_NUMBER")
+    lineNumber         String   @default("on") @map("CODE_LINE_NUMBER")
     defaultLanguage    String   @default("cpp") @map("CODE_DEFAULT_LANGUAGE")
     createdAt          DateTime @default(now())
     updatedAt          DateTime @default(now())
