@@ -1,26 +1,7 @@
-import { LanguageProvider } from '../../common/enums/LanguageProviderEnum';
 import { ApiProperty } from '@nestjs/swagger';
+import ResponseCodeTemplateSummary from './ResponseCodeTemplateSummary';
 
-export default class ResponseCodeTemplate {
-  @ApiProperty({
-    description: '템플릿의 고유 식별자',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  uuid: string;
-
-  @ApiProperty({
-    description: '템플릿 이름',
-    example: '기본 자바스크립트 템플릿',
-  })
-  name: string;
-
-  @ApiProperty({
-    description: '프로그래밍 언어 제공자',
-    enum: LanguageProvider,
-    example: LanguageProvider.CPP,
-  })
-  language: LanguageProvider;
-
+export default class ResponseCodeTemplate extends ResponseCodeTemplateSummary {
   @ApiProperty({
     description: '템플릿 내용',
     example: 'function solution() { ... }',
@@ -28,14 +9,10 @@ export default class ResponseCodeTemplate {
   content: string;
 
   @ApiProperty({
-    description: '생성 일시',
-    example: '2024-03-21T12:00:00Z',
+    description: '템플릿 설명 (선택사항)',
+    example: '배열을 정렬하는 기본적인 방법을 보여주는 예제입니다.',
+    required: false,
+    default: '',
   })
-  createdAt: Date;
-
-  @ApiProperty({
-    description: '수정 일시',
-    example: '2024-03-21T12:00:00Z',
-  })
-  updateAt: Date;
+  description: string = '';
 }

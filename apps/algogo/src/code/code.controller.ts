@@ -3,8 +3,7 @@ import {
   Controller,
   Delete,
   Get,
-  Patch,
-  Post,
+  Param,
   Put,
   Req,
   UseGuards,
@@ -12,18 +11,25 @@ import {
 import { CodeService } from './code.service';
 import { AuthGuard } from '../auth/auth.guard';
 import RequestUpsertCodeSettingDto from './dto/RequestUpsertCodeSettingDto';
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ResponseCodeSettingDto } from './dto/ResponseCodeSettingDto';
 import { ApiGlobalErrorResponses } from '../common/decorators/swagger/ApiGlobalErrorResponse';
 import { ApiBadRequestErrorResponse } from '../common/decorators/swagger/ApiBadRequestErrorResponse';
 import ResponseCodeTemplate from './dto/ResponseCodeTemplate';
-import ResponseCodeTemplateSummary from './dto/ResponseCodeTemplateSummary';
 import ResponseCodeTemplateResult from './dto/ResponseCodeTemplateResult';
 import RequestUpsertDefaultCodeTemplateDto from './dto/RequestUpsertDefaultCodeTemplateDto';
+import RequestUpsertCodeTemplateDto from './dto/RequestUpsertCodeTemplate';
 
 @ApiGlobalErrorResponses()
 @ApiBadRequestErrorResponse()
 @ApiTags('Code API')
+@ApiBearerAuth()
 @UseGuards(AuthGuard)
 @Controller('api/v1/code')
 export class CodeController {
@@ -98,6 +104,14 @@ export class CodeController {
     return new ResponseCodeTemplate();
   }
 
+  @ApiOperation({
+    summary: '기본 템플릿 설정',
+    description: '사용자의 기본 코드 템플릿을 설정합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '기본 템플릿 설정 성공',
+  })
   @Put('/template/default')
   async setDefaultTemplate(
     @Body() body: RequestUpsertDefaultCodeTemplateDto,
@@ -108,24 +122,72 @@ export class CodeController {
     return null;
   }
 
-  @Post('/template')
-  async createTemplate() {
-    return '';
+  @ApiOperation({
+    summary: '코드 템플릿 생성/수정',
+    description:
+      '코드 템플릿을 생성하거나 수정합니다. uuid가 제공되면 수정, 없으면 생성합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '코드 템플릿 생성/수정 성공',
+    type: null,
+  })
+  @Put('/template')
+  async upsertTemplate(
+    @Body() body: RequestUpsertCodeTemplateDto,
+    @Req() req: AuthRequest,
+  ) {
+    const { userNo } = req;
+    const dto = { userNo, ...body };
+    return null;
   }
 
-  @Patch('/template')
-  async updateTemplate() {}
-
+  @ApiOperation({
+    summary: '코드 템플릿 삭제',
+    description: '특정 코드 템플릿을 삭제합니다.',
+  })
+  @ApiParam({
+    name: 'uuid',
+    description: '삭제할 템플릿의 고유 식별자',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '코드 템플릿 삭제 성공',
+  })
+  @ApiResponse({
+    status: 404,
+    description: '삭제할 코드 템플릿을 찾을 수 없음',
+  })
   @Delete('/template/:uuid')
-  async deleteTemplate() {
-    return '';
+  async deleteTemplate(@Param('uuid') uuid: string, @Req() req: AuthRequest) {
+    const dto = { uuid, userNo: req.userNo };
+    return null;
   }
 
+  @ApiOperation({
+    summary: '문제 코드 조회',
+    description: '특정 문제에 대한 사용자의 코드를 조회합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '문제 코드 조회 성공',
+    type: String,
+  })
   @Get('/problem')
   async getProblemCode() {
     return '';
   }
 
+  @ApiOperation({
+    summary: '문제 코드 업데이트',
+    description: '특정 문제에 대한 사용자의 코드를 업데이트합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '문제 코드 업데이트 성공',
+    type: String,
+  })
   @Put('/problem')
   async updateProblemCode() {
     return '';

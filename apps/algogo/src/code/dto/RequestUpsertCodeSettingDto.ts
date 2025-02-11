@@ -32,10 +32,14 @@ export default class RequestUpsertCodeSettingDto {
 
   @ApiProperty({
     description: '탭 크기',
+    minimum: 2,
+    maximum: 8,
     required: false,
   })
   @IsNumber()
   @IsOptional()
+  @Min(2, { message: '최소 2 이상이어야 합니다.' })
+  @Max(8, { message: '최대 8 이하이어야 합니다.' })
   @Transform(({ value }) => parseInt(value, 10), { toClassOnly: true })
   tabSize?: number;
 
@@ -43,6 +47,7 @@ export default class RequestUpsertCodeSettingDto {
     description: '라인 넘버 표시 방식',
     enum: ['on', 'of', 'relative'],
     required: false,
+    example: 'on',
   })
   @IsOptional()
   @Transform(({ value }) => parseInt(value, 10), { toClassOnly: true })

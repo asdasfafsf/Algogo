@@ -7,6 +7,8 @@ export default class RequestUpsertDefaultCodeTemplateDto {
     description: '템플릿 UUID (기존 템플릿 수정 시 필수)',
     required: false,
     example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
+    nullable: false,
   })
   @IsUUID(undefined, {
     message: 'UUID 형식이 올바르지 않습니다.',
@@ -21,6 +23,7 @@ export default class RequestUpsertDefaultCodeTemplateDto {
     required: true,
     example: LanguageProvider.PYTHON,
     enum: LanguageProvider,
+    nullable: false,
   })
   @IsEnum(LanguageProvider, {
     message: '지원하지 않는 프로그래밍 언어입니다.',
@@ -31,6 +34,8 @@ export default class RequestUpsertDefaultCodeTemplateDto {
     description: '템플릿 내용 (새로운 템플릿 생성 시 필수)',
     required: false,
     example: 'def solution():\n    return',
+    minLength: 1,
+    nullable: false,
   })
   @IsString({
     message: '템플릿 내용은 문자열이어야 합니다.',

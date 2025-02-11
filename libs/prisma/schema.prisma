@@ -231,14 +231,15 @@ model CodeDefaultTemplate {
 }
 
 model CodeTemplate {
-    no        Int      @id @default(autoincrement()) @map("CODE_TEMPLATE_NO")
-    uuid      String   @unique @default(uuid()) @map("CODE_TEMPLATE_UUID")
-    userNo    Int      @map("USER_NO")
-    name      String   @map("CODE_TEMPLATE_NAME")
-    language  String   @map("CODE_TEMPLATE_LANGUAGE")
-    content   String   @map("CODE_TEMPLATE_CONTENT") @db.VarChar(4000)
-    createdAt DateTime @default(now()) @map("CODE_TEMPLATE_CREATED_AT")
-    updatedAt DateTime @default(now()) @map("CODE_TEMPLATE_UPDATED_AT")
+    no          Int      @id @default(autoincrement()) @map("CODE_TEMPLATE_NO")
+    uuid        String   @unique @default(uuid()) @map("CODE_TEMPLATE_UUID")
+    userNo      Int      @map("USER_NO")
+    name        String   @map("CODE_TEMPLATE_NAME")
+    language    String   @map("CODE_TEMPLATE_LANGUAGE")
+    content     String   @map("CODE_TEMPLATE_CONTENT") @db.VarChar(4000)
+    createdAt   DateTime @default(now()) @map("CODE_TEMPLATE_CREATED_AT")
+    updatedAt   DateTime @default(now()) @map("CODE_TEMPLATE_UPDATED_AT")
+    description String   @map("CODE_TEMPLATE_DESCRIPTION") @db.VarChar(1000)
 
     @@index([userNo, language])
 }
