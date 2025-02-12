@@ -3,7 +3,11 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
+  Patch,
+  Post,
   Put,
   Req,
   UseGuards,
@@ -24,8 +28,9 @@ import { ApiBadRequestErrorResponse } from '../common/decorators/swagger/ApiBadR
 import ResponseCodeTemplate from './dto/ResponseCodeTemplate';
 import { ResponseCodeTemplateResult } from './dto/ResponseCodeTemplateResult';
 import RequestUpsertDefaultCodeTemplateDto from './dto/RequestUpsertDefaultCodeTemplateDto';
-import RequestUpsertCodeTemplateDto from './dto/RequestUpsertCodeTemplate';
+import RequestUpsertCodeTemplateDto from './dto/RequestUpdateCodeTemplateDto';
 import RequestUpsertProblemCodeDto from './dto/RequestUpsertProblemCodeDto';
+import RequestCreateCodeTemplateDto from './dto/RequestCreateCodeTemplateDto';
 
 @ApiGlobalErrorResponses()
 @ApiBadRequestErrorResponse()
@@ -135,23 +140,46 @@ export class CodeController {
   }
 
   @ApiOperation({
+    summary: '코드 템플릿 생성',
+    description: '코드 템플릿을 생성합니다. 최대 10개까지 생성 가능',
+  })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: '10개를 넘을 경우 오류 발생',
+  })
+  @HttpCode(200)
+  @Post('/template')
+  async createTemplate(
+    @Body() body: RequestCreateCodeTemplateDto,
+    @Req() req: AuthRequest,
+  ) {
+    const { userNo } = req;
+    const dto = { userNo, ...body };
+    return await this.codeService.createCodeTemplate(dto);
+  }
+
+  @ApiOperation({
     summary: '코드 템플릿 생성/수정',
     description:
       '코드 템플릿을 생성하거나 수정합니다. uuid가 제공되면 수정, 없으면 생성합니다.',
   })
   @ApiResponse({
     status: 200,
-    description: '코드 템플릿 생성/수정 성공',
+    description: '코드 템플릿 수정 성공',
     type: null,
   })
-  @Put('/template')
-  async upsertTemplate(
+  @ApiResponse({
+    status: 404,
+    description: '코드 템플릿을 찾지 못했을 때',
+  })
+  @Patch('/template')
+  async updateCodeTemplate(
     @Body() body: RequestUpsertCodeTemplateDto,
     @Req() req: AuthRequest,
   ) {
     const { userNo } = req;
     const dto = { userNo, ...body };
-    return null;
+    return await this.codeService.updateCodeTemplate(dto);
   }
 
   @ApiOperation({

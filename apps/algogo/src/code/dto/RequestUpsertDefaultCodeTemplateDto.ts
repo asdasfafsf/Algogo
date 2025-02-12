@@ -29,19 +29,4 @@ export default class RequestUpsertDefaultCodeTemplateDto {
     message: '지원하지 않는 프로그래밍 언어입니다.',
   })
   language: LanguageProvider;
-
-  @ApiProperty({
-    description: '템플릿 내용 (새로운 템플릿 생성 시 필수)',
-    required: false,
-    example: 'def solution():\n    return',
-    minLength: 1,
-    nullable: false,
-  })
-  @IsString({
-    message: '템플릿 내용은 문자열이어야 합니다.',
-  })
-  @ValidateIf((o) => !o.uuid || o.content, {
-    message: '새로운 템플릿을 생성할 때는 content가 필요합니다.',
-  })
-  content?: string;
 }

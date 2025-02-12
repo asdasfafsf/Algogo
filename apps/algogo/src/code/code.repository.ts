@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { LanguageProvider } from '../common/enums/LanguageProviderEnum';
 
 @Injectable()
 export class CodeRepository {
@@ -108,9 +109,41 @@ export class CodeRepository {
     };
   }
 
-  async getCodeTemplate({ userNo, uuid }: { userNo: number; uuid: string }) {
+  async getCodeTemplateNo({ uuid, userNo }: { uuid: string; userNo: number }) {
     const codeTemplate = await this.prisma.codeTemplate.findUnique({
-      where: { userNo, uuid },
+      select: {
+        no: true,
+      },
+      where: {
+        userNo,
+        uuid,
+      },
+    });
+
+    return codeTemplate?.no;
+  }
+
+  async getCodeTemplate({
+    userNo,
+    codeTemplateNo,
+  }: {
+    userNo: number;
+    codeTemplateNo: number;
+  }) {
+    const codeTemplate = await this.prisma.codeTemplate.findUnique({
+      select: {
+        uuid: true,
+        name: true,
+        language: true,
+        content: true,
+        description: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      where: {
+        userNo,
+        no: codeTemplateNo,
+      },
     });
 
     return codeTemplate;
@@ -127,5 +160,105 @@ export class CodeRepository {
     });
 
     return codeTemplateList;
+  }
+
+  async upsertCodeDefaultTemplate({ userNo, language, codeTemplateNo }) {
+    await this.prisma.codeDefaultTemplate.upsert({
+      select: {},
+      update: {
+        codeTemplateNo,
+      },
+      create: {
+        userNo,
+        language,
+        codeTemplateNo,
+      },
+      where: {
+        userNo_language: {
+          userNo,
+          language,
+        },
+      },
+    });
+  }
+
+  async selectTotalCodeTemplateCount(userNo: number) {
+    return await this.prisma.codeTemplate.count({
+      where: {
+        userNo,
+      },
+    });
+  }
+
+  async createCodeTemplate({
+    userNo,
+    content,
+    language,
+    description,
+    name,
+  }: {
+    userNo: number;
+    content: string;
+    description: string;
+    name: string;
+    language: LanguageProvider;
+  }) {
+    const codeTemplate = await this.prisma.codeTemplate.create({
+      select: {
+        uuid: true,
+        name: true,
+        content: true,
+        language: true,
+        description: true,
+      },
+      data: {
+        userNo,
+        content,
+        language,
+        description,
+        name,
+      },
+    });
+
+    return codeTemplate;
+  }
+
+  async updateCodeTempltae({
+    userNo,
+    content,
+    language,
+    description,
+    name,
+    no,
+  }: {
+    userNo: number;
+    content?: string;
+    description?: string;
+    name?: string;
+    language: LanguageProvider;
+    no: number;
+  }) {
+    const codeTemplate = await this.prisma.codeTemplate.update({
+      select: {
+        uuid: true,
+        name: true,
+        content: true,
+        language: true,
+        description: true,
+      },
+      data: {
+        description,
+        userNo,
+        content,
+        language,
+        name,
+      },
+      where: {
+        no,
+        userNo,
+      },
+    });
+
+    return codeTemplate;
   }
 }

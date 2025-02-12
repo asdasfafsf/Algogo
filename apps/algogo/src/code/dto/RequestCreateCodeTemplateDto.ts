@@ -1,7 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, Length, MinLength, IsOptional } from 'class-validator';
+import {
+  IsString,
+  Length,
+  MinLength,
+  IsOptional,
+  IsEnum,
+} from 'class-validator';
+import { LanguageProvider } from '../../common/enums/LanguageProviderEnum';
 
-export default class RequestUpsertCodeTemplateDto {
+export default class RequestCreateCodeTemplateDto {
   @ApiProperty({
     description: '템플릿 제목',
     example: '기본 정렬 알고리즘',
@@ -10,7 +17,7 @@ export default class RequestUpsertCodeTemplateDto {
   })
   @IsString()
   @Length(1, 100)
-  title: string;
+  name: string;
 
   @ApiProperty({
     description: '템플릿 내용',
@@ -32,5 +39,17 @@ export default class RequestUpsertCodeTemplateDto {
   @IsString()
   @Length(0, 100)
   @IsOptional()
-  description: string = '';
+  description?: string;
+
+  @ApiProperty({
+    description: '프로그래밍 언어',
+    required: true,
+    example: LanguageProvider.PYTHON,
+    enum: LanguageProvider,
+    nullable: false,
+  })
+  @IsEnum(LanguageProvider, {
+    message: '지원하지 않는 프로그래밍 언어입니다.',
+  })
+  language: LanguageProvider;
 }
