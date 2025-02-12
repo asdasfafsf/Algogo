@@ -115,5 +115,21 @@ export class CodeService {
 
   async setDefaultCodeTemplate(
     dto: RequestUpsertDefaultCodeTemplateDto & { userNo: number },
-  ) {}
+  ) {
+    const { userNo, uuid, language } = dto;
+    const codeTemplateNo = await this.codeRepository.getCodeTemplateNo({
+      uuid,
+      userNo,
+    });
+
+    if (!codeTemplateNo) {
+      throw new NotFoundCodeTemplateException();
+    }
+
+    return this.codeRepository.upsertCodeDefaultTemplate({
+      userNo,
+      language,
+      codeTemplateNo,
+    });
+  }
 }
