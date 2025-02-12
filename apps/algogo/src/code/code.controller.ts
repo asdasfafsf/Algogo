@@ -87,7 +87,7 @@ export class CodeController {
   async getTemplateResult(@Req() req: AuthRequest) {
     const { userNo } = req;
     const { defaultList, summaryList } =
-      await this.codeService.getCodeTemplate(userNo);
+      await this.codeService.getCodeTemplateResult(userNo);
     return { defaultList, summaryList };
   }
 
@@ -110,8 +110,10 @@ export class CodeController {
     description: '코드 템플릿을 찾을 수 없음',
   })
   @Get('/template/:uuid')
-  async getTemplate() {
-    return new ResponseCodeTemplate();
+  async getTemplate(@Param('uuid') uuid: string, @Req() req: AuthRequest) {
+    const { userNo } = req;
+    const dto = { userNo, uuid };
+    return await this.codeService.getCodeTemplate(dto);
   }
 
   @ApiOperation({

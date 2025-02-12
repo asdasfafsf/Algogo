@@ -61,7 +61,7 @@ export class CodeRepository {
     });
   }
 
-  async getCodeTemplate(userNo: number) {
+  async getCodeTemplateResult(userNo: number) {
     const [defaultList, summaryList] = await Promise.all([
       this.prisma.codeDefaultTemplate
         .findMany({
@@ -106,6 +106,14 @@ export class CodeRepository {
       defaultList,
       summaryList,
     };
+  }
+
+  async getCodeTemplate({ userNo, uuid }: { userNo: number; uuid: string }) {
+    const codeTemplate = await this.prisma.codeTemplate.findUnique({
+      where: { userNo, uuid },
+    });
+
+    return codeTemplate;
   }
 
   async getCodeTemplateList(userNo: number) {

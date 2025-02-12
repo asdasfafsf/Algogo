@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CodeRepository } from './code.repository';
 import RequestUpsertCodeSettingDto from './dto/RequestUpsertCodeSettingDto';
 import { NotFoundCodeSettingException } from './errors/NotFoundCodeSettingException';
+import { NotFoundCodeTemplateException } from './errors/NotFoundCodeTemplateException';
 import { ResponseCodeTemplateResult } from './dto/ResponseCodeTemplateResult';
 import { LanguageProvider } from '../common/enums/LanguageProviderEnum';
 @Injectable()
@@ -24,9 +25,11 @@ export class CodeService {
     return this.codeRepository.upsertCodeSetting(dto);
   }
 
-  async getCodeTemplate(userNo: number): Promise<ResponseCodeTemplateResult> {
+  async getCodeTemplateResult(
+    userNo: number,
+  ): Promise<ResponseCodeTemplateResult> {
     const { summaryList, defaultList } =
-      await this.codeRepository.getCodeTemplate(userNo);
+      await this.codeRepository.getCodeTemplateResult(userNo);
 
     return {
       summaryList: summaryList.map((elem) => ({
@@ -38,5 +41,15 @@ export class CodeService {
         language: elem.language as LanguageProvider,
       })),
     };
+  }
+
+  async getCodeTemplate({ userNo, uuid }: { userNo: number; uuid: string }) {
+    const codeTemplate = this.codeRepository.getCodeTemplate({ userNo, uuid });
+
+    if (!codeTemplate) {
+      throw new NotFoundCodeTemplateException();
+    }
+
+    return codeTemplate;
   }
 }
