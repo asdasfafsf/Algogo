@@ -261,4 +261,15 @@ export class CodeRepository {
 
     return codeTemplate;
   }
+
+  async deleteCodeTemplate({ no }: { no: number }) {
+    return await this.prisma.codeTemplate.delete({
+      select: {
+        uuid: true,
+      },
+      where: {
+        no,
+      },
+    });
+  }
 }

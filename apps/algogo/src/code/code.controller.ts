@@ -31,6 +31,7 @@ import RequestUpsertDefaultCodeTemplateDto from './dto/RequestUpsertDefaultCodeT
 import RequestUpsertCodeTemplateDto from './dto/RequestUpdateCodeTemplateDto';
 import RequestUpsertProblemCodeDto from './dto/RequestUpsertProblemCodeDto';
 import RequestCreateCodeTemplateDto from './dto/RequestCreateCodeTemplateDto';
+import { ResponseDeleteCodeTemplateDto } from './dto/ResponseDeleteCodeTemplateDto';
 
 @ApiGlobalErrorResponses()
 @ApiBadRequestErrorResponse()
@@ -194,6 +195,7 @@ export class CodeController {
   @ApiResponse({
     status: 200,
     description: '코드 템플릿 삭제 성공',
+    type: [ResponseDeleteCodeTemplateDto],
   })
   @ApiResponse({
     status: 404,
@@ -202,9 +204,8 @@ export class CodeController {
   @Delete('/template/:uuid')
   async deleteTemplate(@Param('uuid') uuid: string, @Req() req: AuthRequest) {
     const dto = { uuid, userNo: req.userNo };
-    return null;
+    return await this.codeService.deleteCodeTemplate(dto);
   }
-
   @ApiOperation({
     summary: '문제 코드 조회',
     description: '특정 문제에 대한 사용자의 코드를 조회합니다.',

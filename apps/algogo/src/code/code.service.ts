@@ -103,6 +103,16 @@ export class CodeService {
     });
   }
 
+  async deleteCodeTemplate({ uuid, userNo }: { uuid: string; userNo: number }) {
+    const no = await this.codeRepository.getCodeTemplateNo({ uuid, userNo });
+
+    if (!no) {
+      throw new NotFoundCodeTemplateException();
+    }
+
+    return await this.codeRepository.deleteCodeTemplate({ no });
+  }
+
   async setDefaultCodeTemplate(
     dto: RequestUpsertDefaultCodeTemplateDto & { userNo: number },
   ) {}
