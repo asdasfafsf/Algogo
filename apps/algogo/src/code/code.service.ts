@@ -9,6 +9,8 @@ import RequestUpsertDefaultCodeTemplateDto from './dto/RequestUpsertDefaultCodeT
 import { CodeTemplateLimitExceededException } from './errors/CodeTemplateLimitExceededException';
 import RequestUpsertCodeTemplateDto from './dto/RequestUpdateCodeTemplateDto';
 import RequestCreateCodeTemplateDto from './dto/RequestCreateCodeTemplateDto';
+import { NotFoundProblemException } from './errors/NotFoundProblemException';
+import { NotFoundProblemCode } from './errors/NotFoundProblemCode';
 @Injectable()
 export class CodeService {
   constructor(private readonly codeRepository: CodeRepository) {}
@@ -131,5 +133,35 @@ export class CodeService {
       language,
       codeTemplateNo,
     });
+  }
+
+  async getProblemCode({
+    userNo,
+    problemUuid,
+    language,
+  }: {
+    userNo: number;
+    problemUuid: string;
+    language: LanguageProvider;
+  }) {
+    const problem =
+      await this.codeRepository.problemUuidToProblemNo(problemUuid);
+
+    if (!problem) {
+      throw new NotFoundProblemException();
+    }
+
+    const problemNo = problem.no;
+    const problemCode = await this.codeRepository.getProblemCode({
+      userNo,
+      problemNo,
+      language,
+    });
+
+    if (!problemCode) {
+      throw new NotFoundProblemCode();
+    }
+
+    return problemCode;
   }
 }

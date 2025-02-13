@@ -6,9 +6,12 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseEnumPipe,
+  ParseUUIDPipe,
   Patch,
   Post,
   Put,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -17,6 +20,7 @@ import { AuthGuard } from '../auth/auth.guard';
 import RequestUpsertCodeSettingDto from './dto/RequestUpsertCodeSettingDto';
 import {
   ApiBearerAuth,
+  ApiNotFoundResponse,
   ApiOperation,
   ApiParam,
   ApiResponse,
@@ -32,6 +36,8 @@ import RequestUpsertCodeTemplateDto from './dto/RequestUpdateCodeTemplateDto';
 import RequestUpsertProblemCodeDto from './dto/RequestUpsertProblemCodeDto';
 import RequestCreateCodeTemplateDto from './dto/RequestCreateCodeTemplateDto';
 import { ResponseDeleteCodeTemplateDto } from './dto/ResponseDeleteCodeTemplateDto';
+import { LanguageProvider } from '../common/enums/LanguageProviderEnum';
+import { ResponseProblemCodeDto } from './dto/ResponseProblemCodeDto';
 
 @ApiGlobalErrorResponses()
 @ApiBadRequestErrorResponse()
@@ -213,16 +219,67 @@ export class CodeController {
   @ApiResponse({
     status: 200,
     description: '문제 코드 조회 성공',
-    type: String,
+    type: ResponseProblemCodeDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: '두 가지 NotFound 에러 상황',
+    schema: {
+      oneOf: [
+        {
+          type: 'object',
+          properties: {
+            code: {
+              type: 'string',
+              example: 'NOT_FOUND_PROBLEM',
+            },
+            message: {
+              type: 'string',
+              example: '문제를 찾을 수 없습니다.',
+            },
+          },
+          required: ['code', 'message'],
+        },
+        {
+          type: 'object',
+          properties: {
+            code: {
+              type: 'string',
+              example: 'NOT_FOUND_PROBLEM_CODE',
+            },
+            message: {
+              type: 'string',
+              example: '저장된 코드가 없습니다.',
+            },
+          },
+          required: ['code', 'message'],
+        },
+      ],
+    },
   })
   @Get('/problem/:problemUuid')
   async getProblemCode(
     @Req() req: AuthRequest,
-    @Param('problemUuid') problemUuid: string,
+    @Param(
+      'problemUuid',
+      new ParseUUIDPipe({
+        version: '4',
+      }),
+    )
+    problemUuid: string,
+    @Query(
+      'language',
+      new ParseEnumPipe(LanguageProvider, {
+        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+      }),
+    )
+    language: LanguageProvider,
   ) {
     const { userNo } = req;
-    const dto = { userNo, problemUuid };
-    return '';
+    const dto = { userNo, problemUuid, language };
+    const problemCode = await this.codeService.getProblemCode(dto);
+
+    return problemCode;
   }
 
   @ApiOperation({

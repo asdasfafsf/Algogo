@@ -272,4 +272,36 @@ export class CodeRepository {
       },
     });
   }
+
+  async problemUuidToProblemNo(uuid: string) {
+    return await this.prisma.problem.findUnique({
+      select: {
+        no: true,
+      },
+      where: {
+        uuid,
+      },
+    });
+  }
+
+  async getProblemCode({
+    userNo,
+    problemNo,
+  }: {
+    userNo: number;
+    problemNo: number;
+    language: LanguageProvider;
+  }) {
+    const problemCode = await this.prisma.problemCode.findFirst({
+      select: {
+        content: true,
+      },
+      where: {
+        userNo,
+        problemNo,
+      },
+    });
+
+    return problemCode;
+  }
 }
