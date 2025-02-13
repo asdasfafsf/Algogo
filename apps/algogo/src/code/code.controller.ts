@@ -299,6 +299,7 @@ export class CodeController {
   ) {
     const { userNo } = req;
     const dto = { userNo, ...body };
+    await this.codeService.upsertProblemCode(dto);
     return null;
   }
 }
