@@ -204,3 +204,60 @@ model ProblemCollectionLog {
     @@index([createdAt])
     @@index([userNo, createdAt])
 }
+
+model CodeSetting {
+    no                 Int      @id @default(autoincrement()) @map("USER_CODE_SETTING_NO")
+    userNo             Int      @map("USER_NO")
+    fontSize           Int      @default(14) @map("CODE_FONT_SIZE")
+    problemContentRate Int      @default(100) @map("CODE_PROBLEM_CONTENT_RATE")
+    theme              String   @default("vs-dark") @map("CODE_THEME")
+    tabSize            Int      @default(4) @map("CODE_TAB_SIZE")
+    lineNumber         String   @default("on") @map("CODE_LINE_NUMBER")
+    defaultLanguage    String   @default("cpp") @map("CODE_DEFAULT_LANGUAGE")
+    createdAt          DateTime @default(now())
+    updatedAt          DateTime @default(now())
+
+    @@unique([userNo])
+    @@index([userNo])
+}
+
+model CodeDefaultTemplate {
+    no             Int    @id @default(autoincrement()) @map("CODE_DEFAULT_TEMPLATE_NO")
+    codeTemplateNo Int    @map("CODE_TEMPLATE_NO")
+    userNo         Int    @map("USER_NO")
+    language       String @map("CODE_DEFAULT_TEMPLATE_LANGUAGE")
+
+    @@unique([userNo, language])
+    @@index([userNo])
+    @@map("CODE_DEFAULT_TEMPLATE")
+}
+
+model CodeTemplate {
+    no          Int      @id @default(autoincrement()) @map("CODE_TEMPLATE_NO")
+    uuid        String   @unique @default(uuid()) @map("CODE_TEMPLATE_UUID")
+    userNo      Int      @map("USER_NO")
+    name        String   @map("CODE_TEMPLATE_NAME")
+    language    String   @map("CODE_TEMPLATE_LANGUAGE")
+    content     String   @map("CODE_TEMPLATE_CONTENT") @db.VarChar(4000)
+    createdAt   DateTime @default(now()) @map("CODE_TEMPLATE_CREATED_AT")
+    updatedAt   DateTime @default(now()) @map("CODE_TEMPLATE_UPDATED_AT")
+    description String   @map("CODE_TEMPLATE_DESCRIPTION") @db.VarChar(1000)
+
+    @@index([userNo, language])
+    @@map("CODE_TEMPLATE")
+}
+
+model ProblemCode {
+    no        Int      @id @default(autoincrement()) @map("PROBLEM_CODE_NO")
+    userNo    Int      @map("USER_NO")
+    problemNo Int      @map("PROBLEM_NO")
+    language  String   @map("PROBLEM_CODE_LANGUAGE")
+    content   String   @map("PROBLEM_CODE_CONTENT") @db.Text()
+    createdAt DateTime @default(now()) @map("PROBLEM_CODE_CREATED_AT")
+    updatedAt DateTime @default(now()) @map("PROBLEM_CODE_UPDATED_AT")
+
+    @@unique([userNo])
+    @@index([userNo])
+    @@index([userNo, problemNo])
+    @@map("PROBLEM_CODE")
+}
