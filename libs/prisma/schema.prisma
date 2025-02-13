@@ -256,7 +256,8 @@ model ProblemCode {
     createdAt DateTime @default(now()) @map("PROBLEM_CODE_CREATED_AT")
     updatedAt DateTime @default(now()) @map("PROBLEM_CODE_UPDATED_AT")
 
-    @@unique([userNo, problemNo])
+    @@unique([userNo])
+    @@index([userNo])
     @@index([userNo, problemNo])
     @@map("PROBLEM_CODE")
 }

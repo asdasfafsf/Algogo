@@ -11,9 +11,16 @@ import RequestUpsertCodeTemplateDto from './dto/RequestUpdateCodeTemplateDto';
 import RequestCreateCodeTemplateDto from './dto/RequestCreateCodeTemplateDto';
 import { NotFoundProblemException } from './errors/NotFoundProblemException';
 import { NotFoundProblemCode } from './errors/NotFoundProblemCode';
+import { RedisService } from '../redis/redis.service';
+import RequestUpsertProblemCodeDto from './dto/RequestUpsertProblemCodeDto';
+import { CustomLogger } from '../logger/custom-logger';
 @Injectable()
 export class CodeService {
-  constructor(private readonly codeRepository: CodeRepository) {}
+  constructor(
+    private readonly redisService: RedisService,
+    private readonly codeRepository: CodeRepository,
+    private readonly logger: CustomLogger,
+  ) {}
 
   async getCodeSetting(userNo: number) {
     const codeSetting = await this.codeRepository.getCodeSetting(userNo);
@@ -135,6 +142,31 @@ export class CodeService {
     });
   }
 
+  async problemUuidToProblemNo(problemUuid: string) {
+    let problemNo = await this.redisService.get(`problemUuid_${problemUuid}`);
+
+    this.logger.silly('하이하이', {
+      problemNo,
+    });
+
+    if (!problemNo) {
+      const problem =
+        await this.codeRepository.problemUuidToProblemNo(problemUuid);
+
+      this.logger.silly('아무것도 ㅠㅠ', {
+        problem,
+      });
+      if (!problem) {
+        throw new NotFoundProblemException();
+      }
+
+      problemNo = problem.no.toString();
+      await this.redisService.set(`problemUuid_${problemUuid}`, problemNo);
+    }
+
+    return Number(problemNo);
+  }
+
   async getProblemCode({
     userNo,
     problemUuid,
@@ -144,14 +176,7 @@ export class CodeService {
     problemUuid: string;
     language: LanguageProvider;
   }) {
-    const problem =
-      await this.codeRepository.problemUuidToProblemNo(problemUuid);
-
-    if (!problem) {
-      throw new NotFoundProblemException();
-    }
-
-    const problemNo = problem.no;
+    const problemNo = await this.problemUuidToProblemNo(problemUuid);
     const problemCode = await this.codeRepository.getProblemCode({
       userNo,
       problemNo,
@@ -163,5 +188,18 @@ export class CodeService {
     }
 
     return problemCode;
+  }
+
+  async upsertProblemCode(
+    dto: RequestUpsertProblemCodeDto & { userNo: number },
+  ) {
+    const { problemUuid, language, content, userNo } = dto;
+    const problemNo = await this.problemUuidToProblemNo(problemUuid);
+    return await this.codeRepository.upsertProblemCode({
+      userNo,
+      problemNo,
+      language,
+      content,
+    });
   }
 }

@@ -38,6 +38,7 @@ import RequestCreateCodeTemplateDto from './dto/RequestCreateCodeTemplateDto';
 import { ResponseDeleteCodeTemplateDto } from './dto/ResponseDeleteCodeTemplateDto';
 import { LanguageProvider } from '../common/enums/LanguageProviderEnum';
 import { ResponseProblemCodeDto } from './dto/ResponseProblemCodeDto';
+import { ResponseDto } from '../common/dto/ResponseDto';
 
 @ApiGlobalErrorResponses()
 @ApiBadRequestErrorResponse()
@@ -201,7 +202,7 @@ export class CodeController {
   @ApiResponse({
     status: 200,
     description: '코드 템플릿 삭제 성공',
-    type: [ResponseDeleteCodeTemplateDto],
+    type: ResponseDto<[ResponseDeleteCodeTemplateDto]>,
   })
   @ApiResponse({
     status: 404,
@@ -219,7 +220,7 @@ export class CodeController {
   @ApiResponse({
     status: 200,
     description: '문제 코드 조회 성공',
-    type: ResponseProblemCodeDto,
+    type: ResponseDto<ResponseProblemCodeDto>,
   })
   @ApiResponse({
     status: 404,
@@ -289,7 +290,7 @@ export class CodeController {
   @ApiResponse({
     status: 200,
     description: '문제 코드 업데이트 성공',
-    type: String,
+    type: ResponseDto<null>,
   })
   @Put('/problem')
   async saveProblemCode(

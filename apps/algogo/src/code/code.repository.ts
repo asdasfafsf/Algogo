@@ -304,4 +304,33 @@ export class CodeRepository {
 
     return problemCode;
   }
+
+  async upsertProblemCode({
+    userNo,
+    problemNo,
+    language,
+    content,
+  }: {
+    userNo: number;
+    problemNo: number;
+    language: LanguageProvider;
+    content: string;
+  }) {
+    await this.prisma.problemCode.upsert({
+      where: {
+        userNo,
+      },
+      update: {
+        content,
+        problemNo,
+        language,
+      },
+      create: {
+        userNo,
+        problemNo,
+        language,
+        content,
+      },
+    });
+  }
 }

@@ -10,7 +10,7 @@ export default class RequestUpsertProblemCodeDto {
   })
   @IsUUID(undefined, { message: 'UUID 형식이 올바르지 않습니다.' })
   @IsNotEmpty({ message: '문제 식별자는 필수 입력값입니다.' })
-  uuid: string;
+  problemUuid: string;
 
   @ApiProperty({
     description: '문제 코드',
