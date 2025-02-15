@@ -145,17 +145,10 @@ export class CodeService {
   async problemUuidToProblemNo(problemUuid: string) {
     let problemNo = await this.redisService.get(`problemUuid_${problemUuid}`);
 
-    this.logger.silly('하이하이', {
-      problemNo,
-    });
-
     if (!problemNo) {
       const problem =
         await this.codeRepository.problemUuidToProblemNo(problemUuid);
 
-      this.logger.silly('아무것도 ㅠㅠ', {
-        problem,
-      });
       if (!problem) {
         throw new NotFoundProblemException();
       }

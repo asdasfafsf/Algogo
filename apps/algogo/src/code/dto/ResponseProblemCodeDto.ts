@@ -19,4 +19,16 @@ export class ResponseProblemCodeDto {
     example: 'console.log("Hello, World!");',
   })
   content: string;
+
+  @ApiProperty({
+    description: '코드 생성시간',
+    example: '2025-01-01T00:00:00.000Z',
+  })
+  createdAt: Date;
+
+  @ApiProperty({
+    description: '코드 수정시간',
+    example: '2025-01-01T00:00:00.000Z',
+  })
+  updatedAt: Date;
 }
