@@ -5,6 +5,7 @@ import {
   MinLength,
   IsOptional,
   IsEnum,
+  IsBoolean,
 } from 'class-validator';
 import { LanguageProvider } from '../../common/enums/LanguageProviderEnum';
 
@@ -52,4 +53,14 @@ export default class RequestCreateCodeTemplateDto {
     message: '지원하지 않는 프로그래밍 언어입니다.',
   })
   language: LanguageProvider;
+
+  @ApiProperty({
+    description: '기본 템플릿 여부',
+    example: false,
+    required: false,
+  })
+  @IsBoolean({
+    message: '기본 템플릿 여부는 불리언 값이어야 합니다.',
+  })
+  isDefault: boolean;
 }
