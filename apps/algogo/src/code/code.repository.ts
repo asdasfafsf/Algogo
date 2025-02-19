@@ -164,7 +164,6 @@ export class CodeRepository {
 
   async upsertCodeDefaultTemplate({ userNo, language, codeTemplateNo }) {
     await this.prisma.codeDefaultTemplate.upsert({
-      select: {},
       update: {
         codeTemplateNo,
       },
