@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsString, IsUUID, ValidateIf } from 'class-validator';
+import { IsEnum, IsUUID, ValidateIf } from 'class-validator';
 import { LanguageProvider } from '../../common/enums/LanguageProviderEnum';
 
 export default class RequestUpsertDefaultCodeTemplateDto {

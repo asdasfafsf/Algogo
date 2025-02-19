@@ -164,7 +164,6 @@ export class CodeRepository {
 
   async upsertCodeDefaultTemplate({ userNo, language, codeTemplateNo }) {
     await this.prisma.codeDefaultTemplate.upsert({
-      select: {},
       update: {
         codeTemplateNo,
       },
@@ -287,6 +286,7 @@ export class CodeRepository {
   async getProblemCode({
     userNo,
     problemNo,
+    language,
   }: {
     userNo: number;
     problemNo: number;
@@ -295,10 +295,13 @@ export class CodeRepository {
     const problemCode = await this.prisma.problemCode.findFirst({
       select: {
         content: true,
+        updatedAt: true,
+        createdAt: true,
       },
       where: {
         userNo,
         problemNo,
+        language,
       },
     });
 

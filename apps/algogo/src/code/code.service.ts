@@ -75,7 +75,7 @@ export class CodeService {
   async createCodeTemplate(
     dto: RequestCreateCodeTemplateDto & { userNo: number },
   ) {
-    const { userNo, content, description, name, language } = dto;
+    const { userNo, content, description, name, language, isDefault } = dto;
     const count =
       await this.codeRepository.selectTotalCodeTemplateCount(userNo);
 
@@ -83,26 +83,37 @@ export class CodeService {
       throw new CodeTemplateLimitExceededException();
     }
 
-    return await this.codeRepository.createCodeTemplate({
+    const codeTemplate = await this.codeRepository.createCodeTemplate({
       userNo,
       content,
       description,
       name,
       language,
     });
+
+    if (isDefault) {
+      await this.setDefaultCodeTemplate({
+        userNo,
+        uuid: codeTemplate.uuid,
+        language,
+      });
+    }
+
+    return codeTemplate;
   }
 
   async updateCodeTemplate(
     dto: RequestUpsertCodeTemplateDto & { userNo: number },
   ) {
-    const { userNo, uuid, content, description, name, language } = dto;
+    const { userNo, uuid, content, description, name, language, isDefault } =
+      dto;
     const no = await this.codeRepository.getCodeTemplateNo({ uuid, userNo });
 
     if (!no) {
       throw new NotFoundCodeTemplateException();
     }
 
-    return await this.codeRepository.updateCodeTempltae({
+    const codeTemplate = await this.codeRepository.updateCodeTempltae({
       userNo,
       content,
       description,
@@ -110,6 +121,16 @@ export class CodeService {
       language,
       no,
     });
+
+    if (isDefault) {
+      await this.setDefaultCodeTemplate({
+        userNo,
+        uuid: codeTemplate.uuid,
+        language,
+      });
+    }
+
+    return codeTemplate;
   }
 
   async deleteCodeTemplate({ uuid, userNo }: { uuid: string; userNo: number }) {
@@ -145,17 +166,10 @@ export class CodeService {
   async problemUuidToProblemNo(problemUuid: string) {
     let problemNo = await this.redisService.get(`problemUuid_${problemUuid}`);
 
-    this.logger.silly('하이하이', {
-      problemNo,
-    });
-
     if (!problemNo) {
       const problem =
         await this.codeRepository.problemUuidToProblemNo(problemUuid);
 
-      this.logger.silly('아무것도 ㅠㅠ', {
-        problem,
-      });
       if (!problem) {
         throw new NotFoundProblemException();
       }
