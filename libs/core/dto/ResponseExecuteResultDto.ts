@@ -5,4 +5,5 @@ export class ResponseExecuteResultDto {
   memory: number;
   message: string;
   result: string;
+  detail: string;
 }

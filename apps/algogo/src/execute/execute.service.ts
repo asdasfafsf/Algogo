@@ -119,6 +119,7 @@ export class ExecuteService implements OnModuleInit {
         memory: 0,
         code: '0000',
         result: res,
+        detail: '',
       };
     } catch (error) {
       this.logger.error(error.message);
@@ -128,6 +129,7 @@ export class ExecuteService implements OnModuleInit {
           memory: 0,
           code: '9000',
           result: '시간 초과',
+          detail: '',
         };
       }
       return {
@@ -135,6 +137,7 @@ export class ExecuteService implements OnModuleInit {
         memory: 0,
         code: '9999',
         result: '예외 오류',
+        detail: '',
       };
     } finally {
     }

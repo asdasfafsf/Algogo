@@ -20,7 +20,6 @@ import { AuthGuard } from '../auth/auth.guard';
 import RequestUpsertCodeSettingDto from './dto/RequestUpsertCodeSettingDto';
 import {
   ApiBearerAuth,
-  ApiNotFoundResponse,
   ApiOperation,
   ApiParam,
   ApiResponse,

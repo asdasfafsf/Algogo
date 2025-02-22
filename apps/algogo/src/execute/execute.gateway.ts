@@ -153,6 +153,7 @@ export class ExecuteGateway {
           result: message,
           processTime: 0,
           memory: 0,
+          detail: '',
         };
       }
 
@@ -161,6 +162,7 @@ export class ExecuteGateway {
         result: '예외 오류',
         processTime: 0,
         memory: 0,
+        detail: '',
       };
     } finally {
     }
