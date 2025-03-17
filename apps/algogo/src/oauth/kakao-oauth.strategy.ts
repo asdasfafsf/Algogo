@@ -30,7 +30,7 @@ export class KakaoOAuthStrategy extends CustomOAuthStrategy(
     const { sub, nickname, email } = userInfo;
     return {
       provider: OAuthProvider.KAKAO,
-      name: nickname,
+      name: nickname ?? '',
       id: sub,
       email: email ?? '',
       accessToken,
