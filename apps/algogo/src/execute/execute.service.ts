@@ -55,8 +55,11 @@ export class ExecuteService implements OnModuleInit {
 
   async run(requestExecuteDto: RequestRunDto): Promise<any> {
     try {
-      const job = await this.queue.add('run', requestExecuteDto);
-      const result = await job.waitUntilFinished(this.queueEvents);
+      const job = await this.queue.add('run', requestExecuteDto, {
+        attempts: 2,
+      });
+      const timeout = 1000 * (requestExecuteDto.inputList.length * 2) + 3000;
+      const result = await job.waitUntilFinished(this.queueEvents, timeout);
 
       return result;
     } catch (error) {
