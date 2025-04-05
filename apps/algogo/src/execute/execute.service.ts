@@ -1,10 +1,9 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
-import { FlowProducer, QueueEvents } from 'bullmq';
+import { Queue, QueueEvents } from 'bullmq';
 import bullmqConfig from '../config/bullmqConfig';
 import { ConfigType } from '@nestjs/config';
 import { uuidv7 } from 'uuidv7';
 import { CustomLogger } from '../logger/custom-logger';
-import { RequestCompileDto } from './dto/RequestCompileDto';
 import { RequestRunDto } from './dto/RequestRunDto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
@@ -17,16 +16,17 @@ export class ExecuteService implements OnModuleInit {
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  private flowProducer: FlowProducer;
   private queueEvents: QueueEvents;
+  private queue: Queue;
 
   async onModuleInit() {
-    this.flowProducer = new FlowProducer({
+    this.queue = new Queue(this.config.queueName, {
       connection: {
         ...this.config,
       },
     });
-    await this.flowProducer.waitUntilReady();
+
+    await this.queue.waitUntilReady();
 
     this.queueEvents = new QueueEvents(this.config.queueName, {
       connection: {
@@ -35,6 +35,18 @@ export class ExecuteService implements OnModuleInit {
     });
 
     await this.queueEvents.waitUntilReady();
+
+    this.queueEvents.on('progress', (progress) => {
+      this.logger.silly('progress', { progress });
+
+      const typedProgress = progress as any;
+      if (typedProgress.data.stage === 'execute') {
+        this.eventEmitter.emit('execute', {
+          ...typedProgress.data,
+          stage: undefined,
+        });
+      }
+    });
   }
 
   async generateJobId(provider: string) {
@@ -43,83 +55,13 @@ export class ExecuteService implements OnModuleInit {
 
   async run(requestExecuteDto: RequestRunDto): Promise<any> {
     try {
-      const { code, provider, inputList, id } = requestExecuteDto;
-      const requestCompileDto = {
-        id,
-        code,
-        provider,
-      } as RequestCompileDto;
-
-      const flow = await this.flowProducer.add({
-        name: 'run',
-        queueName: this.config.queueName,
-        data: {
-          id,
-        },
-        children: [
-          {
-            name: 'compile',
-            queueName: this.config.queueName,
-            data: requestCompileDto,
-            opts: {
-              priority: 1,
-            },
-          },
-          ...inputList.map(({ seq, input }) => ({
-            name: 'execute',
-            queueName: this.config.queueName,
-            data: {
-              id,
-              seq,
-              input,
-              provider,
-            },
-            opts: {
-              priority: 3,
-            },
-          })),
-        ],
+      const job = await this.queue.add('run', requestExecuteDto, {
+        attempts: 2,
       });
+      const timeout = 1000 * (requestExecuteDto.inputList.length * 2) + 3000;
+      const result = await job.waitUntilFinished(this.queueEvents, timeout);
 
-      const compileJob = flow.children.find(
-        (elem) => elem.job.name === 'compile',
-      )!.job;
-      const compileResult = await compileJob.waitUntilFinished(
-        this.queueEvents,
-        2000,
-      );
-
-      if (compileResult.code !== '0000') {
-        return {
-          ...compileResult,
-          result: '컴파일 에러',
-        };
-      }
-
-      const executeJobList = flow.children
-        .filter((elem) => elem.job.name === 'execute')
-        .map((elem) => elem.job);
-
-      for (const executeJob of executeJobList) {
-        const executeResult = await executeJob.waitUntilFinished(
-          this.queueEvents,
-          5000,
-        );
-
-        this.eventEmitter.emitAsync(`execute`, {
-          ...executeResult,
-          id,
-        });
-      }
-
-      const res = await flow.job.waitUntilFinished(this.queueEvents, 2000);
-
-      return {
-        processTime: 0,
-        memory: 0,
-        code: '0000',
-        result: res,
-      };
+      return result;
     } catch (error) {
       this.logger.error(error.message);
       if (error?.message?.includes('timed out before finishing')) {
