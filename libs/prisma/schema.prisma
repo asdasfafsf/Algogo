@@ -156,8 +156,8 @@ model ProblemV2Type {
 model ProblemV2InputOutput {
     no        Int      @id @default(autoincrement()) @map("PROBLEM_V2_INPUT_OUTPUT_NO")
     order     Int      @map("PROBLEM_V2_INPUT_OUTPUT_ORDER")
-    input     String   @map("PROBLEM_V2_INPUT_OUTPUT_INPUT") @db.VarChar(255)
-    output    String   @map("PROBLEM_V2_INPUT_OUTPUT_OUTPUT") @db.VarChar(255)
+    input     String   @map("PROBLEM_V2_INPUT_OUTPUT_INPUT") @db.VarChar(4000)
+    output    String   @map("PROBLEM_V2_INPUT_OUTPUT_OUTPUT") @db.VarChar(4000)
     content   String?  @map("PROBLEM_V2_INPUT_OUTPUT_CONTENT") @db.Text()
     createdAt DateTime @default(now()) @map("PROBLEM_V2_INPUT_OUTPUT_CREATED_AT")
     updatedAt DateTime @updatedAt @map("PROBLEM_V2_INPUT_OUTPUT_UPDATED_AT")
