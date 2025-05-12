@@ -75,6 +75,7 @@ export class ProblemsV2Repository {
     const problemList = await this.prismaService.problemV2.findMany({
       select: {
         no: false,
+        uuid: true,
         title: true,
         level: true,
         levelText: true,
@@ -104,6 +105,7 @@ export class ProblemsV2Repository {
     return this.prismaService.problemV2.findUnique({
       select: {
         no: false,
+        uuid: true,
         title: true,
         level: true,
         levelText: true,
