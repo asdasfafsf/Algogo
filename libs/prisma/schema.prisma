@@ -13,6 +13,162 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+model BatchDefinition {
+    no                Int             @id @default(autoincrement()) @map("BATCH_DEFINITION_NO")
+    name              String          @map("BATCH_DEFINITION_NAME")
+    cron              String          @map("BATCH_DEFINITION_CRON")
+    description       String          @map("BATCH_DEFINITION_DESCRIPTION") @db.Text()
+    createdAt         DateTime        @default(now()) @map("BATCH_DEFINITION_CREATED_AT")
+    updatedAt         DateTime        @updatedAt @map("BATCH_DEFINITION_UPDATED_AT")
+    deletedAt         DateTime?       @map("BATCH_DEFINITION_DELETED_AT")
+    batchInstanceList BatchInstance[]
+
+    @@map("BATCH_DEFINITION")
+}
+
+model BatchInstance {
+    no                Int       @id @default(autoincrement()) @map("BATCH_INSTANCE_NO")
+    batchDefinitionNo Int       @map("BATCH_DEFINITION_NO")
+    state             String    @map("BATCH_INSTANCE_STATE")
+    createdAt         DateTime  @default(now()) @map("BATCH_INSTANCE_CREATED_AT")
+    updatedAt         DateTime? @updatedAt @map("BATCH_INSTANCE_UPDATED_AT")
+    startedAt         DateTime? @map("BATCH_INSTANCE_STARTED_AT")
+    finishedAt        DateTime? @map("BATCH_INSTANCE_FINISHED_AT")
+    elapsedTime       Int?      @map("BATCH_INSTANCE_ELAPSED_TIME")
+    data              Json?     @map("BATCH_INSTANCE_DATA")
+    errorCode         String?   @map("BATCH_INSTANCE_ERROR_CODE")
+    errorMessage      String?   @map("BATCH_INSTANCE_ERROR_MESSAGE")
+
+    batchDefinition BatchDefinition @relation(fields: [batchDefinitionNo], references: [no])
+
+    @@index([batchDefinitionNo, no])
+    @@map("BATCH_INSTANCE")
+}
+
+model JobDefinition {
+    no          Int       @id @default(autoincrement()) @map("JOB_DEFINITION_NO")
+    name        String    @unique @map("JOB_DEFINITION_NAME")
+    description String    @map("JOB_DEFINITION_DESCRIPTION") @db.Text()
+    createdAt   DateTime  @default(now()) @map("JOB_DEFINITION_CREATED_AT")
+    updatedAt   DateTime  @updatedAt @map("JOB_DEFINITION_UPDATED_AT")
+    stepList    JobStep[]
+
+    @@index([name])
+    @@map("JOB_DEFINITION")
+}
+
+model JobStep {
+    no          Int      @id @default(autoincrement()) @map("JOB_STEP_NO")
+    order       Int      @map("JOB_STEP_ORDER")
+    name        String   @map("JOB_STEP_NAME")
+    description String   @map("JOB_STEP_DESCRIPTION") @db.Text()
+    createdAt   DateTime @default(now()) @map("JOB_STEP_CREATED_AT")
+    updatedAt   DateTime @updatedAt @map("JOB_STEP_UPDATED_AT")
+
+    jobDefinitionNo Int           @map("JOB_DEFINITION_NO")
+    jobDefinition   JobDefinition @relation(fields: [jobDefinitionNo], references: [no])
+
+    @@index([jobDefinitionNo, order])
+    @@map("JOB_STEP")
+}
+
+model JobInstance {
+    no              Int       @id @default(autoincrement()) @map("JOB_NO")
+    uuid            String    @map("JOB_UUID")
+    name            String    @map("JOB_NAME")
+    step            String    @map("JOB_STEP")
+    batchInstanceNo Int?      @map("BATCH_INSTANCE_NO")
+    createdAt       DateTime  @default(now()) @map("JOB_CREATED_AT")
+    updatedAt       DateTime  @updatedAt @map("JOB_UPDATED_AT")
+    startedAt       DateTime  @map("JOB_STARTED_AT")
+    finishedAt      DateTime? @map("JOB_FINISHED_AT")
+    elapsedTime     Int?      @map("JOB_ELAPSED_TIME")
+    state           String    @map("JOB_STATE")
+    request         Json?     @map("JOB_REQUEST")
+    result          Json?     @map("JOB_RESULT")
+    errorCode       String?   @map("JOB_ERROR_CODE")
+    errorMessage    String?   @map("JOB_ERROR_MESSAGE")
+
+    @@unique([uuid, name])
+    @@index([uuid, name])
+    @@index([batchInstanceNo])
+    @@index([startedAt])
+    @@index([finishedAt])
+    @@map("JOB_INSTANCE")
+}
+
+model ProblemV2 {
+    no                Int     @id @default(autoincrement()) @map("PROBLEM_V2_NO")
+    uuid              String  @unique @default(uuid()) @map("PROBLEM_V2_UUID") @db.VarChar(36)
+    title             String  @map("PROBLEM_V2_TITLE")
+    level             Int     @map("PROBLEM_V2_LEVEL")
+    levelText         String  @map("PROBLEM_V2_LEVEL_TEXT")
+    answerRate        Float   @map("PROBLEM_V2_ANSWER_RATE")
+    submitCount       Int     @map("PROBLEM_V2_SUBMIT_COUNT")
+    timeout           Int     @map("PROBLEM_V2_TIMEOUT")
+    memoryLimit       Int     @map("PROBLEM_V2_MEMORY_LIMIT")
+    answerCount       Int     @map("PROBLEM_V2_ANSWER_COUNT")
+    answerPeopleCount Int     @map("PROBLEM_V2_ANSWER_PEOPLE_COUNT")
+    source            String  @map("PROBLEM_V2_SOURCE") @db.VarChar(255)
+    sourceUrl         String  @map("PROBLEM_V2_SOURCE_URL") @db.VarChar(255)
+    sourceId          String  @map("PROBLEM_V2_SOURCE_ID") @db.VarChar(255)
+    content           String  @map("PROBLEM_V2_CONTENT") @db.Text()
+    limit             String? @map("PROBLEM_V2_LIMIT") @db.Text()
+    hint              String? @map("PROBLEM_V2_HINT") @db.Text()
+    subTask           String? @map("PROBLEM_V2_SUB_TASK") @db.Text()
+    input             String? @map("PROBLEM_V2_INPUT") @db.Text()
+    output            String? @map("PROBLEM_V2_OUTPUT") @db.Text()
+    protocol          String? @map("PROBLEM_V2_PROTOCOL") @db.Text()
+    etc               String? @map("PROBLEM_V2_ETC") @db.Text()
+
+    additionalTimeAllowed Boolean                @default(false) @map("PROBLEM_V2_ADDITIONAL_TIME_ALLOWED")
+    isSpecialJudge        Boolean                @default(false) @map("PROBLEM_V2_IS_SPECIAL_JUDGE")
+    isSubTask             Boolean                @default(false) @map("PROBLEM_V2_IS_SUB_TASK")
+    isFunction            Boolean                @default(false) @map("PROBLEM_V2_IS_FUNCTION")
+    isInteractive         Boolean                @default(false) @map("PROBLEM_V2_IS_INTERACTIVE")
+    isTwoStep             Boolean                @default(false) @map("PROBLEM_V2_IS_TWO_STEP")
+    isClass               Boolean                @default(false) @map("PROBLEM_V2_IS_CLASS")
+    createdAt             DateTime               @default(now()) @map("PROBLEM_V2_CREATED_AT")
+    updatedAt             DateTime               @updatedAt @map("PROBLEM_V2_UPDATED_AT")
+    inputOutputList       ProblemV2InputOutput[]
+    typeList              ProblemV2Type[]
+
+    @@unique([source, sourceId])
+    @@index([source, sourceId])
+    @@index([answerRate])
+    @@index([submitCount])
+    @@index([level, answerRate])
+    @@index([level, submitCount])
+    @@map("PROBLEM_V2")
+}
+
+model ProblemV2Type {
+    no          Int       @id @default(autoincrement()) @map("PROBLEM_V2_TYPE_NO")
+    name        String    @map("PROBLEM_V2_TYPE_NAME") @db.VarChar(255)
+    problem     ProblemV2 @relation(fields: [problemUuid], references: [uuid], onDelete: Cascade)
+    problemUuid String    @map("PROBLEM_V2_UUID") @db.VarChar(36)
+
+    @@unique([problemUuid, name])
+    @@index([problemUuid])
+    @@map("PROBLEM_V2_TYPE")
+}
+
+model ProblemV2InputOutput {
+    no        Int      @id @default(autoincrement()) @map("PROBLEM_V2_INPUT_OUTPUT_NO")
+    order     Int      @map("PROBLEM_V2_INPUT_OUTPUT_ORDER")
+    input     String   @map("PROBLEM_V2_INPUT_OUTPUT_INPUT") @db.VarChar(255)
+    output    String   @map("PROBLEM_V2_INPUT_OUTPUT_OUTPUT") @db.VarChar(255)
+    content   String?  @map("PROBLEM_V2_INPUT_OUTPUT_CONTENT") @db.Text()
+    createdAt DateTime @default(now()) @map("PROBLEM_V2_INPUT_OUTPUT_CREATED_AT")
+    updatedAt DateTime @updatedAt @map("PROBLEM_V2_INPUT_OUTPUT_UPDATED_AT")
+
+    problemUuid String    @map("PROBLEM_V2_UUID") @db.VarChar(36)
+    problem     ProblemV2 @relation(fields: [problemUuid], references: [uuid], onDelete: Cascade)
+
+    @@index([problemUuid])
+    @@map("PROBLEM_V2_INPUT_OUTPUT")
+}
+
 model User {
     no             Int       @id @default(autoincrement()) @map("USER_NO")
     uuid           String    @unique @default(uuid()) @map("USER_UUID")
