@@ -16,6 +16,7 @@ datasource db {
 model BatchDefinition {
     no                Int             @id @default(autoincrement()) @map("BATCH_DEFINITION_NO")
     name              String          @map("BATCH_DEFINITION_NAME")
+    jobName           String          @map("BATCH_DEFINITION_JOB_NAME")
     cron              String          @map("BATCH_DEFINITION_CRON")
     description       String          @map("BATCH_DEFINITION_DESCRIPTION") @db.Text()
     createdAt         DateTime        @default(now()) @map("BATCH_DEFINITION_CREATED_AT")
