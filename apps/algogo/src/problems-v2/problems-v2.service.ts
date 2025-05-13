@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { ProblemsV2Repository } from './problems-v2.repository';
 import { InquiryProblemsSummaryDto } from './dto/inquiry-problems-summary.dto';
 import { CustomNotFoundException } from '../common/errors/CustomNotFoundException';
+import { ProblemDto } from './dto/problem.dto';
+import { ProblemType } from './types/problem.type';
 
 @Injectable()
 export class ProblemsV2Service {
@@ -11,7 +13,7 @@ export class ProblemsV2Service {
     return this.problemsV2Repository.getProblemsSummary(dto);
   }
 
-  async getProblem(uuid: string) {
+  async getProblem(uuid: string): Promise<ProblemDto> {
     const problem = await this.problemsV2Repository.getProblem(uuid);
 
     if (!problem) {
@@ -21,6 +23,9 @@ export class ProblemsV2Service {
       });
     }
 
-    return problem;
+    return {
+      ...problem,
+      typeList: problem.typeList.map((type) => type.name as ProblemType),
+    };
   }
 }

@@ -197,4 +197,10 @@ export class ProblemDto {
     example: ['그래프 탐색'],
   })
   typeList: ProblemType[];
+
+  @ApiProperty({
+    description: '문제 스타일',
+    example: 'MathJax의 스타일시트가 리턴됨',
+  })
+  style: string;
 }

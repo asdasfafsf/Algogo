@@ -120,6 +120,7 @@ model ProblemV2 {
     output            String? @map("PROBLEM_V2_OUTPUT") @db.Text()
     protocol          String? @map("PROBLEM_V2_PROTOCOL") @db.Text()
     etc               String? @map("PROBLEM_V2_ETC") @db.Text()
+    style             String? @map("PROBLEM_V2_STYLE") @db.Text()
 
     additionalTimeAllowed Boolean                @default(false) @map("PROBLEM_V2_ADDITIONAL_TIME_ALLOWED")
     isSpecialJudge        Boolean                @default(false) @map("PROBLEM_V2_IS_SPECIAL_JUDGE")

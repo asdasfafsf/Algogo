@@ -131,6 +131,11 @@ export class ProblemsV2Repository {
         isInteractive: true,
         isTwoStep: true,
         isClass: true,
+        style: true,
+        timeout: true,
+        memoryLimit: true,
+        createdAt: true,
+        updatedAt: true,
         typeList: {
           select: {
             name: true,
