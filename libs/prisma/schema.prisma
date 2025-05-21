@@ -134,6 +134,14 @@ model ProblemV2 {
     updatedAt             DateTime               @updatedAt @map("PROBLEM_V2_UPDATED_AT")
     inputOutputList       ProblemV2InputOutput[]
     typeList              ProblemV2Type[]
+    subTaskList           ProblemV2SubTask[]
+
+    customExample        String? @map("PROBLEM_V2_CUSTOM_EXAMPLE") @db.Text()
+    customImplementation String? @map("PROBLEM_V2_CUSTOM_IMPLEMENTATION") @db.Text()
+    customGrader         String? @map("PROBLEM_V2_CUSTOM_GRADER") @db.Text()
+    customNotes          String? @map("PROBLEM_V2_CUSTOM_NOTES") @db.Text()
+    customAttachment     String? @map("PROBLEM_V2_CUSTOM_ATTACHMENT") @db.Text()
+    problemSource        String? @map("PROBLEM_V2_PROBLEM_SOURCE") @db.Text()
 
     @@unique([source, sourceId])
     @@index([source, sourceId])
@@ -142,6 +150,17 @@ model ProblemV2 {
     @@index([level, answerRate])
     @@index([level, submitCount])
     @@map("PROBLEM_V2")
+}
+
+model ProblemV2SubTask {
+    no          Int       @id @default(autoincrement()) @map("PROBLEM_V2_SUB_TASK_NO")
+    problemUuid String    @map("PROBLEM_V2_UUID") @db.VarChar(36)
+    order       Int       @map("PROBLEM_V2_SUB_TASK_ORDER")
+    title       String    @map("PROBLEM_V2_SUB_TASK_TITLE") @db.VarChar(255)
+    content     String    @map("PROBLEM_V2_SUB_TASK_CONTENT") @db.Text()
+    problem     ProblemV2 @relation(fields: [problemUuid], references: [uuid], onDelete: Cascade)
+
+    @@map("PROBLEM_V2_SUB_TASK")
 }
 
 model ProblemV2Type {

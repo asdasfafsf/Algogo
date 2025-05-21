@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ProblemType } from '../types/problem.type';
 import { ProblemInputOutputDto } from './problem-input-output.dto';
+import { ProblemSubtaskDto } from './problem-subtask.dto';
+
 export class ProblemDto {
   @ApiProperty({
     description: '문제 UUID',
@@ -203,4 +205,46 @@ export class ProblemDto {
     example: 'MathJax의 스타일시트가 리턴됨',
   })
   style: string;
+
+  @ApiProperty({
+    description: '서브태스크 리스트',
+    type: [ProblemSubtaskDto],
+  })
+  subTaskList: ProblemSubtaskDto[];
+
+  @ApiProperty({
+    description: '커스텀 예시',
+    required: false,
+  })
+  customExample: string;
+
+  @ApiProperty({
+    description: '커스텀 구현',
+    required: false,
+  })
+  customImplementation: string;
+
+  @ApiProperty({
+    description: '커스텀 그라더',
+    required: false,
+  })
+  customGrader: string;
+
+  @ApiProperty({
+    description: '커스텀 노트',
+    required: false,
+  })
+  customNotes: string;
+
+  @ApiProperty({
+    description: '커스텀 첨부 파일',
+    required: false,
+  })
+  customAttachment: string;
+
+  @ApiProperty({
+    description: '출처',
+    required: false,
+  })
+  problemSource: string;
 }

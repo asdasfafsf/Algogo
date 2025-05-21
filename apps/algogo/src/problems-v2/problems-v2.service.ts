@@ -26,6 +26,11 @@ export class ProblemsV2Service {
     return {
       ...problem,
       typeList: problem.typeList.map((type) => type.name as ProblemType),
+      subTaskList: problem.subTaskList.map((subTask) => ({
+        order: subTask.order,
+        title: subTask.title,
+        content: subTask.content,
+      })),
     };
   }
 }

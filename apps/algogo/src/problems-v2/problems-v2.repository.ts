@@ -152,6 +152,22 @@ export class ProblemsV2Repository {
             order: 'asc',
           },
         },
+        subTaskList: {
+          select: {
+            order: true,
+            title: true,
+            content: true,
+          },
+          orderBy: {
+            order: 'asc',
+          },
+        },
+        customExample: true,
+        customImplementation: true,
+        customGrader: true,
+        customNotes: true,
+        customAttachment: true,
+        problemSource: true,
       },
       where: {
         uuid,
