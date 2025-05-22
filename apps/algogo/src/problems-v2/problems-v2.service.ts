@@ -26,6 +26,9 @@ export class ProblemsV2Service {
     return {
       ...problem,
       typeList: problem.typeList.map((type) => type.name as ProblemType),
+      languageLimitList: problem.languageLimitList.map(
+        (languageLimit) => languageLimit.language,
+      ),
       subTaskList: problem.subTaskList.map((subTask) => ({
         order: subTask.order,
         title: subTask.title,

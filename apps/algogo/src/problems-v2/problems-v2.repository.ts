@@ -131,6 +131,7 @@ export class ProblemsV2Repository {
         isInteractive: true,
         isTwoStep: true,
         isClass: true,
+        isLanguageRestrict: true,
         style: true,
         timeout: true,
         memoryLimit: true,
@@ -152,6 +153,11 @@ export class ProblemsV2Repository {
             order: 'asc',
           },
         },
+        languageLimitList: {
+          select: {
+            language: true,
+          },
+        },
         subTaskList: {
           select: {
             order: true,
@@ -168,6 +174,7 @@ export class ProblemsV2Repository {
         customNotes: true,
         customAttachment: true,
         problemSource: true,
+        customSample: true,
       },
       where: {
         uuid,

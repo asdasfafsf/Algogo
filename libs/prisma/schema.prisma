@@ -123,18 +123,21 @@ model ProblemV2 {
     etc               String? @map("PROBLEM_V2_ETC") @db.Text()
     style             String? @map("PROBLEM_V2_STYLE") @db.Text()
 
-    additionalTimeAllowed Boolean                @default(false) @map("PROBLEM_V2_ADDITIONAL_TIME_ALLOWED")
-    isSpecialJudge        Boolean                @default(false) @map("PROBLEM_V2_IS_SPECIAL_JUDGE")
-    isSubTask             Boolean                @default(false) @map("PROBLEM_V2_IS_SUB_TASK")
-    isFunction            Boolean                @default(false) @map("PROBLEM_V2_IS_FUNCTION")
-    isInteractive         Boolean                @default(false) @map("PROBLEM_V2_IS_INTERACTIVE")
-    isTwoStep             Boolean                @default(false) @map("PROBLEM_V2_IS_TWO_STEP")
-    isClass               Boolean                @default(false) @map("PROBLEM_V2_IS_CLASS")
-    createdAt             DateTime               @default(now()) @map("PROBLEM_V2_CREATED_AT")
-    updatedAt             DateTime               @updatedAt @map("PROBLEM_V2_UPDATED_AT")
-    inputOutputList       ProblemV2InputOutput[]
-    typeList              ProblemV2Type[]
-    subTaskList           ProblemV2SubTask[]
+    additionalTimeAllowed Boolean @default(false) @map("PROBLEM_V2_ADDITIONAL_TIME_ALLOWED")
+    isSpecialJudge        Boolean @default(false) @map("PROBLEM_V2_IS_SPECIAL_JUDGE")
+    isSubTask             Boolean @default(false) @map("PROBLEM_V2_IS_SUB_TASK")
+    isFunction            Boolean @default(false) @map("PROBLEM_V2_IS_FUNCTION")
+    isInteractive         Boolean @default(false) @map("PROBLEM_V2_IS_INTERACTIVE")
+    isTwoStep             Boolean @default(false) @map("PROBLEM_V2_IS_TWO_STEP")
+    isClass               Boolean @default(false) @map("PROBLEM_V2_IS_CLASS")
+    isLanguageRestrict    Boolean @default(false) @map("PROBLEM_V2_IS_LANGUAGE_RESTRICTED")
+
+    createdAt         DateTime                 @default(now()) @map("PROBLEM_V2_CREATED_AT")
+    updatedAt         DateTime                 @updatedAt @map("PROBLEM_V2_UPDATED_AT")
+    inputOutputList   ProblemV2InputOutput[]
+    typeList          ProblemV2Type[]
+    subTaskList       ProblemV2SubTask[]
+    languageLimitList ProblemV2LanguageLimit[]
 
     customExample        String? @map("PROBLEM_V2_CUSTOM_EXAMPLE") @db.Text()
     customImplementation String? @map("PROBLEM_V2_CUSTOM_IMPLEMENTATION") @db.Text()
@@ -142,6 +145,7 @@ model ProblemV2 {
     customNotes          String? @map("PROBLEM_V2_CUSTOM_NOTES") @db.Text()
     customAttachment     String? @map("PROBLEM_V2_CUSTOM_ATTACHMENT") @db.Text()
     problemSource        String? @map("PROBLEM_V2_PROBLEM_SOURCE") @db.Text()
+    customSample         String? @map("PROBLEM_V2_CUSTOM_SAMPLE") @db.Text()
 
     @@unique([source, sourceId])
     @@index([source, sourceId])
@@ -188,6 +192,15 @@ model ProblemV2InputOutput {
 
     @@index([problemUuid])
     @@map("PROBLEM_V2_INPUT_OUTPUT")
+}
+
+model ProblemV2LanguageLimit {
+    no          Int       @id @default(autoincrement()) @map("PROBLEM_V2_LANGUAGE_LIMIT_NO")
+    problemUuid String    @map("PROBLEM_V2_UUID") @db.VarChar(36)
+    language    String    @map("PROBLEM_V2_LANGUAGE_LIMIT_LANGUAGE") @db.VarChar(255)
+    problem     ProblemV2 @relation(fields: [problemUuid], references: [uuid], onDelete: Cascade)
+
+    @@map("PROBLEM_V2_LANGUAGE_LIMIT")
 }
 
 model User {

@@ -247,4 +247,22 @@ export class ProblemDto {
     required: false,
   })
   problemSource: string;
+
+  @ApiProperty({
+    description: '언어 제한 여부',
+    default: false,
+  })
+  isLanguageRestrict: boolean;
+
+  @ApiProperty({
+    description: '커스텀 예시',
+    required: false,
+  })
+  customSample: string;
+
+  @ApiProperty({
+    description: '언어 제한 리스트',
+    type: [String],
+  })
+  languageLimitList: string[];
 }
