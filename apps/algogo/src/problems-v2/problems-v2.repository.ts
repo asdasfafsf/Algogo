@@ -53,7 +53,7 @@ export class ProblemsV2Repository {
   }
 
   async getProblemsSummary(dto: InquiryProblemsSummaryDto) {
-    const { pageNo, pageSize, sort, levelList, typeList } = dto;
+    const { pageNo, pageSize, sort, levelList, typeList, title } = dto;
 
     const where: Prisma.ProblemV2WhereInput = {};
 
@@ -63,6 +63,10 @@ export class ProblemsV2Repository {
 
     if (typeList) {
       where.typeList = { some: { name: { in: typeList } } };
+    }
+
+    if (title) {
+      where.title = { contains: title };
     }
 
     const orderBy = this.getProblemOrderBy(sort);
