@@ -190,10 +190,9 @@ export class CodeService {
     problemUuid: string;
     language: LanguageProvider;
   }) {
-    const problemNo = await this.problemUuidToProblemNo(problemUuid);
     const problemCode = await this.codeRepository.getProblemCode({
       userNo,
-      problemNo,
+      problemUuid,
       language,
     });
 
@@ -208,10 +207,9 @@ export class CodeService {
     dto: RequestUpsertProblemCodeDto & { userNo: number },
   ) {
     const { problemUuid, language, content, userNo } = dto;
-    const problemNo = await this.problemUuidToProblemNo(problemUuid);
     return await this.codeRepository.upsertProblemCode({
       userNo,
-      problemNo,
+      problemUuid,
       language,
       content,
     });

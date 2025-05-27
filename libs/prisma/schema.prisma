@@ -38,7 +38,7 @@ model BatchInstance {
     elapsedTime       Int?      @map("BATCH_INSTANCE_ELAPSED_TIME")
     data              Json?     @map("BATCH_INSTANCE_DATA")
     errorCode         String?   @map("BATCH_INSTANCE_ERROR_CODE")
-    errorMessage      String?   @map("BATCH_INSTANCE_ERROR_MESSAGE")
+    errorMessage      String?   @map("BATCH_INSTANCE_ERROR_MESSAGE") @db.VarChar(4000)
 
     batchDefinition BatchDefinition @relation(fields: [batchDefinitionNo], references: [no])
 
@@ -88,7 +88,7 @@ model JobInstance {
     request         Json?     @map("JOB_REQUEST")
     result          Json?     @map("JOB_RESULT")
     errorCode       String?   @map("JOB_ERROR_CODE")
-    errorMessage    String?   @map("JOB_ERROR_MESSAGE")
+    errorMessage    String?   @map("JOB_ERROR_MESSAGE") @db.VarChar(4000)
 
     @@unique([uuid, name])
     @@index([uuid, name])
@@ -101,7 +101,7 @@ model JobInstance {
 model ProblemV2 {
     no                Int     @id @default(autoincrement()) @map("PROBLEM_V2_NO")
     uuid              String  @unique @default(uuid()) @map("PROBLEM_V2_UUID") @db.VarChar(36)
-    title             String  @map("PROBLEM_V2_TITLE")
+    title             String  @map("PROBLEM_V2_TITLE") @db.VarChar(1000)
     level             Int     @map("PROBLEM_V2_LEVEL")
     levelText         String  @map("PROBLEM_V2_LEVEL_TEXT")
     answerRate        Float   @map("PROBLEM_V2_ANSWER_RATE")
@@ -181,8 +181,8 @@ model ProblemV2Type {
 model ProblemV2InputOutput {
     no        Int      @id @default(autoincrement()) @map("PROBLEM_V2_INPUT_OUTPUT_NO")
     order     Int      @map("PROBLEM_V2_INPUT_OUTPUT_ORDER")
-    input     String   @map("PROBLEM_V2_INPUT_OUTPUT_INPUT") @db.VarChar(4000)
-    output    String   @map("PROBLEM_V2_INPUT_OUTPUT_OUTPUT") @db.VarChar(4000)
+    input     String   @map("PROBLEM_V2_INPUT_OUTPUT_INPUT") @db.VarChar(8000)
+    output    String   @map("PROBLEM_V2_INPUT_OUTPUT_OUTPUT") @db.VarChar(8000)
     content   String?  @map("PROBLEM_V2_INPUT_OUTPUT_CONTENT") @db.Text()
     createdAt DateTime @default(now()) @map("PROBLEM_V2_INPUT_OUTPUT_CREATED_AT")
     updatedAt DateTime @updatedAt @map("PROBLEM_V2_INPUT_OUTPUT_UPDATED_AT")
@@ -334,8 +334,8 @@ model ProblemType {
 model ProblemInputOutput {
     problemNo Int     @map("PROBLEM_NO")
     order     Int     @map("PROBLEM_INPUT_OUTPUT_ORDER")
-    input     String  @map("PROBLEM_INPUT") @db.VarChar(1000)
-    output    String  @map("PROBLEM_OUTPUT") @db.VarChar(1000)
+    input     String  @map("PROBLEM_INPUT") @db.VarChar(4000)
+    output    String  @map("PROBLEM_OUTPUT") @db.VarChar(4000)
     Problem   Problem @relation("ProblemToProblemInputOutput", fields: [problemNo], references: [no], onUpdate: Cascade, onDelete: Cascade)
 
     @@unique([problemNo, order])
@@ -438,16 +438,16 @@ model CodeTemplate {
 }
 
 model ProblemCode {
-    no        Int      @id @default(autoincrement()) @map("PROBLEM_CODE_NO")
-    userNo    Int      @map("USER_NO")
-    problemNo Int      @map("PROBLEM_NO")
-    language  String   @map("PROBLEM_CODE_LANGUAGE")
-    content   String   @map("PROBLEM_CODE_CONTENT") @db.Text()
-    createdAt DateTime @default(now()) @map("PROBLEM_CODE_CREATED_AT")
-    updatedAt DateTime @default(now()) @map("PROBLEM_CODE_UPDATED_AT")
+    no          Int      @id @default(autoincrement()) @map("PROBLEM_CODE_NO")
+    userNo      Int      @map("USER_NO")
+    problemUuid String   @map("PROBLEM_UUID")
+    language    String   @map("PROBLEM_CODE_LANGUAGE")
+    content     String   @map("PROBLEM_CODE_CONTENT") @db.Text()
+    createdAt   DateTime @default(now()) @map("PROBLEM_CODE_CREATED_AT")
+    updatedAt   DateTime @default(now()) @map("PROBLEM_CODE_UPDATED_AT")
 
-    @@unique([userNo])
-    @@index([userNo])
-    @@index([userNo, problemNo])
+    @@unique([userNo, problemUuid, language])
+    @@index([userNo, problemUuid])
+    @@index([updatedAt])
     @@map("PROBLEM_CODE")
 }
