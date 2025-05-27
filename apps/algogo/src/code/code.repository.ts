@@ -283,17 +283,16 @@ export class CodeRepository {
     });
   }
 
-  async getProblemCode({
+  async getProblemCodes({
     userNo,
     problemUuid,
-    language,
   }: {
     userNo: number;
     problemUuid: string;
-    language: LanguageProvider;
   }) {
-    const problemCode = await this.prisma.problemCode.findFirst({
+    const problemCode = await this.prisma.problemCode.findMany({
       select: {
+        language: true,
         content: true,
         updatedAt: true,
         createdAt: true,
@@ -301,7 +300,6 @@ export class CodeRepository {
       where: {
         userNo,
         problemUuid,
-        language,
       },
     });
 
@@ -331,6 +329,7 @@ export class CodeRepository {
         content,
         problemUuid,
         language,
+        updatedAt: new Date(),
       },
       create: {
         userNo,
