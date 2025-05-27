@@ -20,7 +20,6 @@ import { AuthGuard } from '../auth/auth.guard';
 import RequestUpsertCodeSettingDto from './dto/RequestUpsertCodeSettingDto';
 import {
   ApiBearerAuth,
-  ApiNotFoundResponse,
   ApiOperation,
   ApiParam,
   ApiResponse,
@@ -213,6 +212,7 @@ export class CodeController {
     const dto = { uuid, userNo: req.userNo };
     return await this.codeService.deleteCodeTemplate(dto);
   }
+
   @ApiOperation({
     summary: '문제 코드 조회',
     description: '특정 문제에 대한 사용자의 코드를 조회합니다.',
