@@ -6,12 +6,10 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseEnumPipe,
   ParseUUIDPipe,
   Patch,
   Post,
   Put,
-  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -35,7 +33,6 @@ import RequestUpsertCodeTemplateDto from './dto/RequestUpdateCodeTemplateDto';
 import RequestUpsertProblemCodeDto from './dto/RequestUpsertProblemCodeDto';
 import RequestCreateCodeTemplateDto from './dto/RequestCreateCodeTemplateDto';
 import { ResponseDeleteCodeTemplateDto } from './dto/ResponseDeleteCodeTemplateDto';
-import { LanguageProvider } from '../common/enums/LanguageProviderEnum';
 import { ResponseProblemCodeDto } from './dto/ResponseProblemCodeDto';
 import { ResponseDto } from '../common/dto/ResponseDto';
 
@@ -142,6 +139,7 @@ export class CodeController {
     @Req() req: AuthRequest,
   ) {
     const { userNo } = req;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const dto = { userNo, ...body };
     return null;
   }
@@ -220,7 +218,7 @@ export class CodeController {
   @ApiResponse({
     status: 200,
     description: '문제 코드 조회 성공',
-    type: ResponseDto<ResponseProblemCodeDto>,
+    type: ResponseDto<ResponseProblemCodeDto[]>,
   })
   @ApiResponse({
     status: 404,
@@ -259,7 +257,7 @@ export class CodeController {
     },
   })
   @Get('/problem/:problemUuid')
-  async getProblemCode(
+  async getProblemCodes(
     @Req() req: AuthRequest,
     @Param(
       'problemUuid',
@@ -268,17 +266,10 @@ export class CodeController {
       }),
     )
     problemUuid: string,
-    @Query(
-      'language',
-      new ParseEnumPipe(LanguageProvider, {
-        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
-      }),
-    )
-    language: LanguageProvider,
   ) {
     const { userNo } = req;
-    const dto = { userNo, problemUuid, language };
-    const problemCode = await this.codeService.getProblemCode(dto);
+    const dto = { userNo, problemUuid };
+    const problemCode = await this.codeService.getProblemCodes(dto);
 
     return problemCode;
   }

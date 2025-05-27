@@ -181,26 +181,23 @@ export class CodeService {
     return Number(problemNo);
   }
 
-  async getProblemCode({
+  async getProblemCodes({
     userNo,
     problemUuid,
-    language,
   }: {
     userNo: number;
     problemUuid: string;
-    language: LanguageProvider;
   }) {
-    const problemCode = await this.codeRepository.getProblemCode({
+    const problemCodes = await this.codeRepository.getProblemCodes({
       userNo,
       problemUuid,
-      language,
     });
 
-    if (!problemCode) {
+    if (!problemCodes) {
       throw new NotFoundProblemCode();
     }
 
-    return problemCode;
+    return problemCodes;
   }
 
   async upsertProblemCode(
