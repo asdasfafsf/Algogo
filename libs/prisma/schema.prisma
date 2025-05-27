@@ -438,16 +438,16 @@ model CodeTemplate {
 }
 
 model ProblemCode {
-    no        Int      @id @default(autoincrement()) @map("PROBLEM_CODE_NO")
-    userNo    Int      @map("USER_NO")
-    problemNo Int      @map("PROBLEM_NO")
-    language  String   @map("PROBLEM_CODE_LANGUAGE")
-    content   String   @map("PROBLEM_CODE_CONTENT") @db.Text()
-    createdAt DateTime @default(now()) @map("PROBLEM_CODE_CREATED_AT")
-    updatedAt DateTime @default(now()) @map("PROBLEM_CODE_UPDATED_AT")
+    no          Int      @id @default(autoincrement()) @map("PROBLEM_CODE_NO")
+    userNo      Int      @map("USER_NO")
+    problemUuid String   @map("PROBLEM_UUID")
+    language    String   @map("PROBLEM_CODE_LANGUAGE")
+    content     String   @map("PROBLEM_CODE_CONTENT") @db.Text()
+    createdAt   DateTime @default(now()) @map("PROBLEM_CODE_CREATED_AT")
+    updatedAt   DateTime @default(now()) @map("PROBLEM_CODE_UPDATED_AT")
 
-    @@unique([userNo])
-    @@index([userNo])
-    @@index([userNo, problemNo])
+    @@unique([userNo, problemUuid, language])
+    @@index([userNo, problemUuid])
+    @@index([updatedAt])
     @@map("PROBLEM_CODE")
 }

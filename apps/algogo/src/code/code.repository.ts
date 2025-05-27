@@ -285,11 +285,11 @@ export class CodeRepository {
 
   async getProblemCode({
     userNo,
-    problemNo,
+    problemUuid,
     language,
   }: {
     userNo: number;
-    problemNo: number;
+    problemUuid: string;
     language: LanguageProvider;
   }) {
     const problemCode = await this.prisma.problemCode.findFirst({
@@ -300,7 +300,7 @@ export class CodeRepository {
       },
       where: {
         userNo,
-        problemNo,
+        problemUuid,
         language,
       },
     });
@@ -310,27 +310,31 @@ export class CodeRepository {
 
   async upsertProblemCode({
     userNo,
-    problemNo,
+    problemUuid,
     language,
     content,
   }: {
     userNo: number;
-    problemNo: number;
+    problemUuid: string;
     language: LanguageProvider;
     content: string;
   }) {
     await this.prisma.problemCode.upsert({
       where: {
-        userNo,
+        userNo_problemUuid_language: {
+          userNo,
+          problemUuid,
+          language,
+        },
       },
       update: {
         content,
-        problemNo,
+        problemUuid,
         language,
       },
       create: {
         userNo,
-        problemNo,
+        problemUuid,
         language,
         content,
       },
