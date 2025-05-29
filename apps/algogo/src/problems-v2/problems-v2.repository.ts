@@ -4,6 +4,7 @@ import { InquiryProblemsSummaryDto } from './dto/inquiry-problems-summary.dto';
 import { Prisma } from '@prisma/client';
 import { ProblemSort } from './types/problem.type';
 import { PROBLEM_SORT_MAP } from './constants/problems-sort';
+import { ProblemSummaryDto } from './dto/problem-summary.dto';
 @Injectable()
 export class ProblemsV2Repository {
   constructor(private readonly prismaService: PrismaService) {}
@@ -98,10 +99,7 @@ export class ProblemsV2Repository {
       }
     })();
 
-    const limit = pageSize;
-    const offset = (pageNo - 1) * pageSize;
-
-    const query = `
+    const rawQuery = `
       SELECT
         p.PROBLEM_V2_UUID AS uuid,
         p.PROBLEM_V2_TITLE AS title,
@@ -118,24 +116,20 @@ export class ProblemsV2Repository {
       WHERE MATCH(p.PROBLEM_V2_TITLE) AGAINST('${title}' IN BOOLEAN MODE)
       ${whereClause}
       ${orderClause}
-      LIMIT ${limit} OFFSET ${offset};
+      LIMIT 1000;
     `;
 
-    const countQuery = `
-      SELECT COUNT(*) as totalCount
-      FROM PROBLEM_V2 p
-      WHERE MATCH(p.PROBLEM_V2_TITLE) AGAINST('${title}' IN BOOLEAN MODE)
-      ${whereClause};
-    `;
-
-    const [problemList, totalResult] = await Promise.all([
-      this.prismaService.$queryRawUnsafe(query),
-      this.prismaService.$queryRawUnsafe<{ totalCount: number }[]>(countQuery),
-    ]);
+    const rawList = await this.prismaService.$queryRawUnsafe(rawQuery);
+    const filtered = (rawList as ProblemSummaryDto[]).filter((item) =>
+      item.title.includes(title),
+    );
+    const totalCount = filtered.length;
+    const offset = (pageNo - 1) * pageSize;
+    const paged = filtered.slice(offset, offset + pageSize);
 
     return {
-      problemList,
-      totalCount: Number(totalResult[0]?.totalCount || 0),
+      problemList: paged,
+      totalCount,
       pageSize,
       pageNo,
     };
