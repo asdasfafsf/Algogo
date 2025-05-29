@@ -10,7 +10,49 @@ export class ProblemsV2Service {
   constructor(private readonly problemsV2Repository: ProblemsV2Repository) {}
 
   async getProblemsSummary(dto: InquiryProblemsSummaryDto) {
-    if (dto.title) {
+    const MYSQL_FULLTEXT_DELIMITERS = [
+      ' ',
+      ',',
+      '.',
+      ':',
+      ';',
+      '!',
+      '?',
+      '@',
+      '#',
+      '$',
+      '%',
+      '^',
+      '&',
+      '*',
+      '(',
+      ')',
+      '-',
+      '+',
+      '=',
+      '<',
+      '>',
+      '/',
+      '\\',
+      '|',
+      '[',
+      ']',
+      '{',
+      '}',
+      '~',
+      '`',
+      "'",
+      '"',
+      '_',
+    ];
+
+    const hasTitle = !!dto.title;
+    const hasSpecial = MYSQL_FULLTEXT_DELIMITERS.some((delimiter) =>
+      dto.title.includes(delimiter),
+    );
+    const canNgramSearch = hasTitle && dto.title.length > 1 && !hasSpecial;
+
+    if (canNgramSearch) {
       return this.problemsV2Repository.getProblemSumamryByTitle(dto);
     }
 
