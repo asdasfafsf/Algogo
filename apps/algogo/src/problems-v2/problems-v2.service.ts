@@ -10,6 +10,10 @@ export class ProblemsV2Service {
   constructor(private readonly problemsV2Repository: ProblemsV2Repository) {}
 
   async getProblemsSummary(dto: InquiryProblemsSummaryDto) {
+    if (dto.title) {
+      return this.problemsV2Repository.getProblemSumamryByTitle(dto);
+    }
+
     return this.problemsV2Repository.getProblemsSummary(dto);
   }
 
