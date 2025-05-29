@@ -52,6 +52,86 @@ export class ProblemsV2Repository {
     return orderBy;
   }
 
+  async getProblemSumamryByTitle(dto: InquiryProblemsSummaryDto) {
+    const { pageNo, pageSize, sort, levelList, typeList, title } = dto;
+
+    const filters: string[] = [];
+
+    if (levelList?.length) {
+      filters.push(
+        `p.PROBLEM_V2_LEVEL IN (${levelList.map(Number).join(',')})`,
+      );
+    }
+
+    if (typeList?.length) {
+      filters.push(`
+        EXISTS (
+          SELECT 1 FROM PROBLEM_V2_TYPE t
+          WHERE t.PROBLEM_V2_UUID = p.PROBLEM_V2_UUID
+          AND t.name IN (${typeList.map((v) => `'${v}'`).join(',')})
+        )
+      `);
+    }
+
+    const whereClause = filters.length ? `AND ${filters.join(' AND ')}` : '';
+
+    const orderClause = (() => {
+      switch (sort) {
+        case PROBLEM_SORT_MAP.ANSWER_RATE_DESC:
+          return 'ORDER BY p.PROBLEM_V2_ANSWER_RATE DESC';
+        case PROBLEM_SORT_MAP.ANSWER_RATE_ASC:
+          return 'ORDER BY p.PROBLEM_V2_ANSWER_RATE ASC';
+        case PROBLEM_SORT_MAP.LEVEL_ASC:
+          return 'ORDER BY p.PROBLEM_V2_LEVEL ASC';
+        case PROBLEM_SORT_MAP.LEVEL_DESC:
+          return 'ORDER BY p.PROBLEM_V2_LEVEL DESC';
+        default:
+          return 'ORDER BY p.PROBLEM_V2_NO DESC';
+      }
+    })();
+
+    const limit = pageSize;
+    const offset = (pageNo - 1) * pageSize;
+
+    const query = `
+      SELECT
+        p.PROBLEM_V2_UUID AS uuid,
+        p.PROBLEM_V2_TITLE AS title,
+        p.PROBLEM_V2_LEVEL AS level,
+        p.PROBLEM_V2_LEVEL_TEXT AS levelText,
+        p.PROBLEM_V2_ANSWER_RATE AS answerRate,
+        p.PROBLEM_V2_SUBMIT_COUNT AS submitCount,
+        p.PROBLEM_V2_ANSWER_COUNT AS answerCount,
+        p.PROBLEM_V2_ANSWER_PEOPLE_COUNT AS answerPeopleCount,
+        p.PROBLEM_V2_SOURCE AS source,
+        p.PROBLEM_V2_SOURCE_ID AS sourceId,
+        p.PROBLEM_V2_SOURCE_URL AS sourceUrl
+      FROM PROBLEM_V2 p
+      WHERE MATCH(p.PROBLEM_V2_TITLE) AGAINST('${title}' IN BOOLEAN MODE)
+      ${whereClause}
+      ${orderClause}
+      LIMIT ${limit} OFFSET ${offset};
+    `;
+
+    const countQuery = `
+      SELECT COUNT(*) as totalCount
+      FROM PROBLEM_V2 p
+      WHERE MATCH(p.PROBLEM_V2_TITLE) AGAINST('${title}' IN BOOLEAN MODE)
+      ${whereClause};
+    `;
+
+    const [problemList, totalResult] = await Promise.all([
+      this.prismaService.$queryRawUnsafe(query),
+      this.prismaService.$queryRawUnsafe<{ totalCount: number }[]>(countQuery),
+    ]);
+
+    return {
+      problemList,
+      totalCount: Number(totalResult[0]?.totalCount || 0),
+      pageSize,
+      pageNo,
+    };
+  }
   async getProblemsSummary(dto: InquiryProblemsSummaryDto) {
     const { pageNo, pageSize, sort, levelList, typeList, title } = dto;
 
