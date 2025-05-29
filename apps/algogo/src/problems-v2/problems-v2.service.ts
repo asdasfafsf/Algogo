@@ -10,41 +10,7 @@ export class ProblemsV2Service {
   constructor(private readonly problemsV2Repository: ProblemsV2Repository) {}
 
   async getProblemsSummary(dto: InquiryProblemsSummaryDto) {
-    const MYSQL_FULLTEXT_DELIMITERS = [
-      ' ',
-      ',',
-      '.',
-      ':',
-      ';',
-      '!',
-      '?',
-      '@',
-      '#',
-      '$',
-      '%',
-      '^',
-      '&',
-      '*',
-      '(',
-      ')',
-      '-',
-      '+',
-      '=',
-      '<',
-      '>',
-      '/',
-      '\\',
-      '|',
-      '[',
-      ']',
-      '{',
-      '}',
-      '~',
-      '`',
-      "'",
-      '"',
-      '_',
-    ];
+    const MYSQL_FULLTEXT_DELIMITERS = ['+', '-', '<', '>', '@', '~', '*'];
 
     const hasTitle = !!dto.title;
     const hasSpecial = MYSQL_FULLTEXT_DELIMITERS.some((delimiter) =>
