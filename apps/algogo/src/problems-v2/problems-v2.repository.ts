@@ -85,8 +85,16 @@ export class ProblemsV2Repository {
           return 'ORDER BY p.PROBLEM_V2_LEVEL ASC';
         case PROBLEM_SORT_MAP.LEVEL_DESC:
           return 'ORDER BY p.PROBLEM_V2_LEVEL DESC';
+        case PROBLEM_SORT_MAP.SUBMIT_COUNT_ASC:
+          return 'ORDER BY p.PROBLEM_V2_SUBMIT_COUNT ASC';
+        case PROBLEM_SORT_MAP.SUBMIT_COUNT_DESC:
+          return 'ORDER BY p.PROBLEM_V2_SUBMIT_COUNT DESC';
+        case PROBLEM_SORT_MAP.TITLE_ASC:
+          return 'ORDER BY p.PROBLEM_V2_TITLE ASC';
+        case PROBLEM_SORT_MAP.TITLE_DESC:
+          return 'ORDER BY p.PROBLEM_V2_TITLE DESC';
         default:
-          return 'ORDER BY p.PROBLEM_V2_NO DESC';
+          return 'ORDER BY p.PROBLEM_V2_NO ASC';
       }
     })();
 
