@@ -99,7 +99,8 @@ export class ProblemsV2Repository {
       }
     })();
 
-    const rawQuery = `
+    const rawList = await this.prismaService.$queryRaw<ProblemSummaryDto[]>(
+      Prisma.sql`
       SELECT
         p.PROBLEM_V2_UUID AS uuid,
         p.PROBLEM_V2_TITLE AS title,
@@ -113,13 +114,12 @@ export class ProblemsV2Repository {
         p.PROBLEM_V2_SOURCE_ID AS sourceId,
         p.PROBLEM_V2_SOURCE_URL AS sourceUrl
       FROM PROBLEM_V2 p
-      WHERE MATCH(p.PROBLEM_V2_TITLE) AGAINST('${title}' IN BOOLEAN MODE)
-      ${whereClause}
-      ${orderClause}
+      WHERE MATCH(p.PROBLEM_V2_TITLE) AGAINST(${title} IN BOOLEAN MODE)
+      ${Prisma.raw(whereClause)}
+      ${Prisma.raw(orderClause)}
       LIMIT 1000;
-    `;
-
-    const rawList = await this.prismaService.$queryRawUnsafe(rawQuery);
+    `,
+    );
     const filtered = (rawList as ProblemSummaryDto[]).filter((item) =>
       item.title.includes(title),
     );
