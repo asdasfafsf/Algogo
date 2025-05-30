@@ -120,9 +120,12 @@ export class ProblemsV2Repository {
       LIMIT 1000;
     `,
     );
-    const filtered = (rawList as ProblemSummaryDto[]).filter((item) =>
-      item.title.includes(title),
-    );
+    const filtered = (rawList as ProblemSummaryDto[]).filter((item) => {
+      const title = item.title.toLowerCase();
+      const search = dto.title.toLowerCase();
+
+      return title.includes(search);
+    });
     const totalCount = filtered.length;
     const offset = (pageNo - 1) * pageSize;
     const paged = filtered.slice(offset, offset + pageSize);
