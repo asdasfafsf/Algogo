@@ -24,6 +24,11 @@ export class ExecuteService implements OnModuleInit {
       connection: {
         ...this.config,
       },
+      defaultJobOptions: {
+        attempts: 1,
+        removeOnComplete: true,
+        removeOnFail: true,
+      },
     });
 
     await this.queue.waitUntilReady();
@@ -57,6 +62,8 @@ export class ExecuteService implements OnModuleInit {
     try {
       const job = await this.queue.add('run', requestExecuteDto, {
         attempts: 2,
+        removeOnComplete: true,
+        removeOnFail: true,
       });
       const timeout = 1000 * (requestExecuteDto.inputList.length * 2) + 3000;
       const result = await job.waitUntilFinished(this.queueEvents, timeout);
