@@ -59,8 +59,6 @@ export class ProblemsV2Service {
     );
     endDate.setHours(0, 0, 0, 0);
 
-    console.log(startDate, endDate);
-
     const todayProblems = await this.problemsV2Repository.getTodayProblems({
       startDate,
       endDate,
@@ -70,6 +68,10 @@ export class ProblemsV2Service {
       uuid: todayProblem.problemUuid,
       ...todayProblem.problemV2,
       typeList: todayProblem.problemV2.typeList.map((elem) => elem.name),
+      difficulty:
+        ['입문', '초급', '중급', '고급', '심화'][
+          Math.floor(todayProblem.problemV2.level / 4)
+        ] ?? '알 수 없음',
     }));
   }
 }

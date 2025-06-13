@@ -73,4 +73,10 @@ export class TodayProblemDto {
     type: [String],
   })
   typeList: string[];
+
+  @ApiProperty({
+    description: '문제 난이도',
+    example: 1,
+  })
+  difficulty: string;
 }
