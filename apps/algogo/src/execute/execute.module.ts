@@ -19,23 +19,10 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
         connection: {
           ...config,
         },
-      }),
-    }),
-    BullModule.registerQueueAsync({
-      inject: [bullmqConfig.KEY],
-      useFactory: (config: ConfigType<typeof bullmqConfig>) => ({
-        name: config.queueName,
-        connection: {
-          ...config,
-        },
-      }),
-    }),
-    BullModule.registerFlowProducerAsync({
-      inject: [bullmqConfig.KEY],
-      useFactory: (config: ConfigType<typeof bullmqConfig>) => ({
-        name: config.queueName,
-        connection: {
-          ...config,
+        defaultJobOptions: {
+          attempts: 1,
+          removeOnComplete: true,
+          removeOnFail: true,
         },
       }),
     }),
