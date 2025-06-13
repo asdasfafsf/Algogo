@@ -1,4 +1,11 @@
-import { Controller, Get, HttpStatus, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpStatus,
+  Param,
+  Query,
+  HttpCode,
+} from '@nestjs/common';
 import { ApiBadRequestErrorResponse } from '../common/decorators/swagger/ApiBadRequestErrorResponse';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { InquiryProblemsSummaryDto } from './dto/inquiry-problems-summary.dto';
@@ -6,6 +13,7 @@ import { ProblemSummaryDto } from './dto/problem-summary.dto';
 import { ProblemDto } from './dto/problem.dto';
 import { CommonApiResponse } from '../common/decorators/swagger/CommonApiResponse';
 import { ProblemsV2Service } from './problems-v2.service';
+import { TodayProblemDto } from './dto/today-problem.dto';
 
 @ApiTags('문제 API V2')
 @ApiBadRequestErrorResponse()
@@ -26,6 +34,22 @@ export class ProblemsV2Controller {
   @Get('/')
   async getProblems(@Query() query: InquiryProblemsSummaryDto) {
     return this.problemsV2Service.getProblemsSummary(query);
+  }
+
+  @ApiOperation({
+    summary: '오늘의 문제',
+    description: 'UTC 기준 오늘 날짜에 해당하는 추천 문제들을 불러온다',
+  })
+  @CommonApiResponse({
+    status: HttpStatus.OK,
+    description: '오늘의 문제 조회 성공',
+    model: TodayProblemDto,
+    isArray: true,
+  })
+  @Get('/today')
+  @HttpCode(HttpStatus.OK)
+  async getTodayProblems() {
+    return this.problemsV2Service.getTodayProblems(0);
   }
 
   @ApiOperation({
