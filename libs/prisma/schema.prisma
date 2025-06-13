@@ -1,16 +1,17 @@
-generator markdown {
-    provider = "prisma-markdown"
-    output   = "./ERD.md"
-    title    = "Sinchon ICPC Camp ERD"
-}
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
     provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "mysql"
-    url      = env("DATABASE_URL")
+    provider     = "mysql"
+    url          = env("DATABASE_URL")
+    relationMode = "prisma"
 }
 
 model BatchDefinition {
@@ -98,6 +99,20 @@ model JobInstance {
     @@map("JOB_INSTANCE")
 }
 
+model TodayProblem {
+    no          Int       @id @default(autoincrement()) @map("TODAY_PROBLEM_NO")
+    problemUuid String    @map("TODAY_PROBLEM_UUID") @db.VarChar(36)
+    createdAt   DateTime  @default(now()) @map("TODAY_PROBLEM_CREATED_AT")
+    updatedAt   DateTime  @updatedAt @map("TODAY_PROBLEM_UPDATED_AT")
+    servedAt    DateTime  @map("TODAY_PROBLEM_SERVED_AT")
+    problemV2   ProblemV2 @relation(fields: [problemUuid], references: [uuid])
+
+    @@index([createdAt])
+    @@index([servedAt])
+    @@index([problemUuid])
+    @@map("TODAY_PROBLEM")
+}
+
 model ProblemV2 {
     no                Int     @id @default(autoincrement()) @map("PROBLEM_V2_NO")
     uuid              String  @unique @default(uuid()) @map("PROBLEM_V2_UUID") @db.VarChar(36)
@@ -138,6 +153,7 @@ model ProblemV2 {
     typeList          ProblemV2Type[]
     subTaskList       ProblemV2SubTask[]
     languageLimitList ProblemV2LanguageLimit[]
+    todayProblemList  TodayProblem[]
 
     customExample        String? @map("PROBLEM_V2_CUSTOM_EXAMPLE") @db.Text()
     customImplementation String? @map("PROBLEM_V2_CUSTOM_IMPLEMENTATION") @db.Text()

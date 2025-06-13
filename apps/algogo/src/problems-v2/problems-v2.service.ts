@@ -4,6 +4,7 @@ import { InquiryProblemsSummaryDto } from './dto/inquiry-problems-summary.dto';
 import { CustomNotFoundException } from '../common/errors/CustomNotFoundException';
 import { ProblemDto } from './dto/problem.dto';
 import { ProblemType } from './types/problem.type';
+import { TodayProblemDto } from './dto/today-problem.dto';
 
 @Injectable()
 export class ProblemsV2Service {
@@ -47,5 +48,30 @@ export class ProblemsV2Service {
         content: subTask.content,
       })),
     };
+  }
+
+  async getTodayProblems(addDays: number): Promise<TodayProblemDto[]> {
+    const servedAt = new Date();
+    const startDate = new Date(servedAt.setDate(servedAt.getDate() + addDays));
+    startDate.setHours(0, 0, 0, 0);
+    const endDate = new Date(
+      servedAt.setDate(servedAt.getDate() + addDays + 1),
+    );
+    endDate.setHours(0, 0, 0, 0);
+
+    const todayProblems = await this.problemsV2Repository.getTodayProblems({
+      startDate,
+      endDate,
+    });
+
+    return todayProblems.map((todayProblem) => ({
+      uuid: todayProblem.problemUuid,
+      ...todayProblem.problemV2,
+      typeList: todayProblem.problemV2.typeList.map((elem) => elem.name),
+      difficulty:
+        ['입문', '초급', '중급', '고급', '심화'][
+          Math.floor(todayProblem.problemV2.level / 4)
+        ] ?? '알 수 없음',
+    }));
   }
 }

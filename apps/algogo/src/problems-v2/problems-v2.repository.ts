@@ -270,4 +270,43 @@ export class ProblemsV2Repository {
       },
     });
   }
+
+  async getTodayProblems({
+    startDate,
+    endDate,
+  }: {
+    startDate: Date;
+    endDate: Date;
+  }) {
+    return this.prismaService.todayProblem.findMany({
+      select: {
+        problemUuid: true,
+        problemV2: {
+          select: {
+            title: true,
+            level: true,
+            levelText: true,
+            answerRate: true,
+            submitCount: true,
+            answerCount: true,
+            answerPeopleCount: true,
+            source: true,
+            sourceId: true,
+            sourceUrl: true,
+            typeList: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+      },
+      where: {
+        servedAt: {
+          gte: startDate,
+          lt: endDate,
+        },
+      },
+    });
+  }
 }
