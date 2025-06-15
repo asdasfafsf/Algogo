@@ -24,9 +24,10 @@ export class AuthGuard implements CanActivate {
     }
 
     const decodedToken = await this.authService.decodeJwt(encryptedToken);
-    const { userNo } = decodedToken;
+    const { userNo, userUuid } = decodedToken;
 
     request.userNo = Number(userNo);
+    request.userUuid = userUuid;
     request.user = decodedToken;
     return true;
   }

@@ -64,7 +64,13 @@ export class AuthService {
     };
   }
 
-  async generateLoginToken(userNo: number) {
+  async generateLoginToken({
+    userNo,
+    userUuid,
+  }: {
+    userNo: number;
+    userUuid: string;
+  }) {
     let uuid = await this.generateRandom(userNo.toString());
 
     while (true) {
@@ -81,11 +87,11 @@ export class AuthService {
     const tmpUuid = await this.generateRandom(uuid);
 
     const accessToken = await this.jwtService.sign(
-      { userNo, uuid },
+      { userNo, userUuid, uuid },
       this.jwtConfig.jwtAccessTokenExpiresIn,
     );
     const refreshToken = await this.jwtService.sign(
-      { uuid, userNo, tmpUuid },
+      { uuid, userNo, userUuid, tmpUuid },
       this.jwtConfig.jwtRefreshTokenExpiresIn,
     );
 

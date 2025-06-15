@@ -244,17 +244,17 @@ model User {
 }
 
 model UserOAuth {
-    userNo    Int      @map("USER_NO")
+    userUuid  String   @map("USER_UUID")
     provider  String   @map("USER_OAUTH_PROVIDER")
     id        String   @map("USER_OAUTH_ID")
     isActive  Boolean  @default(true) @map("USER_OAUTH_IS_ACTIVE")
     createdAt DateTime @default(now()) @map("USER_OAUTH_CREATED_AT")
     updatedAt DateTime @default(now()) @map("USER_OAUTH_UPDATED_AT")
 
-    User User @relation("UserToUserOauth", fields: [userNo], references: [no])
+    User User @relation("UserToUserOauth", fields: [userUuid], references: [uuid])
 
-    @@unique([userNo, id, provider])
-    @@index([userNo])
+    @@unique([userUuid, id, provider])
+    @@index([userUuid])
     @@index([id, provider])
     @@map("USER_OAUTH")
 }
