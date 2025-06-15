@@ -22,8 +22,8 @@ export class CodeService {
     private readonly logger: CustomLogger,
   ) {}
 
-  async getCodeSetting(userNo: number) {
-    const codeSetting = await this.codeRepository.getCodeSetting(userNo);
+  async getCodeSetting(userUuid: string) {
+    const codeSetting = await this.codeRepository.getCodeSetting(userUuid);
 
     if (!codeSetting) {
       throw new NotFoundCodeSettingException();
@@ -33,7 +33,7 @@ export class CodeService {
   }
 
   async upsertCodeSetting(
-    dto: RequestUpsertCodeSettingDto & { userNo: number },
+    dto: RequestUpsertCodeSettingDto & { userUuid: string },
   ) {
     return this.codeRepository.upsertCodeSetting(dto);
   }

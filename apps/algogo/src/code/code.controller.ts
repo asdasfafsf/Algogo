@@ -60,7 +60,7 @@ export class CodeController {
   })
   @Get('/setting')
   async getCodeSetting(@Req() req: AuthRequest) {
-    const codeSetting = await this.codeService.getCodeSetting(req.userNo);
+    const codeSetting = await this.codeService.getCodeSetting(req.userUuid);
     return codeSetting;
   }
 
@@ -77,8 +77,8 @@ export class CodeController {
     @Req() req: AuthRequest,
     @Body() requestUpsertCodeSettingDto: RequestUpsertCodeSettingDto,
   ) {
-    const { userNo } = req;
-    const dto = { userNo, ...requestUpsertCodeSettingDto };
+    const { userUuid } = req;
+    const dto = { userUuid, ...requestUpsertCodeSettingDto };
     await this.codeService.upsertCodeSetting(dto);
     return null;
   }

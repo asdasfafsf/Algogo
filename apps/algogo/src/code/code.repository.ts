@@ -6,7 +6,7 @@ import { LanguageProvider } from '../common/enums/LanguageProviderEnum';
 export class CodeRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getCodeSetting(userNo: number) {
+  async getCodeSetting(userUuid: string) {
     const codeSetting = await this.prisma.codeSetting.findUnique({
       select: {
         fontSize: true,
@@ -16,14 +16,14 @@ export class CodeRepository {
         lineNumber: true,
         defaultLanguage: true,
       },
-      where: { userNo },
+      where: { userUuid },
     });
 
     return codeSetting;
   }
 
   async upsertCodeSetting({
-    userNo,
+    userUuid,
     fontSize,
     problemContentRate,
     theme,
@@ -31,7 +31,7 @@ export class CodeRepository {
     lineNumber,
     defaultLanguage,
   }: {
-    userNo: number;
+    userUuid: string;
     fontSize?: number;
     problemContentRate?: number;
     theme?: string;
@@ -40,7 +40,7 @@ export class CodeRepository {
     defaultLanguage?: string;
   }) {
     await this.prisma.codeSetting.upsert({
-      where: { userNo },
+      where: { userUuid },
       update: {
         fontSize,
         problemContentRate,
@@ -51,7 +51,7 @@ export class CodeRepository {
         updatedAt: new Date(),
       },
       create: {
-        userNo,
+        userUuid,
         fontSize,
         problemContentRate,
         theme,

@@ -414,18 +414,19 @@ model ProblemCollectionLog {
 
 model CodeSetting {
     no                 Int      @id @default(autoincrement()) @map("USER_CODE_SETTING_NO")
-    userNo             Int      @map("USER_NO")
+    userUuid           String   @map("USER_UUID")
     fontSize           Int      @default(14) @map("CODE_FONT_SIZE")
     problemContentRate Int      @default(100) @map("CODE_PROBLEM_CONTENT_RATE")
     theme              String   @default("vs-dark") @map("CODE_THEME")
     tabSize            Int      @default(4) @map("CODE_TAB_SIZE")
     lineNumber         String   @default("on") @map("CODE_LINE_NUMBER")
     defaultLanguage    String   @default("cpp") @map("CODE_DEFAULT_LANGUAGE")
-    createdAt          DateTime @default(now())
-    updatedAt          DateTime @default(now())
+    createdAt          DateTime @default(now()) @map("CODE_SETTING_CREATED_AT")
+    updatedAt          DateTime @default(now()) @map("CODE_SETTING_UPDATED_AT")
 
-    @@unique([userNo])
-    @@index([userNo])
+    @@unique([userUuid])
+    @@index([userUuid])
+    @@map("CODE_SETTING")
 }
 
 model CodeDefaultTemplate {
