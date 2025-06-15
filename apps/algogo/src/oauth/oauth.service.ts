@@ -22,7 +22,10 @@ export class OauthService {
   async getOAuthState(requestOAuthDto: RequestOAuthDto) {
     const { id, provider } = requestOAuthDto;
 
-    const oauthList = await this.oauthRepository.getOAuthList(id, provider);
+    const oauthList = await this.oauthRepository.getOAuthList({
+      id,
+      provider,
+    });
 
     if (!oauthList?.length) {
       return OAuthState.NEW;
@@ -40,22 +43,25 @@ export class OauthService {
   async getOAuthStateWithLogined(
     requestOAuthConnectDto: RequestOAuthConnectDto,
   ) {
-    const { userNo, id, provider } = requestOAuthConnectDto;
-    const oauthList = await this.oauthRepository.getOAuthList(id, provider);
+    const { id, provider, userUuid } = requestOAuthConnectDto;
+    const oauthList = await this.oauthRepository.getOAuthList({
+      id,
+      provider,
+    });
 
     if (!oauthList?.length) {
       return OAuthState.NEW;
     }
 
     const isConnectedToOther = oauthList.some(
-      (elem) => elem.isActive && elem.userNo !== userNo,
+      (elem) => elem.isActive && elem.userUuid !== userUuid,
     );
 
     if (isConnectedToOther) {
       return OAuthState.CONNECTED_TO_OTHER_ACCOUNT;
     }
 
-    const mine = oauthList.find((elem) => elem.userNo === userNo);
+    const mine = oauthList.find((elem) => elem.userUuid === userUuid);
 
     if (mine) {
       if (mine.isActive) {
@@ -72,23 +78,51 @@ export class OauthService {
     try {
       const oauthState = await this.getOAuthState(requestOAuthDto);
       let userNo = -1;
+      let userUuid = '';
 
       if (oauthState === OAuthState.NEW) {
         const user = await this.oauthRepository.insertUser(requestOAuthDto);
         userNo = user.no;
+        userUuid = user.uuid;
       } else if (oauthState === OAuthState.CONNECTED_TO_OTHER_ACCOUNT) {
         const { id, provider } = requestOAuthDto;
-        const user = await this.oauthRepository.getOAuth(id, provider, true);
-        userNo = user.userNo;
+        const user = await this.oauthRepository.getOAuth({
+          id,
+          provider,
+          isActive: true,
+        });
+        userUuid = user.userUuid;
       } else {
         const { id, provider } = requestOAuthDto;
-        const user = await this.oauthRepository.getOAuth(id, provider, false);
-        userNo = user.userNo;
-        await this.oauthRepository.updateUserOAuth(userNo, id, provider, true);
+        const user = await this.oauthRepository.getOAuth({
+          id,
+          provider,
+          isActive: false,
+        });
+        userUuid = user.userUuid;
+        await this.oauthRepository.updateUserOAuth({
+          userUuid,
+          id,
+          provider,
+          isActive: true,
+        });
         // throw new ConflictException('연동해제된 계정입니다. 계속 진행할까요?');
       }
 
-      const uuid = await this.authService.generateLoginToken(userNo);
+      if (userNo === -1) {
+        userNo = await this.oauthRepository.getUserNo(userUuid);
+
+        if (!userNo) {
+          throw new ConflictException(
+            '연동해제된 계정입니다. 계속 진행할까요?',
+          );
+        }
+      }
+
+      const uuid = await this.authService.generateLoginToken({
+        userNo,
+        userUuid,
+      });
       return uuid;
     } catch (e) {
       this.logger.error('OauthService registerOrLogin', {
@@ -101,19 +135,23 @@ export class OauthService {
 
   async connectOAuthProvider(requestOAuthDto: RequestOAuthConnectDto) {
     const { id, provider } = requestOAuthDto;
-    const userOAuth = await this.oauthRepository.getOAuth(id, provider, true);
+    const userOAuth = await this.oauthRepository.getOAuth({
+      id,
+      provider,
+      isActive: true,
+    });
 
     // 동일한 계정으로 이미 연동 됨
     if (userOAuth) {
       throw new ConflictException('이미 연동 된 계정입니다.');
     }
 
-    const { userNo } = requestOAuthDto;
+    const { userUuid } = requestOAuthDto;
 
-    const myUserOAuth = await this.oauthRepository.getUserOAuth(
-      userNo,
+    const myUserOAuth = await this.oauthRepository.getUserOAuth({
+      userUuid,
       provider,
-    );
+    });
 
     if (myUserOAuth?.isActive) {
       throw new ConflictException(
@@ -124,17 +162,26 @@ export class OauthService {
     await this.oauthRepository.addOAuthProvider(requestOAuthDto);
   }
 
-  async disconnectOAuth(userNo: number, provider: OAuthProvider) {
-    const myOAuth = await this.oauthRepository.getUserOAuth(
-      userNo,
+  async disconnectOAuth({
+    userUuid,
+    provider,
+  }: {
+    userUuid: string;
+    provider: OAuthProvider;
+  }) {
+    const myOAuth = await this.oauthRepository.getUserOAuth({
+      userUuid,
       provider,
-      true,
-    );
+      isActive: true,
+    });
 
     if (!myOAuth) {
       throw new NotFoundException('연동되지 않은 인증기관입니다.');
     }
 
-    await this.oauthRepository.disconnectOAuth(userNo, provider);
+    await this.oauthRepository.disconnectOAuth({
+      userUuid,
+      provider,
+    });
   }
 }

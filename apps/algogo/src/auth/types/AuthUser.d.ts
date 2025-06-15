@@ -1,5 +1,5 @@
 type AuthUser = {
-  no: mumber;
+  no: number;
   uuid: string;
   state: 'ACTIVE';
 };

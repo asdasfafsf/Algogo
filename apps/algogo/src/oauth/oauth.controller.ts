@@ -137,9 +137,11 @@ export class OauthController {
     @Res() res: Response,
   ) {
     const userNo = req.userNo;
+    const userUuid = req.userUuid;
     const requestOAuthDto = {
       ...(req.user as RequestOAuthDto),
       userNo,
+      userUuid,
       provider,
     };
 

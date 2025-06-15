@@ -43,8 +43,8 @@ export class MeService {
     const { file } = updateMeDto;
     if (file) {
       const webp = await this.imageService.toWebp(file.buffer);
-      const { userNo } = updateMeDto;
-      const path = `${await this.toPath(userNo)}.webp`;
+      const { userUuid } = updateMeDto;
+      const path = `${await this.toPath(userUuid)}.webp`;
 
       const fullPath = await this.s3Service.upload(path, webp);
 
@@ -69,8 +69,7 @@ export class MeService {
     };
   }
 
-  private async toPath(userNo: number) {
-    const uuid = await this.meRepository.getUuid(userNo);
+  private async toPath(uuid: string) {
     const fileName = await this.cryptoService.SHA256(uuidv7());
     return `${uuid}/${fileName}`;
   }
