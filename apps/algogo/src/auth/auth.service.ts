@@ -114,10 +114,10 @@ export class AuthService {
     await this.jwtService.verify(decryptedToken);
     const decodedToken = await this.jwtService.decode(decryptedToken);
 
-    if (!decodedToken.userNo) {
+    if (!decodedToken.userUuid) {
       throw new JwtInvalidTokenException();
     }
-    const user = await this.authRepository.getUser(decodedToken.userNo);
+    const user = await this.authRepository.getUser(decodedToken.userUuid);
 
     if (!user) {
       throw new NotFoundException('일치하는 회원이 없습니다.');
@@ -137,7 +137,7 @@ export class AuthService {
       token,
     );
     const decodedToken = await this.jwtService.decode(decryptedToken);
-    const { uuid, userNo } = decodedToken;
+    const { uuid, userNo, userUuid } = decodedToken;
     const savedToken = await this.redisService.get(`${uuid}`);
 
     await this.redisService.del(uuid);
@@ -148,7 +148,7 @@ export class AuthService {
       );
     }
 
-    const user = await this.authRepository.getUser(userNo);
+    const user = await this.authRepository.getUser(userUuid);
 
     if (!user) {
       throw new NotFoundException('찾을 수 없는 회원입니다.');
@@ -171,11 +171,11 @@ export class AuthService {
 
     const tmpUuid = await this.generateRandom(userNo.toString());
     const accessToken = await this.jwtService.sign(
-      { uuid: newUuid, userNo },
+      { uuid: newUuid, userNo, userUuid: user.uuid },
       this.jwtConfig.jwtAccessTokenExpiresIn,
     );
     const refreshToken = await this.jwtService.sign(
-      { userNo, uuid: newUuid, tmpUuid },
+      { userNo, uuid: newUuid, tmpUuid, userUuid: user.uuid },
       this.jwtConfig.jwtRefreshTokenExpiresIn,
     );
 

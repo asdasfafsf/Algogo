@@ -5,7 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export class AuthRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async getUser(userNo: number) {
+  async getUser(userUuid: string) {
     const user = await this.prismaService.user.findUnique({
       select: {
         no: true,
@@ -13,7 +13,7 @@ export class AuthRepository {
         state: true,
       },
       where: {
-        no: userNo,
+        uuid: userUuid,
       },
     });
 
