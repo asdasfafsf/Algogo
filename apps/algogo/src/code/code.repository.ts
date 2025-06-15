@@ -62,11 +62,11 @@ export class CodeRepository {
     });
   }
 
-  async getCodeTemplateResult(userNo: number) {
+  async getCodeTemplateResult(userUuid: string) {
     const [defaultList, summaryList] = await Promise.all([
       this.prisma.codeDefaultTemplate
         .findMany({
-          where: { userNo },
+          where: { userUuid },
           select: {
             codeTemplateNo: true,
           },
@@ -92,7 +92,7 @@ export class CodeRepository {
 
       // 전체 템플릿 목록
       this.prisma.codeTemplate.findMany({
-        where: { userNo },
+        where: { userUuid },
         select: {
           uuid: true,
           name: true,
@@ -109,13 +109,19 @@ export class CodeRepository {
     };
   }
 
-  async getCodeTemplateNo({ uuid, userNo }: { uuid: string; userNo: number }) {
+  async getCodeTemplateNo({
+    uuid,
+    userUuid,
+  }: {
+    uuid: string;
+    userUuid: string;
+  }) {
     const codeTemplate = await this.prisma.codeTemplate.findUnique({
       select: {
         no: true,
       },
       where: {
-        userNo,
+        userUuid,
         uuid,
       },
     });
@@ -124,13 +130,13 @@ export class CodeRepository {
   }
 
   async getCodeTemplate({
-    userNo,
-    codeTemplateNo,
+    uuid,
+    userUuid,
   }: {
-    userNo: number;
-    codeTemplateNo: number;
+    uuid: string;
+    userUuid: string;
   }) {
-    const codeTemplate = await this.prisma.codeTemplate.findUnique({
+    const codeTemplates = await this.prisma.codeTemplate.findFirst({
       select: {
         uuid: true,
         name: true,
@@ -141,62 +147,62 @@ export class CodeRepository {
         updatedAt: true,
       },
       where: {
-        userNo,
-        no: codeTemplateNo,
+        uuid,
+        userUuid,
       },
     });
 
-    return codeTemplate;
+    return codeTemplates;
   }
 
-  async getCodeTemplateList(userNo: number) {
+  async getCodeTemplateList(userUuid: string) {
     const codeTemplateList = await this.prisma.codeTemplate.findMany({
       select: {
         uuid: true,
         name: true,
         language: true,
       },
-      where: { userNo },
+      where: { userUuid },
     });
 
     return codeTemplateList;
   }
 
-  async upsertCodeDefaultTemplate({ userNo, language, codeTemplateNo }) {
+  async upsertCodeDefaultTemplate({ userUuid, language, codeTemplateNo }) {
     await this.prisma.codeDefaultTemplate.upsert({
       update: {
         codeTemplateNo,
       },
       create: {
-        userNo,
+        userUuid,
         language,
         codeTemplateNo,
       },
       where: {
-        userNo_language: {
-          userNo,
+        userUuid_language: {
+          userUuid,
           language,
         },
       },
     });
   }
 
-  async selectTotalCodeTemplateCount(userNo: number) {
+  async selectTotalCodeTemplateCount(userUuid: string) {
     return await this.prisma.codeTemplate.count({
       where: {
-        userNo,
+        userUuid,
       },
     });
   }
 
   async createCodeTemplate({
-    userNo,
+    userUuid,
     content,
     language,
     description,
     name,
   }: {
-    userNo: number;
+    userUuid: string;
     content: string;
     description: string;
     name: string;
@@ -211,7 +217,7 @@ export class CodeRepository {
         description: true,
       },
       data: {
-        userNo,
+        userUuid,
         content,
         language,
         description,
@@ -223,14 +229,14 @@ export class CodeRepository {
   }
 
   async updateCodeTempltae({
-    userNo,
+    userUuid,
     content,
     language,
     description,
     name,
     no,
   }: {
-    userNo: number;
+    userUuid: string;
     content?: string;
     description?: string;
     name?: string;
@@ -247,14 +253,14 @@ export class CodeRepository {
       },
       data: {
         description,
-        userNo,
+        userUuid,
         content,
         language,
         name,
       },
       where: {
         no,
-        userNo,
+        userUuid,
       },
     });
 

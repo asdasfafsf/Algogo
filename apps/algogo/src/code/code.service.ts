@@ -39,10 +39,10 @@ export class CodeService {
   }
 
   async getCodeTemplateResult(
-    userNo: number,
+    userUuid: string,
   ): Promise<ResponseCodeTemplateResult> {
     const { summaryList, defaultList } =
-      await this.codeRepository.getCodeTemplateResult(userNo);
+      await this.codeRepository.getCodeTemplateResult(userUuid);
 
     return {
       summaryList: summaryList.map((elem) => ({
@@ -56,35 +56,38 @@ export class CodeService {
     };
   }
 
-  async getCodeTemplate({ userNo, uuid }: { userNo: number; uuid: string }) {
-    const codeTemplateNo = await this.codeRepository.getCodeTemplateNo({
-      userNo,
+  async getCodeTemplate({
+    userUuid,
+    uuid,
+  }: {
+    userUuid: string;
+    uuid: string;
+  }) {
+    const codeTemplate = this.codeRepository.getCodeTemplate({
+      userUuid,
       uuid,
     });
-    if (!codeTemplateNo) {
+
+    if (!codeTemplate) {
       throw new NotFoundCodeTemplateException();
     }
-    const codeTemplate = this.codeRepository.getCodeTemplate({
-      userNo,
-      codeTemplateNo,
-    });
 
     return codeTemplate;
   }
 
   async createCodeTemplate(
-    dto: RequestCreateCodeTemplateDto & { userNo: number },
+    dto: RequestCreateCodeTemplateDto & { userUuid: string },
   ) {
-    const { userNo, content, description, name, language, isDefault } = dto;
+    const { userUuid, content, description, name, language, isDefault } = dto;
     const count =
-      await this.codeRepository.selectTotalCodeTemplateCount(userNo);
+      await this.codeRepository.selectTotalCodeTemplateCount(userUuid);
 
     if (count >= 10) {
       throw new CodeTemplateLimitExceededException();
     }
 
     const codeTemplate = await this.codeRepository.createCodeTemplate({
-      userNo,
+      userUuid,
       content,
       description,
       name,
@@ -93,7 +96,7 @@ export class CodeService {
 
     if (isDefault) {
       await this.setDefaultCodeTemplate({
-        userNo,
+        userUuid,
         uuid: codeTemplate.uuid,
         language,
       });
@@ -103,18 +106,18 @@ export class CodeService {
   }
 
   async updateCodeTemplate(
-    dto: RequestUpsertCodeTemplateDto & { userNo: number },
+    dto: RequestUpsertCodeTemplateDto & { userUuid: string },
   ) {
-    const { userNo, uuid, content, description, name, language, isDefault } =
+    const { userUuid, uuid, content, description, name, language, isDefault } =
       dto;
-    const no = await this.codeRepository.getCodeTemplateNo({ uuid, userNo });
+    const no = await this.codeRepository.getCodeTemplateNo({ uuid, userUuid });
 
     if (!no) {
       throw new NotFoundCodeTemplateException();
     }
 
     const codeTemplate = await this.codeRepository.updateCodeTempltae({
-      userNo,
+      userUuid,
       content,
       description,
       name,
@@ -124,7 +127,7 @@ export class CodeService {
 
     if (isDefault) {
       await this.setDefaultCodeTemplate({
-        userNo,
+        userUuid,
         uuid: codeTemplate.uuid,
         language,
       });
@@ -133,8 +136,14 @@ export class CodeService {
     return codeTemplate;
   }
 
-  async deleteCodeTemplate({ uuid, userNo }: { uuid: string; userNo: number }) {
-    const no = await this.codeRepository.getCodeTemplateNo({ uuid, userNo });
+  async deleteCodeTemplate({
+    uuid,
+    userUuid,
+  }: {
+    uuid: string;
+    userUuid: string;
+  }) {
+    const no = await this.codeRepository.getCodeTemplateNo({ uuid, userUuid });
 
     if (!no) {
       throw new NotFoundCodeTemplateException();
@@ -144,12 +153,12 @@ export class CodeService {
   }
 
   async setDefaultCodeTemplate(
-    dto: RequestUpsertDefaultCodeTemplateDto & { userNo: number },
+    dto: RequestUpsertDefaultCodeTemplateDto & { userUuid: string },
   ) {
-    const { userNo, uuid, language } = dto;
+    const { userUuid, uuid, language } = dto;
     const codeTemplateNo = await this.codeRepository.getCodeTemplateNo({
       uuid,
-      userNo,
+      userUuid,
     });
 
     if (!codeTemplateNo) {
@@ -157,7 +166,7 @@ export class CodeService {
     }
 
     return this.codeRepository.upsertCodeDefaultTemplate({
-      userNo,
+      userUuid,
       language,
       codeTemplateNo,
     });

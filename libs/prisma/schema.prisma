@@ -432,18 +432,18 @@ model CodeSetting {
 model CodeDefaultTemplate {
     no             Int    @id @default(autoincrement()) @map("CODE_DEFAULT_TEMPLATE_NO")
     codeTemplateNo Int    @map("CODE_TEMPLATE_NO")
-    userNo         Int    @map("USER_NO")
+    userUuid       String @map("USER_UUID")
     language       String @map("CODE_DEFAULT_TEMPLATE_LANGUAGE")
 
-    @@unique([userNo, language])
-    @@index([userNo])
+    @@unique([userUuid, language])
+    @@index([userUuid])
     @@map("CODE_DEFAULT_TEMPLATE")
 }
 
 model CodeTemplate {
     no          Int      @id @default(autoincrement()) @map("CODE_TEMPLATE_NO")
     uuid        String   @unique @default(uuid()) @map("CODE_TEMPLATE_UUID")
-    userNo      Int      @map("USER_NO")
+    userUuid    String   @map("USER_UUID")
     name        String   @map("CODE_TEMPLATE_NAME")
     language    String   @map("CODE_TEMPLATE_LANGUAGE")
     content     String   @map("CODE_TEMPLATE_CONTENT") @db.VarChar(4000)
@@ -451,7 +451,7 @@ model CodeTemplate {
     updatedAt   DateTime @default(now()) @map("CODE_TEMPLATE_UPDATED_AT")
     description String   @map("CODE_TEMPLATE_DESCRIPTION") @db.VarChar(1000)
 
-    @@index([userNo, language])
+    @@index([userUuid, language])
     @@map("CODE_TEMPLATE")
 }
 
