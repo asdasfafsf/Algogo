@@ -155,13 +155,14 @@ model ProblemV2 {
     languageLimitList ProblemV2LanguageLimit[]
     todayProblemList  TodayProblem[]
 
-    customExample        String? @map("PROBLEM_V2_CUSTOM_EXAMPLE") @db.Text()
-    customImplementation String? @map("PROBLEM_V2_CUSTOM_IMPLEMENTATION") @db.Text()
-    customGrader         String? @map("PROBLEM_V2_CUSTOM_GRADER") @db.Text()
-    customNotes          String? @map("PROBLEM_V2_CUSTOM_NOTES") @db.Text()
-    customAttachment     String? @map("PROBLEM_V2_CUSTOM_ATTACHMENT") @db.Text()
-    problemSource        String? @map("PROBLEM_V2_PROBLEM_SOURCE") @db.Text()
-    customSample         String? @map("PROBLEM_V2_CUSTOM_SAMPLE") @db.Text()
+    customExample        String?       @map("PROBLEM_V2_CUSTOM_EXAMPLE") @db.Text()
+    customImplementation String?       @map("PROBLEM_V2_CUSTOM_IMPLEMENTATION") @db.Text()
+    customGrader         String?       @map("PROBLEM_V2_CUSTOM_GRADER") @db.Text()
+    customNotes          String?       @map("PROBLEM_V2_CUSTOM_NOTES") @db.Text()
+    customAttachment     String?       @map("PROBLEM_V2_CUSTOM_ATTACHMENT") @db.Text()
+    problemSource        String?       @map("PROBLEM_V2_PROBLEM_SOURCE") @db.Text()
+    customSample         String?       @map("PROBLEM_V2_CUSTOM_SAMPLE") @db.Text()
+    ProblemCode          ProblemCode[] @relation("ProblemToProblemCode")
 
     @@unique([source, sourceId])
     @@index([source, sourceId])
@@ -239,6 +240,7 @@ model User {
     problemStateList         UserProblemState[]     @relation("UserToUserProblemState")
     problemReportList        ProblemReport[]        @relation("UserToProblemReport")
     problemCollectionLogList ProblemCollectionLog[] @relation("UserToProblemCollectionLog")
+    problemCodeList          ProblemCode[]          @relation("UserToProblemCode")
 
     @@map("USER")
 }
@@ -457,15 +459,18 @@ model CodeTemplate {
 
 model ProblemCode {
     no          Int      @id @default(autoincrement()) @map("PROBLEM_CODE_NO")
-    userNo      Int      @map("USER_NO")
+    userUuid    String   @map("USER_UUID")
     problemUuid String   @map("PROBLEM_UUID")
     language    String   @map("PROBLEM_CODE_LANGUAGE")
     content     String   @map("PROBLEM_CODE_CONTENT") @db.Text()
     createdAt   DateTime @default(now()) @map("PROBLEM_CODE_CREATED_AT")
     updatedAt   DateTime @default(now()) @map("PROBLEM_CODE_UPDATED_AT")
 
-    @@unique([userNo, problemUuid, language])
-    @@index([userNo, problemUuid])
+    User    User      @relation("UserToProblemCode", fields: [userUuid], references: [uuid])
+    Problem ProblemV2 @relation("ProblemToProblemCode", fields: [problemUuid], references: [uuid])
+
+    @@unique([userUuid, problemUuid, language])
+    @@index([userUuid, problemUuid])
     @@index([updatedAt])
     @@map("PROBLEM_CODE")
 }

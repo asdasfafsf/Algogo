@@ -191,14 +191,14 @@ export class CodeService {
   }
 
   async getProblemCodes({
-    userNo,
+    userUuid,
     problemUuid,
   }: {
-    userNo: number;
+    userUuid: string;
     problemUuid: string;
   }) {
     const problemCodes = await this.codeRepository.getProblemCodes({
-      userNo,
+      userUuid,
       problemUuid,
     });
 
@@ -210,11 +210,11 @@ export class CodeService {
   }
 
   async upsertProblemCode(
-    dto: RequestUpsertProblemCodeDto & { userNo: number },
+    dto: RequestUpsertProblemCodeDto & { userUuid: string },
   ) {
-    const { problemUuid, language, content, userNo } = dto;
+    const { problemUuid, language, content, userUuid } = dto;
     return await this.codeRepository.upsertProblemCode({
-      userNo,
+      userUuid,
       problemUuid,
       language,
       content,

@@ -268,8 +268,8 @@ export class CodeController {
     )
     problemUuid: string,
   ) {
-    const { userNo } = req;
-    const dto = { userNo, problemUuid };
+    const { userUuid } = req;
+    const dto = { userUuid, problemUuid };
     const problemCode = await this.codeService.getProblemCodes(dto);
 
     return problemCode;
@@ -289,8 +289,8 @@ export class CodeController {
     @Body() body: RequestUpsertProblemCodeDto,
     @Req() req: AuthRequest,
   ) {
-    const { userNo } = req;
-    const dto = { userNo, ...body };
+    const { userUuid } = req;
+    const dto = { userUuid, ...body };
     await this.codeService.upsertProblemCode(dto);
     return null;
   }

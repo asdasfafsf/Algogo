@@ -290,10 +290,10 @@ export class CodeRepository {
   }
 
   async getProblemCodes({
-    userNo,
+    userUuid,
     problemUuid,
   }: {
-    userNo: number;
+    userUuid: string;
     problemUuid: string;
   }) {
     const problemCode = await this.prisma.problemCode.findMany({
@@ -304,7 +304,7 @@ export class CodeRepository {
         createdAt: true,
       },
       where: {
-        userNo,
+        userUuid,
         problemUuid,
       },
     });
@@ -313,20 +313,20 @@ export class CodeRepository {
   }
 
   async upsertProblemCode({
-    userNo,
+    userUuid,
     problemUuid,
     language,
     content,
   }: {
-    userNo: number;
+    userUuid: string;
     problemUuid: string;
     language: LanguageProvider;
     content: string;
   }) {
     await this.prisma.problemCode.upsert({
       where: {
-        userNo_problemUuid_language: {
-          userNo,
+        userUuid_problemUuid_language: {
+          userUuid,
           problemUuid,
           language,
         },
@@ -338,7 +338,7 @@ export class CodeRepository {
         updatedAt: new Date(),
       },
       create: {
-        userNo,
+        userUuid,
         problemUuid,
         language,
         content,
