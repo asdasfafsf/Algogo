@@ -29,5 +29,6 @@ export class RequestOAuthConnectDto {
   accessToken: string;
 
   userNo: number;
+  userUuid: string;
   ip?: string;
 }

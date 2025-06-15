@@ -67,9 +67,7 @@ export class CrawlerService {
     );
 
     const data = response.data;
-    this.logger.silly('data', {
-      data,
-    });
+
     data.data.contentList = data.data.contentList.map((elem) => {
       return {
         cellList: elem.cellList ?? [],

@@ -57,8 +57,6 @@ export class ProblemsCollectService {
       sourceId,
     );
 
-    this.logger.silly('야야야', { contentList });
-
     const problem = await this.problemsCollectRepository.upsertProblem({
       ...result.data,
       contentList,

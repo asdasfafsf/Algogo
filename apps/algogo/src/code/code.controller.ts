@@ -60,7 +60,7 @@ export class CodeController {
   })
   @Get('/setting')
   async getCodeSetting(@Req() req: AuthRequest) {
-    const codeSetting = await this.codeService.getCodeSetting(req.userNo);
+    const codeSetting = await this.codeService.getCodeSetting(req.userUuid);
     return codeSetting;
   }
 
@@ -77,8 +77,8 @@ export class CodeController {
     @Req() req: AuthRequest,
     @Body() requestUpsertCodeSettingDto: RequestUpsertCodeSettingDto,
   ) {
-    const { userNo } = req;
-    const dto = { userNo, ...requestUpsertCodeSettingDto };
+    const { userUuid } = req;
+    const dto = { userUuid, ...requestUpsertCodeSettingDto };
     await this.codeService.upsertCodeSetting(dto);
     return null;
   }
@@ -94,9 +94,9 @@ export class CodeController {
   })
   @Get('/template')
   async getTemplateResult(@Req() req: AuthRequest) {
-    const { userNo } = req;
+    const { userUuid } = req;
     const { defaultList, summaryList } =
-      await this.codeService.getCodeTemplateResult(userNo);
+      await this.codeService.getCodeTemplateResult(userUuid);
     return { defaultList, summaryList };
   }
 
@@ -120,8 +120,8 @@ export class CodeController {
   })
   @Get('/template/:uuid')
   async getTemplate(@Param('uuid') uuid: string, @Req() req: AuthRequest) {
-    const { userNo } = req;
-    const dto = { userNo, uuid };
+    const { userUuid } = req;
+    const dto = { userUuid, uuid };
     return await this.codeService.getCodeTemplate(dto);
   }
 
@@ -138,9 +138,9 @@ export class CodeController {
     @Body() body: RequestUpsertDefaultCodeTemplateDto,
     @Req() req: AuthRequest,
   ) {
-    const { userNo } = req;
+    const { userUuid } = req;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const dto = { userNo, ...body };
+    const dto = { userUuid, ...body };
     return null;
   }
 
@@ -158,8 +158,8 @@ export class CodeController {
     @Body() body: RequestCreateCodeTemplateDto,
     @Req() req: AuthRequest,
   ) {
-    const { userNo } = req;
-    const dto = { userNo, ...body };
+    const { userUuid } = req;
+    const dto = { userUuid, ...body };
     return await this.codeService.createCodeTemplate(dto);
   }
 
@@ -182,8 +182,8 @@ export class CodeController {
     @Body() body: RequestUpsertCodeTemplateDto,
     @Req() req: AuthRequest,
   ) {
-    const { userNo } = req;
-    const dto = { userNo, ...body };
+    const { userUuid } = req;
+    const dto = { userUuid, ...body };
     return await this.codeService.updateCodeTemplate(dto);
   }
 
@@ -207,7 +207,8 @@ export class CodeController {
   })
   @Delete('/template/:uuid')
   async deleteTemplate(@Param('uuid') uuid: string, @Req() req: AuthRequest) {
-    const dto = { uuid, userNo: req.userNo };
+    const { userUuid } = req;
+    const dto = { uuid, userUuid };
     return await this.codeService.deleteCodeTemplate(dto);
   }
 
@@ -267,8 +268,8 @@ export class CodeController {
     )
     problemUuid: string,
   ) {
-    const { userNo } = req;
-    const dto = { userNo, problemUuid };
+    const { userUuid } = req;
+    const dto = { userUuid, problemUuid };
     const problemCode = await this.codeService.getProblemCodes(dto);
 
     return problemCode;
@@ -288,8 +289,8 @@ export class CodeController {
     @Body() body: RequestUpsertProblemCodeDto,
     @Req() req: AuthRequest,
   ) {
-    const { userNo } = req;
-    const dto = { userNo, ...body };
+    const { userUuid } = req;
+    const dto = { userUuid, ...body };
     await this.codeService.upsertProblemCode(dto);
     return null;
   }

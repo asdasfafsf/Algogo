@@ -86,8 +86,11 @@ export class OAuthApiController {
     @Req() req: AuthRequest,
     @Param('provider') provider: OAuthProvider,
   ) {
-    const { userNo } = req;
-    await this.oauthService.disconnectOAuth(userNo, provider);
+    const { userUuid } = req;
+    await this.oauthService.disconnectOAuth({
+      userUuid,
+      provider,
+    });
     return null;
   }
 }
