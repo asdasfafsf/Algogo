@@ -18,7 +18,6 @@ import {
   ApiBody,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { RequestUpdateMeDto } from './dto/RequestUpdateMeDto';
 import { MeService } from './me.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { Express } from 'express';
@@ -128,7 +127,7 @@ export class MeController {
     @Body('name') name: string, // 이름 (name 필드)
     @Body('socialList') socialListString: string, // socialList 필드를 JSON 문자열로 받음
   ): Promise<ResponseMeDto> {
-    const { userNo } = request;
+    const { userUuid } = request;
 
     let socialList: RequestUpdateSocialDto[];
     try {
@@ -137,11 +136,10 @@ export class MeController {
       throw new BadRequestException('Invalid socialList format');
     }
 
-    const updateMeDto = new RequestUpdateMeDto();
-    updateMeDto.name = name;
-    updateMeDto.socialList = socialList;
-
-    const errors = await validate(updateMeDto);
+    const errors = await validate({
+      name,
+      socialList,
+    });
     if (errors.length > 0) {
       throw new BadRequestException(errors);
     }
@@ -149,7 +147,7 @@ export class MeController {
     const responseMeDto = await this.meService.updateMe({
       name,
       socialList,
-      userNo,
+      userUuid,
       file,
     });
 

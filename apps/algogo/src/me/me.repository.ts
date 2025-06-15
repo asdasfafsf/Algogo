@@ -51,7 +51,7 @@ export class MeRepository {
   }
 
   async updateMe(updateMeDto: UpdateMeDto) {
-    const { userNo, profilePhoto, name, socialList } = updateMeDto;
+    const { userUuid, profilePhoto, name, socialList } = updateMeDto;
 
     const me = await this.prismaService.$transaction(async (prisma) => {
       await Promise.all(
@@ -60,15 +60,15 @@ export class MeRepository {
           : socialList?.map(({ provider, content }) =>
               prisma.userSocial.upsert({
                 where: {
-                  userNo_provider: {
+                  userUuid_provider: {
                     provider,
-                    userNo,
+                    userUuid,
                   },
                 },
                 create: {
                   provider,
                   content,
-                  userNo,
+                  userUuid,
                 },
                 update: {
                   content,
@@ -85,7 +85,7 @@ export class MeRepository {
           name: true,
           socialList: {
             select: {
-              userNo: false,
+              userUuid: false,
               provider: true,
               content: true,
             },
@@ -100,7 +100,7 @@ export class MeRepository {
           },
         },
         where: {
-          no: userNo,
+          uuid: userUuid,
         },
         data: {
           profilePhoto,
