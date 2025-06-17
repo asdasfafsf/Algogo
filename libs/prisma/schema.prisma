@@ -241,8 +241,41 @@ model User {
     problemReportList        ProblemReport[]        @relation("UserToProblemReport")
     problemCollectionLogList ProblemCollectionLog[] @relation("UserToProblemCollectionLog")
     problemCodeList          ProblemCode[]          @relation("UserToProblemCode")
+    userLoginHistoryList     UserLoginHistory[]     @relation("UserToUserLoginHistory")
+    userSessionList          UserSession[]          @relation("UserToUserSession")
 
     @@map("USER")
+}
+
+model UserLoginHistory {
+    no        Int      @id @default(autoincrement()) @map("USER_LOGIN_HISTORY_NO")
+    userUuid  String   @map("USER_UUID")
+    type      String   @map("USER_LOGIN_HISTORY_TYPE")
+    ipv4      String   @map("USER_LOGIN_HISTORY_IPV4")
+    ipv6      String?  @map("USER_LOGIN_HISTORY_IPV6")
+    userAgent String?  @map("USER_LOGIN_HISTORY_USER_AGENT")
+    createdAt DateTime @default(now()) @map("USER_LOGIN_HISTORY_CREATED_AT")
+    updatedAt DateTime @updatedAt @map("USER_LOGIN_HISTORY_UPDATED_AT")
+
+    User User @relation("UserToUserLoginHistory", fields: [userUuid], references: [uuid])
+
+    @@index([userUuid, createdAt])
+    @@index([createdAt])
+    @@map("USER_LOGIN_HISTORY")
+}
+
+model UserSession {
+    no           Int      @id @default(autoincrement()) @map("USER_SESSION_NO")
+    userUuid     String   @map("USER_UUID")
+    deviceId     String   @map("USER_SESSION_DEVICE_ID")
+    refreshToken String   @map("USER_SESSION_REFRESH_TOKEN")
+    createdAt    DateTime @default(now()) @map("USER_SESSION_CREATED_AT")
+    updatedAt    DateTime @updatedAt @map("USER_SESSION_UPDATED_AT")
+
+    User User @relation("UserToUserSession", fields: [userUuid], references: [uuid])
+
+    @@index([userUuid])
+    @@map("USER_SESSION")
 }
 
 model UserOAuth {
@@ -256,6 +289,7 @@ model UserOAuth {
     User User @relation("UserToUserOauth", fields: [userUuid], references: [uuid])
 
     @@unique([userUuid, id, provider])
+    @@unique([id, provider])
     @@index([userUuid])
     @@index([id, provider])
     @@map("USER_OAUTH")
