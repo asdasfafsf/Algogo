@@ -19,7 +19,6 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { MeService } from './me.service';
-import { AuthGuard } from '../auth/auth.guard';
 import { Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MULTER_OPTION } from './me.constants';
@@ -27,12 +26,14 @@ import { ResponseMeDto } from './dto/ResponseMeDto';
 import { ApiGlobalErrorResponses } from '../common/decorators/swagger/ApiGlobalErrorResponse';
 import { RequestUpdateSocialDto } from './dto/RequestUpdateSocialDto';
 import { validate } from 'class-validator';
+import { AuthV2Guard } from '../auth-v2/auth-v2.guard';
+import { AuthRequest } from '../common/types/request';
 
 @ApiTags('사용자 자기 자신의 관련된 API')
 @ApiBearerAuth('Authorization')
 @ApiGlobalErrorResponses()
 @Controller('api/v1/me')
-@UseGuards(AuthGuard)
+@UseGuards(AuthV2Guard)
 export class MeController {
   constructor(private readonly meService: MeService) {}
 
@@ -47,8 +48,8 @@ export class MeController {
   })
   @Get('')
   async getMe(@Req() request: AuthRequest) {
-    const { userNo } = request;
-    return await this.meService.getMe(userNo);
+    const { sub } = request.user;
+    return await this.meService.getMe(sub);
   }
 
   @ApiOperation({
@@ -127,7 +128,7 @@ export class MeController {
     @Body('name') name: string, // 이름 (name 필드)
     @Body('socialList') socialListString: string, // socialList 필드를 JSON 문자열로 받음
   ): Promise<ResponseMeDto> {
-    const { userUuid } = request;
+    const { sub } = request.user;
 
     let socialList: RequestUpdateSocialDto[];
     try {
@@ -136,10 +137,19 @@ export class MeController {
       throw new BadRequestException('Invalid socialList format');
     }
 
+    console.log('야야야토큰이야,', sub);
+    // 디버깅용 로그 추가
+    console.log('name:', name);
+    console.log('socialList:', socialList);
+    console.log('validation object:', { name, socialList });
+
     const errors = await validate({
       name,
       socialList,
     });
+
+    console.log('야야야토큰이야222,', socialList);
+
     if (errors.length > 0) {
       throw new BadRequestException(errors);
     }
@@ -147,7 +157,7 @@ export class MeController {
     const responseMeDto = await this.meService.updateMe({
       name,
       socialList,
-      userUuid,
+      userUuid: sub,
       file,
     });
 

@@ -6,7 +6,7 @@ import { UpdateMeDto } from './dto/UpdateMeDto';
 export class MeRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async getMe(userNo: number) {
+  async getMe(uuid: string) {
     const user = await this.prismaService.user.findUnique({
       select: {
         uuid: true,
@@ -30,7 +30,7 @@ export class MeRepository {
         },
       },
       where: {
-        no: userNo,
+        uuid,
       },
     });
 

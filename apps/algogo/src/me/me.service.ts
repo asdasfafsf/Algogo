@@ -8,7 +8,7 @@ import { CryptoService } from '../crypto/crypto.service';
 import { ImageService } from '../image/image.service';
 import { UpdateMeDto } from './dto/UpdateMeDto';
 import { SocialProvider } from '../common/enums/SocialProviderEnum';
-import { OAuthProvider } from '../common/enums/OAuthProviderEnum';
+import { OAuthProvider } from '../oauth-v2/types/oauth.type';
 import { CustomLogger } from '../logger/custom-logger';
 
 @Injectable()
@@ -21,8 +21,8 @@ export class MeService {
     private readonly logger: CustomLogger,
   ) {}
 
-  async getMe(userNo: number): Promise<ResponseMeDto> {
-    const me = await this.meRepository.getMe(userNo);
+  async getMe(uuid: string): Promise<ResponseMeDto> {
+    const me = await this.meRepository.getMe(uuid);
     const socialList = me.socialList.map((elem) => ({
       provider: elem.provider as SocialProvider,
       content: elem.content,
