@@ -13,13 +13,6 @@ import { AuthRepository } from './auth.repository';
   imports: [RedisModule, JwtModule, CryptoModule, PrismaModule],
   controllers: [AuthController],
   providers: [AuthService, AuthGuard, WsAuthGuard, AuthRepository],
-  exports: [
-    AuthService,
-    AuthGuard,
-    WsAuthGuard,
-    RedisModule,
-    JwtModule,
-    CryptoModule,
-  ],
+  exports: [AuthService, AuthGuard, WsAuthGuard, RedisModule, CryptoModule],
 })
 export class AuthModule {}
