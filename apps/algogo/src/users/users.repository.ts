@@ -1,3 +1,4 @@
+import { uuidv7 } from 'uuidv7';
 import { PrismaService } from '../prisma/prisma.service';
 import { InquiryUserDto } from './dto/InquiryUserDto';
 
@@ -41,5 +42,63 @@ export class UsersRepository {
     user.no = undefined;
 
     return user;
+  }
+
+  async createUser({
+    id,
+    email,
+    provider,
+    name,
+  }: {
+    id: string;
+    email: string;
+    provider: string;
+    name: string;
+  }) {
+    const uuid = uuidv7();
+    const user = await this.prismaService.user.create({
+      select: {
+        no: true,
+        uuid: true,
+      },
+      data: {
+        uuid,
+        name,
+        email,
+        emailVerified: false,
+        profilePhoto: '',
+        lastLoginDate: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        oauthList: {
+          create: {
+            id,
+            provider,
+            isActive: true,
+          },
+        },
+      },
+    });
+
+    return user;
+  }
+
+  async findSummaryByUuid(uuid: string) {
+    return this.prismaService.user.findUnique({
+      select: {
+        uuid: true,
+        state: true,
+        socialList: false,
+        oauthList: false,
+        profilePhoto: false,
+        name: false,
+        email: false,
+        createdAt: false,
+        updatedAt: false,
+      },
+      where: {
+        uuid,
+      },
+    });
   }
 }

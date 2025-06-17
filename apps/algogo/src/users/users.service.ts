@@ -4,7 +4,7 @@ import { InquiryUserDto } from './dto/InquiryUserDto';
 import { USER_NOT_FOUND_MESSAGE } from './constants';
 import { ResponseUserDto } from './dto/ResponseUserDto';
 import { SocialProvider } from '../common/enums/SocialProviderEnum';
-import { OAuthProvider } from '../common/enums/OAuthProviderEnum';
+import { OAuthProvider } from '../oauth-v2/types/oauth.type';
 
 @Injectable()
 export class UsersService {
@@ -34,5 +34,26 @@ export class UsersService {
         provider: provider as OAuthProvider,
       })),
     };
+  }
+
+  async createUser({
+    provider,
+    id,
+    name,
+    email,
+  }: {
+    provider: OAuthProvider;
+    id: string;
+    name: string;
+    email: string;
+  }) {
+    const user = await this.usersRepository.createUser({
+      provider,
+      id,
+      name,
+      email,
+    });
+
+    return user;
   }
 }
