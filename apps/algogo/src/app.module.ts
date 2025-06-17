@@ -33,6 +33,8 @@ import { ProblemsReportModule } from './problems-report/problems-report.module';
 import { ProblemsCollectModule } from './problems-collect/problems-collect.module';
 import { CodeModule } from './code/code.module';
 import { ProblemsV2Module } from './problems-v2/problems-v2.module';
+import { AuthV2Module } from './auth-v2/auth-v2.module';
+import { OauthV2Module } from './oauth-v2/oauth-v2.module';
 import googleOAuthConfig from './config/googleOAuthConfig';
 import kakaoOAuthConfig from './config/kakaoOAuthConfig';
 import githubOAuthConfig from './config/githubOAuthConfig';
@@ -100,6 +102,8 @@ import LoggerConfig from './config/LoggerConfig';
     ProblemsCollectModule,
     CodeModule,
     ProblemsV2Module,
+    AuthV2Module,
+    OauthV2Module,
   ],
 
   controllers: [AppController],
