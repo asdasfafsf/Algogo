@@ -132,7 +132,6 @@ export class OauthRepository {
   async insertUser(requestOAuthDto: RequestOAuthDto) {
     const { id, email, provider, name } = requestOAuthDto;
     const uuid = uuidv7();
-    console.log('야야야', requestOAuthDto);
     const user = await this.prismaService.user.create({
       select: {
         no: true,
