@@ -83,7 +83,7 @@ export class UsersRepository {
     return user;
   }
 
-  async findSummaryByUuid(uuid: string) {
+  async findUserSummaryByUuid(uuid: string) {
     return this.prismaService.user.findUnique({
       select: {
         uuid: true,

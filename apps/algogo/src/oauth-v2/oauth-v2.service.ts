@@ -69,10 +69,9 @@ export class OauthV2Service {
       throw new OAuthConflictException();
     }
 
-    const { accessToken, refreshToken } =
-      await this.authV2Service.generateToken({
-        sub: userUuid,
-      });
+    const { accessToken, refreshToken } = await this.authV2Service.login({
+      userUuid: userUuid,
+    });
 
     return {
       accessToken,
