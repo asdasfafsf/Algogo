@@ -1,7 +1,9 @@
 import { uuidv7 } from 'uuidv7';
 import { PrismaService } from '../prisma/prisma.service';
 import { InquiryUserDto } from './dto/InquiryUserDto';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class UsersRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
