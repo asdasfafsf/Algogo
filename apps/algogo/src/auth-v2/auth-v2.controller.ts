@@ -1,4 +1,4 @@
-import { Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { Controller, Post, Req, UseGuards, HttpCode } from '@nestjs/common';
 import { AuthV2Service } from './auth-v2.service';
 import { RefreshTokenRequest } from '../common/types/request';
 import { AuthRefreshGuard } from './auth-refresh.guard';
@@ -10,7 +10,6 @@ import {
 } from '@nestjs/swagger';
 import { ApiGlobalErrorResponses } from '../common/decorators/swagger/ApiGlobalErrorResponse';
 
-// ... existing code ...
 
 @ApiTags('Auth V2')
 @ApiBearerAuth('Authorization')
@@ -19,8 +18,7 @@ import { ApiGlobalErrorResponses } from '../common/decorators/swagger/ApiGlobalE
 export class AuthV2Controller {
   constructor(private readonly authV2Service: AuthV2Service) {}
 
-  @UseGuards(AuthRefreshGuard)
-  @Post('/refresh')
+
   @ApiOperation({
     summary: '토큰 재발급',
     description:
@@ -41,6 +39,9 @@ export class AuthV2Controller {
       },
     },
   })
+  @HttpCode(200)
+  @UseGuards(AuthRefreshGuard)
+  @Post('/refresh')
   async refresh(@Req() req: RefreshTokenRequest) {
     const { user } = req;
     const { accessToken, refreshToken } = await this.authV2Service.refresh({

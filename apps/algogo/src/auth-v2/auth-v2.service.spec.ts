@@ -7,6 +7,7 @@ import { JwtService } from '../jwt/jwt.service';
 import { UsersService } from '../users/users.service';
 import JwtConfig from '../config/jwtConfig';
 import { JwtInvalidTokenException } from '../common/errors/token/JwtInvalidTokenException';
+import { CustomLogger } from '../logger/custom-logger';
 
 describe('AuthV2Service 단위 테스트', () => {
   let authService: AuthV2Service;
@@ -28,9 +29,13 @@ describe('AuthV2Service 단위 테스트', () => {
     del: jest.fn(),
   };
 
+  const mockLogger: Partial<CustomLogger> = {
+    log: jest.fn(),
+  };
+
   const mockJwtConfig = {
-    jwtAccessTokenExpiresIn: 3600, // 1h
-    jwtRefreshTokenExpiresIn: 3600 * 24 * 7, // 7d
+    jwtAccessTokenExpiresIn: 3600, // 1h (초 단위)
+    jwtRefreshTokenExpiresIn: 3600 * 24 * 7, // 7d (초 단위)
   };
 
   beforeEach(async () => {
@@ -43,6 +48,7 @@ describe('AuthV2Service 단위 테스트', () => {
         { provide: UsersService, useValue: mockUsersService },
         { provide: CACHE_MANAGER, useValue: mockCache },
         { provide: JwtConfig.KEY, useValue: mockJwtConfig },
+        { provide: CustomLogger, useValue: mockLogger },
       ],
     }).compile();
 
@@ -72,10 +78,11 @@ describe('AuthV2Service 단위 테스트', () => {
     expect(result).toEqual({ accessToken, refreshToken });
     expect(mockUsersService.validateUser).toHaveBeenCalledWith(userUuid);
     expect(mockJwtService.sign).toHaveBeenCalledTimes(2);
+    // cache-manager 7.0.0에서는 TTL이 밀리초 단위
     expect(mockCache.set).toHaveBeenCalledWith(
       `${userUuid}:${refreshToken}`,
-      refreshToken,
-      mockJwtConfig.jwtRefreshTokenExpiresIn + 1,
+      true,
+      mockJwtConfig.jwtRefreshTokenExpiresIn * 1000 + 10000, // 초를 밀리초로 변환
     );
   });
 
@@ -92,7 +99,7 @@ describe('AuthV2Service 단위 테스트', () => {
     (mockUsersService.validateUser as jest.Mock).mockResolvedValue({
       uuid: userUuid,
     });
-    (mockCache.get as jest.Mock).mockResolvedValue(oldRefreshToken);
+    (mockCache.get as jest.Mock).mockResolvedValue(true); // 캐시된 값은 true
     (mockJwtService.sign as jest.Mock)
       .mockResolvedValueOnce(newAccessToken)
       .mockResolvedValueOnce(newRefreshToken);
@@ -111,10 +118,11 @@ describe('AuthV2Service 단위 테스트', () => {
     expect(mockCache.del).toHaveBeenCalledWith(
       `${userUuid}:${oldRefreshToken}`,
     );
+    // cache-manager 7.0.0에서는 TTL이 밀리초 단위
     expect(mockCache.set).toHaveBeenCalledWith(
       `${userUuid}:${newRefreshToken}`,
-      newRefreshToken,
-      mockJwtConfig.jwtRefreshTokenExpiresIn + 1,
+      true,
+      mockJwtConfig.jwtRefreshTokenExpiresIn * 1000 + 10000, // 초를 밀리초로 변환
     );
   });
 
@@ -137,5 +145,70 @@ describe('AuthV2Service 단위 테스트', () => {
 
     expect(mockCache.del).not.toHaveBeenCalled();
     expect(mockJwtService.sign).not.toHaveBeenCalled();
+  });
+
+  /* ────────────────────────
+        validateRefreshToken() 성공
+  ──────────────────────── */
+  it('validateRefreshToken() : 캐시에 토큰이 존재하면 토큰을 반환한다', async () => {
+    // Arrange
+    const userUuid = 'uuid-123';
+    const refreshToken = 'refresh';
+    (mockCache.get as jest.Mock).mockResolvedValue(true);
+
+    // Act
+    const result = await authService.validateRefreshToken(userUuid, refreshToken);
+
+    // Assert
+    expect(result).toBe(true);
+    expect(mockCache.get).toHaveBeenCalledWith(`${userUuid}:${refreshToken}`);
+  });
+
+  /* ────────────────────────
+        validateRefreshToken() 실패
+  ──────────────────────── */
+  it('validateRefreshToken() : 캐시에 토큰이 없으면 JwtInvalidTokenException을 던진다', async () => {
+    // Arrange
+    const userUuid = 'uuid-123';
+    const refreshToken = 'refresh';
+    (mockCache.get as jest.Mock).mockResolvedValue(null);
+
+    // Act & Assert
+    await expect(
+      authService.validateRefreshToken(userUuid, refreshToken),
+    ).rejects.toBeInstanceOf(JwtInvalidTokenException);
+
+    expect(mockCache.get).toHaveBeenCalledWith(`${userUuid}:${refreshToken}`);
+  });
+
+  /* ────────────────────────
+        generateToken()
+  ──────────────────────── */
+  it('generateToken() : 액세스 토큰과 리프레시 토큰을 생성한다', async () => {
+    // Arrange
+    const payload = { sub: 'uuid-123' };
+    const accessToken = 'access';
+    const refreshToken = 'refresh';
+
+    (mockJwtService.sign as jest.Mock)
+      .mockResolvedValueOnce(accessToken)
+      .mockResolvedValueOnce(refreshToken);
+
+    // Act
+    const result = await authService.generateToken(payload);
+
+    // Assert
+    expect(result).toEqual({ accessToken, refreshToken });
+    expect(mockJwtService.sign).toHaveBeenCalledTimes(2);
+    expect(mockJwtService.sign).toHaveBeenNthCalledWith(
+      1,
+      payload,
+      mockJwtConfig.jwtAccessTokenExpiresIn,
+    );
+    expect(mockJwtService.sign).toHaveBeenNthCalledWith(
+      2,
+      payload,
+      mockJwtConfig.jwtRefreshTokenExpiresIn,
+    );
   });
 });
