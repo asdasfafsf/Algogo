@@ -1,7 +1,15 @@
 import { Request } from 'express';
 
+type TokenUser = {
+  sub: string;
+};
+
 export type AuthRequest = Request & {
-  user: {
-    sub: string;
+  user: TokenUser;
+};
+
+export type RefreshTokenRequest = Request & {
+  user: TokenUser & {
+    refreshToken: string;
   };
 };
