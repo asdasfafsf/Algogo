@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigType } from '@nestjs/config';
 import { validationSchema } from './config/validationSchema';
 import { CrawlerModule } from './crawler/crawler.module';
 import crawlerConfig from './config/crawlerConfig';
@@ -44,6 +44,9 @@ import encryptConfig from './config/encryptConfig';
 import bullmqConfig from './config/bullmqConfig';
 import wsConfig from './config/wsConfig';
 import LoggerConfig from './config/LoggerConfig';
+import { CacheModule } from '@nestjs/cache-manager';
+import { redisStore } from 'cache-manager-redis-store';
+import type { RedisClientOptions } from 'redis';
 
 @Module({
   imports: [
@@ -80,6 +83,18 @@ import LoggerConfig from './config/LoggerConfig';
       isGlobal: true,
       validationSchema,
     }),
+    CacheModule.registerAsync<RedisClientOptions>({
+      imports: [ConfigModule],
+      useFactory: async (config: ConfigType<typeof redisConfig>) => ({
+        store: redisStore,
+        host: config.host,
+        port: config.port,
+        password: config.password,
+      }),
+      inject: [redisConfig.KEY],
+      isGlobal: true,
+    }),
+
     CrawlerModule,
     ProblemsModule,
     S3Module,
