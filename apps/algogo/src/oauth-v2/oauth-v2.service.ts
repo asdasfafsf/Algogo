@@ -69,6 +69,9 @@ export class OauthV2Service {
       throw new OAuthConflictException();
     }
 
+    console.log('userUuid', userUuid);
+    console.log('oauthState', oauthState);
+
     const { accessToken, refreshToken } = await this.authV2Service.login({
       userUuid: userUuid,
     });
