@@ -49,6 +49,8 @@ export class JwtService {
       } else if (error instanceof JsonWebTokenError) {
         throw new JwtInvalidTokenException();
       }
+
+      throw new JwtInvalidTokenException();
     }
   }
 
