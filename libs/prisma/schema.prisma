@@ -221,15 +221,15 @@ model ProblemV2LanguageLimit {
 }
 
 model User {
-    no             Int       @id @default(autoincrement()) @map("USER_NO")
-    uuid           String    @unique @default(uuid()) @map("USER_UUID")
-    email          String    @map("USER_EMAIL")
-    name           String    @map("USER_NAME")
-    profilePhoto   String    @map("USER_PROFILE_PHOTO")
-    registeredDate DateTime  @default(now()) @map("USER_REGISTERED_DATE")
-    lastLoginDate  DateTime  @map("USER_LAST_LOGIN_DATE")
-    state          UserState @default(ACTIVE) @map("USER_STATE")
-    emailVerified  Boolean   @default(false) @map("USER_EMAIL_VERIFIED")
+    no             Int      @id @default(autoincrement()) @map("USER_NO")
+    uuid           String   @unique @default(uuid()) @map("USER_UUID")
+    email          String   @map("USER_EMAIL")
+    name           String   @map("USER_NAME")
+    profilePhoto   String   @map("USER_PROFILE_PHOTO")
+    registeredDate DateTime @default(now()) @map("USER_REGISTERED_DATE")
+    lastLoginDate  DateTime @map("USER_LAST_LOGIN_DATE")
+    state          String?  @default("ACTIVE") @map("USER_STATE")
+    emailVerified  Boolean  @default(false) @map("USER_EMAIL_VERIFIED")
 
     createdAt DateTime @default(now()) @map("USER_CREATED_AT")
     updatedAt DateTime @default(now()) @map("USER_UPDATED_AT")
