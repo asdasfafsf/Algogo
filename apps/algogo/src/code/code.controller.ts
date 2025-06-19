@@ -14,7 +14,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CodeService } from './code.service';
-import { AuthGuard } from '../auth/auth.guard';
 import RequestUpsertCodeSettingDto from './dto/RequestUpsertCodeSettingDto';
 import {
   ApiBearerAuth,
@@ -35,12 +34,15 @@ import RequestCreateCodeTemplateDto from './dto/RequestCreateCodeTemplateDto';
 import { ResponseDeleteCodeTemplateDto } from './dto/ResponseDeleteCodeTemplateDto';
 import { ResponseProblemCodeDto } from './dto/ResponseProblemCodeDto';
 import { ResponseDto } from '../common/dto/ResponseDto';
+import { AuthV2Guard } from '../auth-v2/auth-v2.guard';
+import { User } from '../common/decorators/contexts/user.decorator';
+import { TokenUser } from '../common/types/request.type';
 
 @ApiGlobalErrorResponses()
 @ApiBadRequestErrorResponse()
 @ApiTags('Code API')
 @ApiBearerAuth('Authorization')
-@UseGuards(AuthGuard)
+@UseGuards(AuthV2Guard)
 @Controller('api/v1/code')
 export class CodeController {
   constructor(private readonly codeService: CodeService) {}
@@ -93,10 +95,10 @@ export class CodeController {
     type: ResponseCodeTemplateResult,
   })
   @Get('/template')
-  async getTemplateResult(@Req() req: AuthRequest) {
-    const { userUuid } = req;
+  async getTemplateResult(@User() user: TokenUser) {
+    const { sub } = user;
     const { defaultList, summaryList } =
-      await this.codeService.getCodeTemplateResult(userUuid);
+      await this.codeService.getCodeTemplateResult(sub);
     return { defaultList, summaryList };
   }
 
@@ -119,9 +121,9 @@ export class CodeController {
     description: '코드 템플릿을 찾을 수 없음',
   })
   @Get('/template/:uuid')
-  async getTemplate(@Param('uuid') uuid: string, @Req() req: AuthRequest) {
-    const { userUuid } = req;
-    const dto = { userUuid, uuid };
+  async getTemplate(@Param('uuid') uuid: string, @User() user: TokenUser) {
+    const { sub } = user;
+    const dto = { userUuid: sub, uuid };
     return await this.codeService.getCodeTemplate(dto);
   }
 
@@ -136,11 +138,11 @@ export class CodeController {
   @Put('/template/default')
   async setDefaultTemplate(
     @Body() body: RequestUpsertDefaultCodeTemplateDto,
-    @Req() req: AuthRequest,
+    @User() user: TokenUser,
   ) {
-    const { userUuid } = req;
+    const { sub } = user;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const dto = { userUuid, ...body };
+    const dto = { userUuid: sub, ...body };
     return null;
   }
 
@@ -156,10 +158,10 @@ export class CodeController {
   @Post('/template')
   async createTemplate(
     @Body() body: RequestCreateCodeTemplateDto,
-    @Req() req: AuthRequest,
+    @User() user: TokenUser,
   ) {
-    const { userUuid } = req;
-    const dto = { userUuid, ...body };
+    const { sub } = user;
+    const dto = { userUuid: sub, ...body };
     return await this.codeService.createCodeTemplate(dto);
   }
 
@@ -180,10 +182,10 @@ export class CodeController {
   @Patch('/template')
   async updateCodeTemplate(
     @Body() body: RequestUpsertCodeTemplateDto,
-    @Req() req: AuthRequest,
+    @User() user: TokenUser,
   ) {
-    const { userUuid } = req;
-    const dto = { userUuid, ...body };
+    const { sub } = user;
+    const dto = { userUuid: sub, ...body };
     return await this.codeService.updateCodeTemplate(dto);
   }
 
@@ -206,9 +208,9 @@ export class CodeController {
     description: '삭제할 코드 템플릿을 찾을 수 없음',
   })
   @Delete('/template/:uuid')
-  async deleteTemplate(@Param('uuid') uuid: string, @Req() req: AuthRequest) {
-    const { userUuid } = req;
-    const dto = { uuid, userUuid };
+  async deleteTemplate(@Param('uuid') uuid: string, @User() user: TokenUser) {
+    const { sub } = user;
+    const dto = { uuid, userUuid: sub };
     return await this.codeService.deleteCodeTemplate(dto);
   }
 
@@ -259,7 +261,7 @@ export class CodeController {
   })
   @Get('/problem/:problemUuid')
   async getProblemCodes(
-    @Req() req: AuthRequest,
+    @User() user: TokenUser,
     @Param(
       'problemUuid',
       new ParseUUIDPipe({
@@ -268,8 +270,8 @@ export class CodeController {
     )
     problemUuid: string,
   ) {
-    const { userUuid } = req;
-    const dto = { userUuid, problemUuid };
+    const { sub } = user;
+    const dto = { userUuid: sub, problemUuid };
     const problemCode = await this.codeService.getProblemCodes(dto);
 
     return problemCode;
@@ -287,10 +289,10 @@ export class CodeController {
   @Put('/problem')
   async saveProblemCode(
     @Body() body: RequestUpsertProblemCodeDto,
-    @Req() req: AuthRequest,
+    @User() user: TokenUser,
   ) {
-    const { userUuid } = req;
-    const dto = { userUuid, ...body };
+    const { sub } = user;
+    const dto = { userUuid: sub, ...body };
     await this.codeService.upsertProblemCode(dto);
     return null;
   }

@@ -15,7 +15,6 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { WsAuthGuard } from '../auth/ws.auth.guard';
 import { Server, Socket } from 'socket.io';
 import { RedisService } from '../redis/redis.service';
 import WsConfig from '../config/wsConfig';
@@ -27,10 +26,12 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { CustomHttpException } from '../common/errors/CustomHttpException';
 import { ExecuteWsExceptionFilter } from './filter/execute-ws-exception.filter';
 import { CustomError } from '../common/types/error.type';
+import { TokenUser } from '../common/types/request.type';
+import { WsAuthV2Guard } from '../auth-v2/ws.auth-v2.guard';
 
 class AuthSocket extends Socket {
   messageCount: number;
-  userNo: string;
+  user: TokenUser;
   token: string;
   lastRequestTime: number;
   authErrorCount: number;
@@ -41,7 +42,7 @@ class AuthSocket extends Socket {
 export class ExecuteGateway {
   constructor(
     private readonly executeService: ExecuteService,
-    private readonly wsAuthGurad: WsAuthGuard,
+    private readonly wsAuthGurad: WsAuthV2Guard,
     private readonly logger: CustomLogger,
     @Inject(WsConfig.KEY)
     private readonly wsConfig: ConfigType<typeof WsConfig>,
@@ -59,12 +60,12 @@ export class ExecuteGateway {
     await this.redisService.subscribe(socket.id);
     clearTimeout(timeout);
 
-    const { userNo, id } = socket;
+    const { user, id } = socket;
     const preSocketId = await this.redisService.get(
-      `${this.wsConfig.wsTag}_${userNo}`,
+      `${this.wsConfig.wsTag}_${user.sub}`,
     );
 
-    await this.redisService.set(`${this.wsConfig.wsTag}_${userNo}`, id);
+    await this.redisService.set(`${this.wsConfig.wsTag}_${user.sub}`, id);
 
     if (preSocketId) {
       const prevSocket = this.server.sockets.sockets.get(preSocketId);
@@ -78,14 +79,14 @@ export class ExecuteGateway {
   }
 
   async handleDisconnect(socket: AuthSocket) {
-    const { userNo } = socket;
+    const { user } = socket;
 
     const savedSocketId = await this.redisService.get(
-      `${this.wsConfig.wsTag}_${userNo}`,
+      `${this.wsConfig.wsTag}_${user.sub}`,
     );
 
     if (!savedSocketId || savedSocketId === socket.id) {
-      await this.redisService.del(`${this.wsConfig.wsTag}_${userNo}`);
+      await this.redisService.del(`${this.wsConfig.wsTag}_${user.sub}`);
     }
   }
 
@@ -131,7 +132,7 @@ export class ExecuteGateway {
       whitelist: true,
     }),
   )
-  @UseGuards(WsAuthGuard)
+  @UseGuards(WsAuthV2Guard)
   @UseFilters(ExecuteWsExceptionFilter)
   @SubscribeMessage('execute')
   async handleExecute(

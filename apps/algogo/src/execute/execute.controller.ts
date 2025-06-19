@@ -8,9 +8,9 @@ import {
 } from '@nestjs/common';
 import { ExecuteService } from './execute.service';
 import { RequestExecuteDto } from '@libs/core/dto/RequestExecuteDto';
-import { AuthGuard } from '../auth/auth.guard';
 import { ApiExcludeEndpoint } from '@nestjs/swagger';
 import { CustomLogger } from '../logger/custom-logger';
+import { AuthV2Guard } from '../auth-v2/auth-v2.guard';
 
 @Controller('api/v1/execute')
 export class ExecuteController {
@@ -21,7 +21,7 @@ export class ExecuteController {
 
   @Post('/')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthV2Guard)
   @ApiExcludeEndpoint()
   async execute(@Body() requestExecuteDto: RequestExecuteDto) {
     this.logger.silly('execute', requestExecuteDto);
