@@ -8,7 +8,6 @@ import { JwtMissingTokenException } from '../common/errors/token/JwtMissingToken
 
 describe('AuthRefreshGuard 단위 테스트', () => {
   let guard: AuthRefreshGuard;
-  let jwtService: JwtService;
 
   const mockJwtService = {
     verify: jest.fn(),
@@ -23,20 +22,22 @@ describe('AuthRefreshGuard 단위 테스트', () => {
     }).compile();
 
     guard = module.get<AuthRefreshGuard>(AuthRefreshGuard);
-    jwtService = module.get<JwtService>(JwtService);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  const createMockContext = (headers: any = {}, cookies: any = {}): ExecutionContext => {
+  const createMockContext = (
+    headers: any = {},
+    cookies: any = {},
+  ): ExecutionContext => {
     const mockRequest = {
       headers,
       cookies,
       user: undefined,
     };
-    
+
     return {
       switchToHttp: () => ({
         getRequest: () => mockRequest,
@@ -52,7 +53,7 @@ describe('AuthRefreshGuard 단위 테스트', () => {
       const mockContext = createMockContext({
         authorization: `Bearer ${refreshToken}`,
       });
-      
+
       mockJwtService.verify.mockResolvedValue(mockPayload);
 
       // Act
@@ -76,7 +77,7 @@ describe('AuthRefreshGuard 단위 테스트', () => {
       await expect(guard.canActivate(mockContext)).rejects.toThrow(
         JwtMissingTokenException,
       );
-      
+
       expect(mockJwtService.verify).not.toHaveBeenCalled();
     });
 
@@ -90,7 +91,7 @@ describe('AuthRefreshGuard 단위 테스트', () => {
       await expect(guard.canActivate(mockContext)).rejects.toThrow(
         JwtMissingTokenException,
       );
-      
+
       expect(mockJwtService.verify).not.toHaveBeenCalled();
     });
 
@@ -104,7 +105,7 @@ describe('AuthRefreshGuard 단위 테스트', () => {
       await expect(guard.canActivate(mockContext)).rejects.toThrow(
         JwtMissingTokenException,
       );
-      
+
       expect(mockJwtService.verify).not.toHaveBeenCalled();
     });
 
@@ -118,7 +119,7 @@ describe('AuthRefreshGuard 단위 테스트', () => {
       await expect(guard.canActivate(mockContext)).rejects.toThrow(
         JwtMissingTokenException,
       );
-      
+
       expect(mockJwtService.verify).not.toHaveBeenCalled();
     });
 
@@ -127,14 +128,14 @@ describe('AuthRefreshGuard 단위 테스트', () => {
       const mockContext = createMockContext({
         authorization: 'Bearer invalid-token',
       });
-      
+
       mockJwtService.verify.mockRejectedValue(new JwtInvalidTokenException());
 
       // Act & Assert
       await expect(guard.canActivate(mockContext)).rejects.toThrow(
         JwtInvalidTokenException,
       );
-      
+
       expect(mockJwtService.verify).toHaveBeenCalledWith('invalid-token');
     });
 
@@ -143,14 +144,14 @@ describe('AuthRefreshGuard 단위 테스트', () => {
       const mockContext = createMockContext({
         authorization: 'Bearer expired-token',
       });
-      
+
       mockJwtService.verify.mockRejectedValue(new JwtTokenExpiredException());
 
       // Act & Assert
       await expect(guard.canActivate(mockContext)).rejects.toThrow(
         JwtTokenExpiredException,
       );
-      
+
       expect(mockJwtService.verify).toHaveBeenCalledWith('expired-token');
     });
 
@@ -160,9 +161,9 @@ describe('AuthRefreshGuard 단위 테스트', () => {
       const refreshToken = 'cookie-refresh-token';
       const mockContext = createMockContext(
         {}, // headers
-        { authorization: `Bearer ${refreshToken}` } // cookies
+        { authorization: `Bearer ${refreshToken}` }, // cookies
       );
-      
+
       mockJwtService.verify.mockResolvedValue(mockPayload);
 
       // Act
@@ -185,9 +186,9 @@ describe('AuthRefreshGuard 단위 테스트', () => {
       const cookieToken = 'cookie-refresh-token';
       const mockContext = createMockContext(
         { authorization: `Bearer ${headerToken}` }, // headers
-        { authorization: `Bearer ${cookieToken}` } // cookies
+        { authorization: `Bearer ${cookieToken}` }, // cookies
       );
-      
+
       mockJwtService.verify.mockResolvedValue(mockPayload);
 
       // Act
@@ -220,10 +221,10 @@ describe('AuthRefreshGuard 단위 테스트', () => {
 
         if (testCase.shouldPass) {
           mockJwtService.verify.mockResolvedValue(mockPayload);
-          
+
           const result = await guard.canActivate(mockContext);
           const request = mockContext.switchToHttp().getRequest();
-          
+
           expect(result).toBe(true);
           expect(mockJwtService.verify).toHaveBeenCalledWith('refresh-token');
           expect(request.user).toEqual({
@@ -235,24 +236,24 @@ describe('AuthRefreshGuard 단위 테스트', () => {
             JwtMissingTokenException,
           );
         }
-        
+
         jest.clearAllMocks();
       }
     });
 
     it('payload와 refreshToken이 모두 request.user에 설정된다', async () => {
       // Arrange
-      const mockPayload = { 
-        sub: 'user-uuid', 
+      const mockPayload = {
+        sub: 'user-uuid',
         iat: 1234567890,
         exp: 1234567890 + 3600,
-        customData: 'test'
+        customData: 'test',
       };
       const refreshToken = 'complex-refresh-token-123';
       const mockContext = createMockContext({
         authorization: `Bearer ${refreshToken}`,
       });
-      
+
       mockJwtService.verify.mockResolvedValue(mockPayload);
 
       // Act
