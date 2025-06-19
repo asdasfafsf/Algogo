@@ -9,6 +9,8 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { ApiGlobalErrorResponses } from '../common/decorators/swagger/ApiGlobalErrorResponse';
+import { RequestMetadata as Metadata } from '../common/types/request.type';
+import { RequestMetadata } from '../common/decorators/contexts/request-metadata.decorator';
 
 @ApiTags('Auth V2')
 @ApiBearerAuth('Authorization')
@@ -40,11 +42,13 @@ export class AuthV2Controller {
   @HttpCode(200)
   @UseGuards(AuthRefreshGuard)
   @Post('/refresh')
-  async refresh(@Req() req: RefreshTokenRequest) {
+  async refresh(@Req() req: RefreshTokenRequest, @RequestMetadata() metadata: Metadata) {
     const { user } = req;
     const { accessToken, refreshToken } = await this.authV2Service.refresh({
       userUuid: user.sub,
       refreshToken: user.refreshToken,
+      ip: metadata.ip,
+      userAgent: metadata.userAgent,
     });
 
     return {

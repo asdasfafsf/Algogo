@@ -17,7 +17,7 @@ export class AuthV2Service {
     private readonly cacheManager: Cache,
     @Inject(JwtConfig.KEY)
     private readonly jwtConfig: ConfigType<typeof JwtConfig>,
-    private readonly logger: CustomLogger,
+    private readonly logger: CustomLogger
   ) {}
 
   /**
@@ -28,7 +28,7 @@ export class AuthV2Service {
    * @throws UserNotFoundException - 사용자를 찾을 수 없는 경우
    * @throws UserInactiveException - 사용자가 비활성화 상태인 경우
    */
-  async login({ userUuid }: TokenPayload) {
+  async login({ userUuid, ip, userAgent }: TokenPayload & { ip: string, userAgent: string }) {
     const user = await this.usersService.validateUser(userUuid);
 
     const { accessToken, refreshToken } = await this.generateToken({
@@ -36,6 +36,12 @@ export class AuthV2Service {
     });
 
     await this.saveRefreshToken(user.uuid, refreshToken);
+    await this.usersService.insertLoginHistory({
+      userUuid: user.uuid,
+      type: 'LOGIN',
+      ip,
+      userAgent,
+    });
 
     return {
       accessToken,
@@ -55,7 +61,9 @@ export class AuthV2Service {
   async refresh({
     userUuid,
     refreshToken,
-  }: TokenPayload & { refreshToken: string }) {
+    ip,
+    userAgent,
+  }: TokenPayload & { refreshToken: string, ip: string, userAgent: string }) {
     const user = await this.usersService.validateUser(userUuid);
 
     await this.validateRefreshToken(userUuid, refreshToken);
@@ -68,7 +76,14 @@ export class AuthV2Service {
 
     await this.saveRefreshToken(user.uuid, newRefreshToken);
 
-    return {
+    await this.usersService.insertLoginHistory({
+      userUuid: user.uuid,
+      type: 'REFRESH',
+      ip,
+      userAgent,
+    });
+
+    return { 
       accessToken,
       refreshToken: newRefreshToken,
     };
@@ -86,6 +101,8 @@ export class AuthV2Service {
       this.jwtConfig.jwtRefreshTokenExpiresIn * 1000 + 10000, // cache-manager 버전 5부터는 ms단위로 설정해야함
     );
   }
+
+
 
   /**
    * 리프레시 토큰을 검증합니다.

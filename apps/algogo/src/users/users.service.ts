@@ -84,5 +84,22 @@ export class UsersService {
     };
   }
 
-  async insertLoginHistory() {}
+  async insertLoginHistory({
+    userUuid,
+    type,
+    ip,
+    userAgent,
+  }: {
+    userUuid: string;
+    type: string;
+    ip: string;
+    userAgent: string;
+  }) {
+    await this.usersRepository.insertLoginHistory({
+      userUuid,
+      type,
+      ip,
+      userAgent,
+    });
+  }
 }

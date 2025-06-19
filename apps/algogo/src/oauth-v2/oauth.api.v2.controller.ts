@@ -6,6 +6,8 @@ import { AuthGuard } from '../auth-guard/auth.guard';
 import { TokenUser } from '../common/types/request.type';
 import { User } from '../common/decorators/contexts/user.decorator';
 import { OAuth } from '../common/decorators/contexts/oauth.decorator';
+import { RequestMetadata } from '../common/decorators/contexts/request-metadata.decorator';
+import { RequestMetadata as Metadata } from '../common/types/request.type';
 
 @Controller('api/v2/oauth')
 export class OauthApiV2Controller {
@@ -13,9 +15,13 @@ export class OauthApiV2Controller {
 
   @Post('/:provider')
   @UseGuards(DynamicOAuthGuard)
-  async oauth(@OAuth() oauth: OAuthRequestUser) {
+  async oauth(@OAuth() oauth: OAuthRequestUser, @RequestMetadata() metadata: Metadata) {
     const { accessToken, refreshToken } =
-      await this.oauthV2Service.registerOrLogin(oauth);
+      await this.oauthV2Service.registerOrLogin({
+        ...oauth,
+        ip: metadata.ip,
+        userAgent: metadata.userAgent,
+      });
 
     return {
       accessToken,

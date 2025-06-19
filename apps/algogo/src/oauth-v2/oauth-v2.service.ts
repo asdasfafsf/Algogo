@@ -57,11 +57,15 @@ export class OauthV2Service {
     provider,
     name,
     email,
+    ip,
+    userAgent,
   }: {
     id: string;
     provider: OAuthProvider;
     name: string;
     email: string;
+    ip: string;
+    userAgent: string;
   }) {
     const oauthState = await this.getOAuthState({ id, provider });
     let userUuid = '';
@@ -90,6 +94,8 @@ export class OauthV2Service {
 
     const { accessToken, refreshToken } = await this.authV2Service.login({
       userUuid: userUuid,
+      ip,
+      userAgent,
     });
 
     return {

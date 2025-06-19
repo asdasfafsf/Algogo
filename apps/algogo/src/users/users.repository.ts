@@ -97,13 +97,14 @@ export class UsersRepository {
     userAgent: string;
   }) {
     await this.prismaService.userLoginHistory.create({
+      select: {
+        no: true,
+      },
       data: {
         userUuid,
         type,
         ip,
-        userAgent,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        userAgent
       },
     });
   }

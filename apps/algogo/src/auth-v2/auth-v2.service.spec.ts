@@ -72,7 +72,7 @@ describe('AuthV2Service 단위 테스트', () => {
       .mockResolvedValueOnce(refreshToken); // refresh
 
     // Act
-    const result = await authService.login({ userUuid });
+    const result = await authService.login({ userUuid, ip: '127.0.0.1', userAgent: 'test' });
 
     // Assert
     expect(result).toEqual({ accessToken, refreshToken });
@@ -108,6 +108,8 @@ describe('AuthV2Service 단위 테스트', () => {
     const result = await authService.refresh({
       userUuid,
       refreshToken: oldRefreshToken,
+      ip: '127.0.0.1',
+      userAgent: 'test',
     });
 
     // Assert
@@ -140,7 +142,7 @@ describe('AuthV2Service 단위 테스트', () => {
 
     // Act & Assert
     await expect(
-      authService.refresh({ userUuid, refreshToken: invalidRefreshToken }),
+      authService.refresh({ userUuid, refreshToken: invalidRefreshToken, ip: '127.0.0.1', userAgent: 'test' }),
     ).rejects.toBeInstanceOf(JwtInvalidTokenException);
 
     expect(mockCache.del).not.toHaveBeenCalled();
