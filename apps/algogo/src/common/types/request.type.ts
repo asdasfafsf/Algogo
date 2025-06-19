@@ -13,3 +13,8 @@ export type RefreshTokenRequest = Request & {
     refreshToken: string;
   };
 };
+
+export type RequestMetadata = {
+  ip: string;
+  userAgent: string;
+};
