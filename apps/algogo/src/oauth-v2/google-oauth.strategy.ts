@@ -25,16 +25,17 @@ export class GoogleOauthStrategy extends CustomOAuthStrategy(
     });
   }
 
-  async validate(accessToken: string) {
+  async validate(req: any, accessToken: string, refreshToken: string, profile: any) {
     const userInfo = await this.getUserInfo(accessToken);
     const { sub, name, email } = userInfo;
-    return {
+
+    return super.validate(req, accessToken, refreshToken, {
       provider: OAUTH_PROVIDER.GOOGLE,
       name,
       id: sub,
       email,
       accessToken,
-    };
+    });
   }
 
   private async getUserInfo(accessToken: string): Promise<any> {

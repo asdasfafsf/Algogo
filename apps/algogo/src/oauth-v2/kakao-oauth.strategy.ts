@@ -25,16 +25,20 @@ export class KakaoOAuthStrategy extends CustomOAuthStrategy(
     });
   }
 
-  async validate(accessToken: string): Promise<any> {
+  async validate(req: any, accessToken: string, refreshToken: string, profile: any): Promise<any> {
     const userInfo = await this.getUserInfo(accessToken);
     const { sub, nickname, email } = userInfo;
-    return {
+
+    console.log('userInfo', userInfo);
+
+
+    return super.validate(req, accessToken, refreshToken, {
       provider: OAUTH_PROVIDER.KAKAO,
       name: nickname ?? '',
       id: sub,
       email: email ?? '',
       accessToken,
-    };
+    });
   }
 
   private async getUserInfo(accessToken: string): Promise<any> {
