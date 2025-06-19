@@ -1,9 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { UsersRepository } from './users.repository';
-import { InquiryUserDto } from './dto/InquiryUserDto';
+
 import { USER_NOT_FOUND_MESSAGE } from './constants';
-import { ResponseUserDto } from './dto/ResponseUserDto';
-import { SocialProvider } from '../common/enums/SocialProviderEnum';
 import { OAuthProvider } from '../common/types/oauth.type';
 import { UserInactiveException } from '../common/errors/user/UserInactiveException';
 import { UserNotFoundException } from '../common/errors/user/UserNotFoundException';
@@ -14,29 +12,22 @@ import { USER_STATE } from '../common/constants/user.constant';
 export class UsersService {
   constructor(private readonly usersRepository: UsersRepository) {}
 
-  async getUser(inquiryUserDto: InquiryUserDto): Promise<ResponseUserDto> {
-    const user = await this.usersRepository.getUser(inquiryUserDto);
+  /**
+   * 유저 조회
+   * @param userUuid 유저 고유 아이디
+   * @returns 유저 정보
+   */
+  async getUser({ userUuid }: { userUuid: string }) {
+    const user = await this.usersRepository.findUser({
+      userUuid,
+    });
 
     if (!user) {
       throw new NotFoundException(USER_NOT_FOUND_MESSAGE);
     }
 
-    if (user.no) {
-      if (inquiryUserDto.userNo !== user.no) {
-        user.oauthList = undefined;
-      }
-    }
-    user.no = undefined;
-
     return {
       ...user,
-      socialList: user.socialList.map(({ provider, content }) => ({
-        provider: provider as SocialProvider,
-        content,
-      })),
-      oauthList: user?.oauthList?.map(({ provider }) => ({
-        provider: provider as OAuthProvider,
-      })),
     };
   }
 

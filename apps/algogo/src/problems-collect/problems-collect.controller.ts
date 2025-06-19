@@ -13,16 +13,16 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '../auth/auth.guard';
 import { RequestProblemCollectDto } from './dto/RequestProblemCollectDto';
 import { ApiGlobalErrorResponses } from '../common/decorators/swagger/ApiGlobalErrorResponse';
 import { ProblemsCollectService } from './problems-collect.service';
+import { AuthV2Guard } from '../auth-v2/auth-v2.guard';
 
 @ApiTags('문제 수집 관련 API')
 @ApiBearerAuth('Authorization')
 @ApiBadRequestErrorResponse()
 @ApiGlobalErrorResponses()
-@UseGuards(AuthGuard)
+@UseGuards(AuthV2Guard)
 @Controller('api/v1/problems/collect')
 export class ProblemsCollectController {
   constructor(

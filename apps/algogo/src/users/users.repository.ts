@@ -1,47 +1,28 @@
 import { uuidv7 } from 'uuidv7';
 import { PrismaService } from '../prisma/prisma.service';
-import { InquiryUserDto } from './dto/InquiryUserDto';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class UsersRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async getUser(inquiryUserDto: InquiryUserDto) {
-    const { userNo, uuid } = inquiryUserDto;
+  async findUser({ userUuid }: { userUuid: string }) {
     const user = await this.prismaService.user.findUnique({
       select: {
-        no: true,
+        no: false,
         uuid: true,
         name: true,
         email: true,
         profilePhoto: true,
-        socialList: {
-          select: {
-            provider: true,
-            content: true,
-          },
-        },
-        oauthList: {
-          select: {
-            provider: true,
-          },
-        },
       },
       where: {
-        uuid,
+        uuid: userUuid,
       },
     });
 
     if (!user) {
       return user;
     }
-
-    if (userNo !== user.no) {
-      user.oauthList = undefined;
-    }
-
-    user.no = undefined;
 
     return user;
   }

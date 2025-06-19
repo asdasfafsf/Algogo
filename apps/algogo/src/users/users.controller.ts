@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Get,
-  HttpStatus,
-  Param,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, HttpStatus, Param, UseGuards } from '@nestjs/common';
 import { ResponseUserDto } from './dto/ResponseUserDto';
 import {
   ApiBearerAuth,
@@ -14,16 +7,17 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ApiGlobalErrorResponses } from '../common/decorators/swagger/ApiGlobalErrorResponse';
-import { AuthGuard } from '../auth/auth.guard';
-import { InquiryUserDto } from './dto/InquiryUserDto';
+import { AuthV2Guard } from '../auth-v2/auth-v2.guard';
 import { USER_NOT_FOUND_MESSAGE } from './constants';
 import { UsersService } from './users.service';
+import { User } from '../common/decorators/contexts/user.decorator';
+import { TokenUser } from '../common/types/request.type';
 
 @ApiTags('유저(타인) 정보 API')
 @ApiBearerAuth('Authorization')
 @ApiGlobalErrorResponses()
 @Controller('users')
-@UseGuards(AuthGuard)
+@UseGuards(AuthV2Guard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
   @ApiOperation({
@@ -47,13 +41,8 @@ export class UsersController {
     description: '유저 못찾음',
   })
   @Get('/:uuid')
-  async getUser(
-    @Req() request: AuthRequest,
-    @Param('uuid') uuid: string,
-  ): Promise<ResponseUserDto> {
-    const { userNo } = request;
-    const inquiryUserDto: InquiryUserDto = { userNo, uuid };
-    const user = await this.usersService.getUser(inquiryUserDto);
-    return user;
+  async getUser(@User() user: TokenUser, @Param('uuid') uuid: string) {
+    const userInfo = await this.usersService.getUser({ userUuid: uuid });
+    return userInfo;
   }
 }

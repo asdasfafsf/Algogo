@@ -10,10 +10,10 @@ import { ProblemsReportService } from './problems-report.service';
 import RequestProblemReportDto from './dto/RequestProblemReportDto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiBadRequestErrorResponse } from '../common/decorators/swagger/ApiBadRequestErrorResponse';
-import { AuthGuard } from '../auth/auth.guard';
+import { AuthV2Guard } from '../auth-v2/auth-v2.guard';
 @ApiTags('문제 문의 관련 API')
 @ApiBadRequestErrorResponse()
-@UseGuards(AuthGuard)
+@UseGuards(AuthV2Guard)
 @Controller('api/v1/problems/report')
 export class ProblemsReportController {
   constructor(private readonly problemsReportService: ProblemsReportService) {}
