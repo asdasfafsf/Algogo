@@ -1,5 +1,5 @@
 import { OAUTH_PROVIDER } from '../../common/constants/oauth.contant';
-import { TokenGeneratePayload } from './auth.type';
+import { TokenUser } from './request.type';
 
 export type OAuthProvider =
   (typeof OAUTH_PROVIDER)[keyof typeof OAUTH_PROVIDER];
@@ -18,5 +18,5 @@ export type OAuthRequestUser = {
 
 export type OAuthConnectRequest = Express.Request & {
   oauth: OAuthRequestUser;
-  user: TokenGeneratePayload;
+  user: TokenUser;
 };

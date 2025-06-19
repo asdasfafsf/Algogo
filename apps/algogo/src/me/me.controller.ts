@@ -27,7 +27,7 @@ import { ApiGlobalErrorResponses } from '../common/decorators/swagger/ApiGlobalE
 import { RequestUpdateSocialDto } from './dto/RequestUpdateSocialDto';
 import { validate } from 'class-validator';
 import { AuthV2Guard } from '../auth-v2/auth-v2.guard';
-import { AuthRequest } from '../common/types/request';
+import { AuthRequest } from '../common/types/request.type';
 
 @ApiTags('사용자 자기 자신의 관련된 API')
 @ApiBearerAuth('Authorization')

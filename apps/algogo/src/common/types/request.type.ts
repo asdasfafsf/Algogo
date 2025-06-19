@@ -1,6 +1,6 @@
 import { Request } from 'express';
 
-type TokenUser = {
+export type TokenUser = {
   sub: string;
 };
 

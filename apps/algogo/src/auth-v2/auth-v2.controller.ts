@@ -1,6 +1,6 @@
 import { Controller, Post, Req, UseGuards, HttpCode } from '@nestjs/common';
 import { AuthV2Service } from './auth-v2.service';
-import { RefreshTokenRequest } from '../common/types/request';
+import { RefreshTokenRequest } from '../common/types/request.type';
 import { AuthRefreshGuard } from './auth-refresh.guard';
 import {
   ApiTags,
