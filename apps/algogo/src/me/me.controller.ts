@@ -5,7 +5,6 @@ import {
   Get,
   HttpStatus,
   Patch,
-  Req,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -27,7 +26,8 @@ import { ApiGlobalErrorResponses } from '../common/decorators/swagger/ApiGlobalE
 import { RequestUpdateSocialDto } from './dto/RequestUpdateSocialDto';
 import { validate } from 'class-validator';
 import { AuthV2Guard } from '../auth-v2/auth-v2.guard';
-import { AuthRequest } from '../common/types/request.type';
+import { TokenUser } from '../common/types/request.type';
+import { User } from '../common/decorators/contexts/user.decorator';
 
 @ApiTags('사용자 자기 자신의 관련된 API')
 @ApiBearerAuth('Authorization')
@@ -47,8 +47,8 @@ export class MeController {
     type: ResponseMeDto,
   })
   @Get('')
-  async getMe(@Req() request: AuthRequest) {
-    const { sub } = request.user;
+  async getMe(@User() user: TokenUser) {
+    const { sub } = user;
     return await this.meService.getMe(sub);
   }
 
@@ -123,12 +123,12 @@ export class MeController {
   @Patch('profile')
   @UseInterceptors(FileInterceptor('file', MULTER_OPTION))
   async updateMe(
-    @Req() request: AuthRequest, // 인증된 사용자 정보
+    @User() user: TokenUser,
     @UploadedFile() file: Express.Multer.File, // 파일
     @Body('name') name: string, // 이름 (name 필드)
     @Body('socialList') socialListString: string, // socialList 필드를 JSON 문자열로 받음
   ): Promise<ResponseMeDto> {
-    const { sub } = request.user;
+    const { sub } = user;
 
     let socialList: RequestUpdateSocialDto[];
     try {

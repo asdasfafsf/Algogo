@@ -26,6 +26,7 @@ import { RequestWsAuthDto } from './dto/RequestWsAuthDto';
 import { OnEvent } from '@nestjs/event-emitter';
 import { CustomHttpException } from '../common/errors/CustomHttpException';
 import { ExecuteWsExceptionFilter } from './filter/execute-ws-exception.filter';
+import { CustomError } from '../common/types/error.type';
 
 class AuthSocket extends Socket {
   messageCount: number;

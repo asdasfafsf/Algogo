@@ -74,8 +74,6 @@ export function CustomOAuthStrategy(
         });
       }
 
-      console.log('인증해');
-
       newOptions.callbackURL = callbackURL;
       super.authenticate(req, newOptions);
     }

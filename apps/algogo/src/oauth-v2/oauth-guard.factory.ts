@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AuthGuard, IAuthGuard } from '@nestjs/passport';
-import { OAUTH_PROVIDER } from './constants/oauth.contant';
-import { OAuthProvider } from './types/oauth.type';
+import { OAUTH_PROVIDER } from '../common/constants/oauth.contant';
+import { OAuthProvider } from '../common/types/oauth.type';
 
 @Injectable()
 export class OAuthGuardFactory {
