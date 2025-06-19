@@ -88,7 +88,14 @@ export class OauthV2Service {
       // 정상적으로 연동되었다면 로그인해야함.
       userUuid = oauthState.user.userUuid;
     } else if (oauthState.state === OAUTH_STATE.CONNECTED_AND_INACTIVE) {
-      throw new OAuthConflictException();
+      // 이미 연동되어있었다면 우선 연동시킴
+      await this.oauthV2Repository.updateUserOAuth({
+        id,
+        provider,
+        userUuid: oauthState.user.userUuid,
+        isActive: true,
+      });
+      userUuid = oauthState.user.userUuid;
     } else if (oauthState.state === OAUTH_STATE.CONNECTED_TO_OTHER_ACCOUNT) {
       throw new OAuthConflictException();
     } else if (
@@ -143,6 +150,7 @@ export class OauthV2Service {
     } else if (oauthState.state === OAUTH_STATE.CONNECTED_AND_ACTIVE) {
       // 정상 아무것도 안함
     } else if (oauthState.state === OAUTH_STATE.CONNECTED_AND_INACTIVE) {
+      // 내 계정에 이전에 연동되어있었다면 우선 연동시킴
       await this.oauthV2Repository.updateUserOAuth({
         id,
         provider,
