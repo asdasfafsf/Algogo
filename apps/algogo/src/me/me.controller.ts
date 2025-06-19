@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -23,8 +22,6 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { MULTER_OPTION } from './me.constants';
 import { ResponseMeDto } from './dto/ResponseMeDto';
 import { ApiGlobalErrorResponses } from '../common/decorators/swagger/ApiGlobalErrorResponse';
-import { RequestUpdateSocialDto } from './dto/RequestUpdateSocialDto';
-import { validate } from 'class-validator';
 import { AuthV2Guard } from '../auth-v2/auth-v2.guard';
 import { TokenUser } from '../common/types/request.type';
 import { User } from '../common/decorators/contexts/user.decorator';
@@ -124,36 +121,11 @@ export class MeController {
   @UseInterceptors(FileInterceptor('file', MULTER_OPTION))
   async updateMe(
     @User() user: TokenUser,
-    @UploadedFile() file: Express.Multer.File, // 파일
-    @Body('name') name: string, // 이름 (name 필드)
-    @Body('socialList') socialListString: string, // socialList 필드를 JSON 문자열로 받음
+    @UploadedFile() file: Express.Multer.File,
+    @Body('name') name: string,
   ): Promise<ResponseMeDto> {
     const { sub } = user;
-
-    let socialList: RequestUpdateSocialDto[];
-    try {
-      socialList = JSON.parse(socialListString ?? '[]');
-    } catch (error) {
-      throw new BadRequestException('Invalid socialList format');
-    }
-
-    console.log('야야야토큰이야,', sub);
-    // 디버깅용 로그 추가
-    console.log('name:', name);
-    console.log('socialList:', socialList);
-    console.log('validation object:', { name, socialList });
-
-    const errors = await validate({
-      name,
-      socialList,
-    });
-
-    console.log('야야야토큰이야222,', socialList);
-
-    if (errors.length > 0) {
-      throw new BadRequestException(errors);
-    }
-
+    const socialList = [];
     const responseMeDto = await this.meService.updateMe({
       name,
       socialList,
