@@ -12,9 +12,21 @@ import { OauthV2Service } from './oauth-v2.service';
 import { UsersModule } from '../users/users.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { OauthV2Repository } from './oauth-v2.repository';
+import { PassportModule } from '@nestjs/passport';
 
 @Module({
-  imports: [AuthV2Module, HttpModule, UsersModule, AuthV2Module, PrismaModule],
+  imports: [
+    PassportModule.register({
+      session: false,
+      property: 'oauth',
+      assignProperty: 'oauth',
+    }),
+    AuthV2Module,
+    HttpModule,
+    UsersModule,
+    AuthV2Module,
+    PrismaModule,
+  ],
   providers: [
     KakaoOAuthStrategy,
     GoogleOauthStrategy,
