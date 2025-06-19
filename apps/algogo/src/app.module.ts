@@ -1,7 +1,7 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigType } from '@nestjs/config';
 import { validationSchema } from './config/validationSchema';
 import { CrawlerModule } from './crawler/crawler.module';
 import crawlerConfig from './config/crawlerConfig';
@@ -21,8 +21,6 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { AllExceptionsFilter } from '@libs/filter/src';
 import { ResponseInterceptor } from '@libs/interceptor/src';
 import { UsersModule } from './users/users.module';
-import { OauthModule } from './oauth/oauth.module';
-import { AuthModule } from './auth/auth.module';
 import { RedisModule } from './redis/redis.module';
 import { JwtModule } from './jwt/jwt.module';
 import { CryptoModule } from './crypto/crypto.module';
@@ -33,6 +31,8 @@ import { ProblemsReportModule } from './problems-report/problems-report.module';
 import { ProblemsCollectModule } from './problems-collect/problems-collect.module';
 import { CodeModule } from './code/code.module';
 import { ProblemsV2Module } from './problems-v2/problems-v2.module';
+import { AuthV2Module } from './auth-v2/auth-v2.module';
+import { OauthV2Module } from './oauth-v2/oauth-v2.module';
 import googleOAuthConfig from './config/googleOAuthConfig';
 import kakaoOAuthConfig from './config/kakaoOAuthConfig';
 import githubOAuthConfig from './config/githubOAuthConfig';
@@ -42,6 +42,11 @@ import encryptConfig from './config/encryptConfig';
 import bullmqConfig from './config/bullmqConfig';
 import wsConfig from './config/wsConfig';
 import LoggerConfig from './config/LoggerConfig';
+import { CacheModule } from '@nestjs/cache-manager';
+import { redisStore } from 'cache-manager-redis-store';
+import type { RedisClientOptions } from 'redis';
+import { RequestMetadataMiddleware } from './middlewares/RequestMetadataMiddleware';
+import { AuthGuardModule } from './auth-guard/auth-guard.module';
 
 @Module({
   imports: [
@@ -78,14 +83,24 @@ import LoggerConfig from './config/LoggerConfig';
       isGlobal: true,
       validationSchema,
     }),
+    CacheModule.registerAsync<RedisClientOptions>({
+      imports: [ConfigModule],
+      useFactory: async (config: ConfigType<typeof redisConfig>) => ({
+        store: redisStore,
+        host: config.host,
+        port: config.port,
+        password: config.password,
+      }),
+      inject: [redisConfig.KEY],
+      isGlobal: true,
+    }),
+
     CrawlerModule,
     ProblemsModule,
     S3Module,
-    ImageModule,
+    ImageModule,  
     PrismaModule,
     UsersModule,
-    OauthModule,
-    AuthModule,
     RedisModule.forRootAsync({
       host: process.env.REDIS_HOST,
       port: Number(process.env.REDIS_PORT),
@@ -100,6 +115,9 @@ import LoggerConfig from './config/LoggerConfig';
     ProblemsCollectModule,
     CodeModule,
     ProblemsV2Module,
+    AuthV2Module,
+    OauthV2Module,
+    AuthGuardModule,
   ],
 
   controllers: [AppController],
@@ -115,4 +133,8 @@ import LoggerConfig from './config/LoggerConfig';
     AppService,
   ],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestMetadataMiddleware).forRoutes('*');
+  }
+}

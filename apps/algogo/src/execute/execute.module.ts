@@ -2,13 +2,13 @@ import { Module } from '@nestjs/common';
 import { ExecuteService } from './execute.service';
 import { ExecuteController } from './execute.controller';
 import { BullModule } from '@nestjs/bullmq';
-import { AuthModule } from '../auth/auth.module';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import bullmqConfig from '../config/bullmqConfig';
 import { ExecuteGateway } from './execute.gateway';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CryptoModule } from '../crypto/crypto.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { AuthGuardModule } from '../auth-guard/auth-guard.module';
 
 @Module({
   imports: [
@@ -28,7 +28,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     }),
     ScheduleModule.forRoot(),
     CryptoModule,
-    AuthModule,
+    AuthGuardModule,
     EventEmitterModule.forRoot(),
   ],
   controllers: [ExecuteController],

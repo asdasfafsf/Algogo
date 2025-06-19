@@ -76,7 +76,7 @@ export class TodayProblemDto {
 
   @ApiProperty({
     description: '문제 난이도',
-    example: 1,
+    example: '입문',
   })
   difficulty: string;
 }

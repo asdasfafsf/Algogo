@@ -13,10 +13,10 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '../auth/auth.guard';
 import { RequestProblemCollectDto } from './dto/RequestProblemCollectDto';
 import { ApiGlobalErrorResponses } from '../common/decorators/swagger/ApiGlobalErrorResponse';
 import { ProblemsCollectService } from './problems-collect.service';
+import { AuthGuard } from '../auth-guard/auth.guard';
 
 @ApiTags('문제 수집 관련 API')
 @ApiBearerAuth('Authorization')
