@@ -4,7 +4,7 @@ export type OAuthProvider =
   (typeof OAUTH_PROVIDER)[keyof typeof OAUTH_PROVIDER];
 
 export type OAuthRequest = Express.Request & {
-  user: OAuthRequestUser;
+  oauth: OAuthRequestUser;
 };
 
 export type OAuthRequestUser = {
@@ -13,4 +13,12 @@ export type OAuthRequestUser = {
   id: string;
   email: string;
   accessToken: string;
+};
+
+
+
+export type OAuthConnectRequest = OAuthRequest & {
+  params: {
+    provider: OAuthProvider;
+  };
 };
