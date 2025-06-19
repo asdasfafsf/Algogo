@@ -7,10 +7,7 @@ export class OauthV2Controller {
   @UseGuards(DynamicOAuthGuard)
   async oauth() {}
 
-
   @Post('/connect/:provider')
   @UseGuards(DynamicOAuthGuard)
   async connectOAuth() {}
-
-
 }

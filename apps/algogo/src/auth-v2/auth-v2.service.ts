@@ -17,7 +17,7 @@ export class AuthV2Service {
     private readonly cacheManager: Cache,
     @Inject(JwtConfig.KEY)
     private readonly jwtConfig: ConfigType<typeof JwtConfig>,
-    private readonly logger: CustomLogger
+    private readonly logger: CustomLogger,
   ) {}
 
   /**
@@ -68,7 +68,7 @@ export class AuthV2Service {
 
     await this.saveRefreshToken(user.uuid, newRefreshToken);
 
-    return { 
+    return {
       accessToken,
       refreshToken: newRefreshToken,
     };
@@ -86,8 +86,6 @@ export class AuthV2Service {
       this.jwtConfig.jwtRefreshTokenExpiresIn * 1000 + 10000, // cache-manager 버전 5부터는 ms단위로 설정해야함
     );
   }
-
-
 
   /**
    * 리프레시 토큰을 검증합니다.

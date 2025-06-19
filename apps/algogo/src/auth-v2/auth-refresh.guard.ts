@@ -15,11 +15,10 @@ export class AuthRefreshGuard implements CanActivate {
       throw new JwtMissingTokenException();
     }
 
-    const payload = await this.jwtService.verify(token); 
+    const payload = await this.jwtService.verify(token);
     request.user = { ...payload, refreshToken: token };
     return true;
   }
-
 
   private extractTokenFromHeader(request: Request): string | undefined {
     const [typeFromHeader, tokenFromHeader] =

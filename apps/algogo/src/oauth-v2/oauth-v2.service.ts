@@ -14,14 +14,12 @@ export class OauthV2Service {
     private readonly authV2Service: AuthV2Service,
   ) {}
 
-
-
- /**
-  * OAuth 상태 조회
-  * @param id 유저 아이디
-  * @param provider 프로바이더
-  * @returns OAuth 상태
-  */
+  /**
+   * OAuth 상태 조회
+   * @param id 유저 아이디
+   * @param provider 프로바이더
+   * @returns OAuth 상태
+   */
   async getOAuthState({
     id,
     provider,
@@ -46,7 +44,6 @@ export class OauthV2Service {
     };
   }
 
-
   /**
    * 유저 등록 또는 로그인
    * @param id 유저 아이디
@@ -69,7 +66,12 @@ export class OauthV2Service {
     const oauthState = await this.getOAuthState({ id, provider });
     let userUuid = '';
     if (oauthState.state === OAUTH_STATE.NEW) {
-      const user = await this.usersService.createUser({ id, provider, name, email });
+      const user = await this.usersService.createUser({
+        id,
+        provider,
+        name,
+        email,
+      });
       userUuid = user.uuid;
     } else if (oauthState.state === OAUTH_STATE.CONNECTED_AND_ACTIVE) {
       // 정상적으로 연동되었다면 로그인해야함.
@@ -95,7 +97,6 @@ export class OauthV2Service {
       refreshToken,
     };
   }
-
 
   /**
    * OAuth 연동
@@ -130,11 +131,12 @@ export class OauthV2Service {
       });
     } else if (oauthState.state === OAUTH_STATE.CONNECTED_TO_OTHER_ACCOUNT) {
       throw new OAuthConflictException();
-    } else if (oauthState.state === OAUTH_STATE.DISCONNECTED_FROM_OTHER_ACCOUNT) {
+    } else if (
+      oauthState.state === OAUTH_STATE.DISCONNECTED_FROM_OTHER_ACCOUNT
+    ) {
       throw new OAuthConflictException();
     }
-  } 
-
+  }
 
   async disconnectOAuthProvider({
     id,

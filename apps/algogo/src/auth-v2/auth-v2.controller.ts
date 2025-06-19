@@ -10,14 +10,12 @@ import {
 } from '@nestjs/swagger';
 import { ApiGlobalErrorResponses } from '../common/decorators/swagger/ApiGlobalErrorResponse';
 
-
 @ApiTags('Auth V2')
 @ApiBearerAuth('Authorization')
 @ApiGlobalErrorResponses()
 @Controller('api/v2/auth')
 export class AuthV2Controller {
   constructor(private readonly authV2Service: AuthV2Service) {}
-
 
   @ApiOperation({
     summary: '토큰 재발급',

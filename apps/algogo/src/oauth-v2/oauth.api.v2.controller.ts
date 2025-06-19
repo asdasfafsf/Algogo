@@ -21,15 +21,15 @@ export class OauthApiV2Controller {
     };
   }
 
-  // @Post('/connect/:provider')
-  // @UseGuards(AuthV2Guard, DynamicOAuthGuard)
-  // async connectOAuth(@Req() req: OAuthRequest) {
-  //   const { user } = req;
-  //   const { provider } = req.params;
-  //   await this.oauthV2Service.connectOAuthProvider({
-  //     id: user.id,
-  //     provider,
-  //     userUuid: user.uuid,
-  //   });
-  // }
+  @Post('/connect/:provider')
+  @UseGuards(AuthV2Guard, DynamicOAuthGuard)
+  async connectOAuth(@Req() req: OAuthRequest) {
+    const { user, oauth } = req;
+    const { provider } = req.params;
+    await this.oauthV2Service.connectOAuthProvider({
+      id: oauth.id,
+      provider,
+      userUuid: user.sub,
+    });
+  }
 }

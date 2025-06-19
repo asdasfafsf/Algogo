@@ -35,7 +35,6 @@ export class JwtService {
     });
   }
 
-
   /**
    * 토큰을 검증합니다.
    * @param token - 검증할 토큰

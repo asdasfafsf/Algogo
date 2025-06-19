@@ -157,7 +157,10 @@ describe('AuthV2Service 단위 테스트', () => {
     (mockCache.get as jest.Mock).mockResolvedValue(true);
 
     // Act
-    const result = await authService.validateRefreshToken(userUuid, refreshToken);
+    const result = await authService.validateRefreshToken(
+      userUuid,
+      refreshToken,
+    );
 
     // Assert
     expect(result).toBe(true);

@@ -72,7 +72,6 @@ export class OauthV2Repository {
     return userOAuth;
   }
 
-
   async updateUserOAuth({
     id,
     provider,

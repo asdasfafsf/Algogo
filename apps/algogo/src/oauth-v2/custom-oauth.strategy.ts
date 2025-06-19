@@ -27,7 +27,7 @@ export function CustomOAuthStrategy(
     readonly config: OAuthConfig;
 
     constructor(config: OAuthConfig) {
-      super({ 
+      super({
         ...config,
         callbackURL: '',
         session: false,
@@ -42,9 +42,7 @@ export function CustomOAuthStrategy(
         property: 'oauth',
         passReqToCallback: true,
       };
-
     }
-
 
     // success(req: any, user: any, info: any) {
     //   console.log('success', req, user, info);
@@ -52,14 +50,19 @@ export function CustomOAuthStrategy(
     //   (this as any).success(user, info);
     // }
 
-    async validate(req: any, accessToken: string, refreshToken: string, profile: any) {
+    async validate(
+      req: any,
+      accessToken: string,
+      refreshToken: string,
+      profile: any,
+    ) {
       req.oauth = profile;
       console.log('req.oauth', req.oauth);
       return req?.user ?? profile;
     }
 
     authenticate(req: Request, options: any) {
-      const newOptions = { ...options, ...this.config};
+      const newOptions = { ...options, ...this.config };
       const requestUrl = req.originalUrl;
       const { destination } = req.query;
       const callbackURL = this.getCallbackUrl(requestUrl);
@@ -71,7 +74,7 @@ export function CustomOAuthStrategy(
         });
       }
 
-      console.log('인증해')
+      console.log('인증해');
 
       newOptions.callbackURL = callbackURL;
       super.authenticate(req, newOptions);
