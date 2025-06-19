@@ -71,4 +71,32 @@ export class OauthV2Repository {
 
     return userOAuth;
   }
+
+
+  async updateUserOAuth({
+    id,
+    provider,
+    userUuid,
+    isActive,
+  }: {
+    id: string;
+    provider: OAuthProvider;
+    userUuid: string;
+    isActive: boolean;
+  }) {
+    const userOAuth = await this.prismaService.userOAuth.update({
+      where: {
+        userUuid_id_provider: {
+          userUuid,
+          id,
+          provider,
+        },
+      },
+      data: {
+        isActive,
+      },
+    });
+
+    return userOAuth;
+  }
 }
