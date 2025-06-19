@@ -221,15 +221,15 @@ model ProblemV2LanguageLimit {
 }
 
 model User {
-    no             Int       @id @default(autoincrement()) @map("USER_NO")
-    uuid           String    @unique @default(uuid()) @map("USER_UUID")
-    email          String    @map("USER_EMAIL")
-    name           String    @map("USER_NAME")
-    profilePhoto   String    @map("USER_PROFILE_PHOTO")
-    registeredDate DateTime  @default(now()) @map("USER_REGISTERED_DATE")
-    lastLoginDate  DateTime  @map("USER_LAST_LOGIN_DATE")
-    state          UserState @default(ACTIVE) @map("USER_STATE")
-    emailVerified  Boolean   @default(false) @map("USER_EMAIL_VERIFIED")
+    no             Int      @id @default(autoincrement()) @map("USER_NO")
+    uuid           String   @unique @default(uuid()) @map("USER_UUID")
+    email          String   @map("USER_EMAIL")
+    name           String   @map("USER_NAME")
+    profilePhoto   String   @map("USER_PROFILE_PHOTO")
+    registeredDate DateTime @default(now()) @map("USER_REGISTERED_DATE")
+    lastLoginDate  DateTime @map("USER_LAST_LOGIN_DATE")
+    state          String?  @default("ACTIVE") @map("USER_STATE")
+    emailVerified  Boolean  @default(false) @map("USER_EMAIL_VERIFIED")
 
     createdAt DateTime @default(now()) @map("USER_CREATED_AT")
     updatedAt DateTime @default(now()) @map("USER_UPDATED_AT")
@@ -241,8 +241,40 @@ model User {
     problemReportList        ProblemReport[]        @relation("UserToProblemReport")
     problemCollectionLogList ProblemCollectionLog[] @relation("UserToProblemCollectionLog")
     problemCodeList          ProblemCode[]          @relation("UserToProblemCode")
+    userLoginHistoryList     UserLoginHistory[]     @relation("UserToUserLoginHistory")
+    userSessionList          UserSession[]          @relation("UserToUserSession")
 
     @@map("USER")
+}
+
+model UserLoginHistory {
+    no        Int      @id @default(autoincrement()) @map("USER_LOGIN_HISTORY_NO")
+    userUuid  String   @map("USER_UUID")
+    type      String   @map("USER_LOGIN_HISTORY_TYPE")
+    ip        String   @map("USER_LOGIN_HISTORY_IP")
+    userAgent String?  @map("USER_LOGIN_HISTORY_USER_AGENT")
+    createdAt DateTime @default(now()) @map("USER_LOGIN_HISTORY_CREATED_AT")
+    updatedAt DateTime @updatedAt @map("USER_LOGIN_HISTORY_UPDATED_AT")
+
+    User User @relation("UserToUserLoginHistory", fields: [userUuid], references: [uuid])
+
+    @@index([userUuid, createdAt])
+    @@index([createdAt])
+    @@map("USER_LOGIN_HISTORY")
+}
+
+model UserSession {
+    no           Int      @id @default(autoincrement()) @map("USER_SESSION_NO")
+    userUuid     String   @map("USER_UUID")
+    deviceId     String   @map("USER_SESSION_DEVICE_ID")
+    refreshToken String   @map("USER_SESSION_REFRESH_TOKEN")
+    createdAt    DateTime @default(now()) @map("USER_SESSION_CREATED_AT")
+    updatedAt    DateTime @updatedAt @map("USER_SESSION_UPDATED_AT")
+
+    User User @relation("UserToUserSession", fields: [userUuid], references: [uuid])
+
+    @@index([userUuid])
+    @@map("USER_SESSION")
 }
 
 model UserOAuth {
@@ -256,6 +288,7 @@ model UserOAuth {
     User User @relation("UserToUserOauth", fields: [userUuid], references: [uuid])
 
     @@unique([userUuid, id, provider])
+    @@unique([id, provider])
     @@index([userUuid])
     @@index([id, provider])
     @@map("USER_OAUTH")

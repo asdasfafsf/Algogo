@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ProblemsReportService } from './problems-report.service';
 import { ProblemsReportController } from './problems-report.controller';
-import { AuthModule } from '../auth/auth.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { ProblemsReportRepository } from './problems-report.repository';
+import { AuthGuardModule } from '../auth-guard/auth-guard.module';
 
 @Module({
   controllers: [ProblemsReportController],
   providers: [ProblemsReportService, ProblemsReportRepository],
-  imports: [AuthModule, PrismaModule],
+  imports: [AuthGuardModule, PrismaModule],
 })
 export class ProblemsReportModule {}

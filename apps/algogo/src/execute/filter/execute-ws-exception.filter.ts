@@ -1,5 +1,6 @@
 import { Catch, ArgumentsHost, WsExceptionFilter } from '@nestjs/common';
 import { CustomHttpException } from '../../common/errors/CustomHttpException';
+import { CustomError } from '../../common/types/error.type';
 
 @Catch()
 export class ExecuteWsExceptionFilter implements WsExceptionFilter {
