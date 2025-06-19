@@ -8,7 +8,7 @@ import { CryptoService } from '../crypto/crypto.service';
 import { ImageService } from '../image/image.service';
 import { UpdateMeDto } from './dto/UpdateMeDto';
 import { SocialProvider } from '../common/enums/SocialProviderEnum';
-import { OAuthProvider } from '../oauth-v2/types/oauth.type';
+import { OAuthProvider } from '../common/types/oauth.type';
 import { CustomLogger } from '../logger/custom-logger';
 
 @Injectable()

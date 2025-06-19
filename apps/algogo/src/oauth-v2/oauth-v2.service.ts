@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { OauthV2Repository } from './oauth-v2.repository';
-import { OAuthProvider } from './types/oauth.type';
-import { OAUTH_STATE } from './constants/oauth.contant';
+import { OAuthProvider } from '../common/types/oauth.type';
+import { OAUTH_STATE } from '../common/constants/oauth.contant';
 import { AuthV2Service } from '../auth-v2/auth-v2.service';
 import { OAuthConflictException } from '../common/errors/oauth/OAuthConflictException';
 

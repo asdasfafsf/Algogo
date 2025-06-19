@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { OAuthGuardFactory } from './oauth-guard.factory';
-import { OAuthProvider } from './types/oauth.type';
+import { OAuthProvider } from '../common/types/oauth.type';
 
 @Injectable()
 export class DynamicOAuthGuard implements CanActivate {

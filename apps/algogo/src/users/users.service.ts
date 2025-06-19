@@ -4,7 +4,7 @@ import { InquiryUserDto } from './dto/InquiryUserDto';
 import { USER_NOT_FOUND_MESSAGE } from './constants';
 import { ResponseUserDto } from './dto/ResponseUserDto';
 import { SocialProvider } from '../common/enums/SocialProviderEnum';
-import { OAuthProvider } from '../oauth-v2/types/oauth.type';
+import { OAuthProvider } from '../common/types/oauth.type';
 import { UserInactiveException } from '../common/errors/user/UserInactiveException';
 import { UserNotFoundException } from '../common/errors/user/UserNotFoundException';
 import { UserState, UserSummary } from '../common/types/user.type';

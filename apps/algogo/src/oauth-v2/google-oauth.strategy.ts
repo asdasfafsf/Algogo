@@ -6,7 +6,7 @@ import { lastValueFrom } from 'rxjs';
 import { CustomLogger } from '../logger/custom-logger';
 import { CustomOAuthStrategy } from './custom-oauth.strategy';
 import { Strategy } from 'passport-oauth2';
-import { OAUTH_PROVIDER } from './constants/oauth.contant';
+import { OAUTH_PROVIDER } from '../common/constants/oauth.contant';
 
 @Injectable()
 export class GoogleOauthStrategy extends CustomOAuthStrategy(

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { OAuthProvider } from './types/oauth.type';
+import { OAuthProvider } from '../common/types/oauth.type';
 
 @Injectable()
 export class OauthV2Repository {
