@@ -21,8 +21,6 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { AllExceptionsFilter } from '@libs/filter/src';
 import { ResponseInterceptor } from '@libs/interceptor/src';
 import { UsersModule } from './users/users.module';
-import { OauthModule } from './oauth/oauth.module';
-import { AuthModule } from './auth/auth.module';
 import { RedisModule } from './redis/redis.module';
 import { JwtModule } from './jwt/jwt.module';
 import { CryptoModule } from './crypto/crypto.module';
@@ -48,6 +46,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-store';
 import type { RedisClientOptions } from 'redis';
 import { RequestMetadataMiddleware } from './middlewares/RequestMetadataMiddleware';
+import { AuthGuardModule } from './auth-guard/auth-guard.module';
 
 @Module({
   imports: [
@@ -99,11 +98,9 @@ import { RequestMetadataMiddleware } from './middlewares/RequestMetadataMiddlewa
     CrawlerModule,
     ProblemsModule,
     S3Module,
-    ImageModule,
+    ImageModule,  
     PrismaModule,
     UsersModule,
-    OauthModule,
-    AuthModule,
     RedisModule.forRootAsync({
       host: process.env.REDIS_HOST,
       port: Number(process.env.REDIS_PORT),
@@ -120,6 +117,7 @@ import { RequestMetadataMiddleware } from './middlewares/RequestMetadataMiddlewa
     ProblemsV2Module,
     AuthV2Module,
     OauthV2Module,
+    AuthGuardModule,
   ],
 
   controllers: [AppController],

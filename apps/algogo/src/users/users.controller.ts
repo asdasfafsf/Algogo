@@ -7,7 +7,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ApiGlobalErrorResponses } from '../common/decorators/swagger/ApiGlobalErrorResponse';
-import { AuthV2Guard } from '../auth-v2/auth-v2.guard';
+import { AuthGuard } from '../auth-guard/auth.guard';
 import { USER_NOT_FOUND_MESSAGE } from './constants';
 import { UsersService } from './users.service';
 import { User } from '../common/decorators/contexts/user.decorator';
@@ -17,7 +17,7 @@ import { TokenUser } from '../common/types/request.type';
 @ApiBearerAuth('Authorization')
 @ApiGlobalErrorResponses()
 @Controller('users')
-@UseGuards(AuthV2Guard)
+@UseGuards(AuthGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
   @ApiOperation({

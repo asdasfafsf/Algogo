@@ -8,7 +8,7 @@ import { ExecuteGateway } from './execute.gateway';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CryptoModule } from '../crypto/crypto.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { AuthV2Module } from '../auth-v2/auth-v2.module';
+import { AuthGuardModule } from '../auth-guard/auth-guard.module';
 
 @Module({
   imports: [
@@ -28,7 +28,7 @@ import { AuthV2Module } from '../auth-v2/auth-v2.module';
     }),
     ScheduleModule.forRoot(),
     CryptoModule,
-    AuthV2Module,
+    AuthGuardModule,
     EventEmitterModule.forRoot(),
   ],
   controllers: [ExecuteController],

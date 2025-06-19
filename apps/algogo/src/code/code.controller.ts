@@ -34,7 +34,7 @@ import RequestCreateCodeTemplateDto from './dto/RequestCreateCodeTemplateDto';
 import { ResponseDeleteCodeTemplateDto } from './dto/ResponseDeleteCodeTemplateDto';
 import { ResponseProblemCodeDto } from './dto/ResponseProblemCodeDto';
 import { ResponseDto } from '../common/dto/ResponseDto';
-import { AuthV2Guard } from '../auth-v2/auth-v2.guard';
+import { AuthGuard } from '../auth-guard/auth.guard';
 import { User } from '../common/decorators/contexts/user.decorator';
 import { TokenUser } from '../common/types/request.type';
 
@@ -42,7 +42,7 @@ import { TokenUser } from '../common/types/request.type';
 @ApiBadRequestErrorResponse()
 @ApiTags('Code API')
 @ApiBearerAuth('Authorization')
-@UseGuards(AuthV2Guard)
+@UseGuards(AuthGuard)
 @Controller('api/v1/code')
 export class CodeController {
   constructor(private readonly codeService: CodeService) {}

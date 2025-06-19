@@ -22,7 +22,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { MULTER_OPTION } from './me.constants';
 import { ResponseMeDto } from './dto/ResponseMeDto';
 import { ApiGlobalErrorResponses } from '../common/decorators/swagger/ApiGlobalErrorResponse';
-import { AuthV2Guard } from '../auth-v2/auth-v2.guard';
+import { AuthGuard } from '../auth-guard/auth.guard';
 import { TokenUser } from '../common/types/request.type';
 import { User } from '../common/decorators/contexts/user.decorator';
 
@@ -30,7 +30,7 @@ import { User } from '../common/decorators/contexts/user.decorator';
 @ApiBearerAuth('Authorization')
 @ApiGlobalErrorResponses()
 @Controller('api/v1/me')
-@UseGuards(AuthV2Guard)
+@UseGuards(AuthGuard)
 export class MeController {
   constructor(private readonly meService: MeService) {}
 

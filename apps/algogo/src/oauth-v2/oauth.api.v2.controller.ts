@@ -2,7 +2,7 @@ import { Controller, Param, Post, UseGuards } from '@nestjs/common';
 import { DynamicOAuthGuard } from './dynamic-oauth.guard';
 import { OAuthProvider, OAuthRequestUser } from '../common/types/oauth.type';
 import { OauthV2Service } from './oauth-v2.service';
-import { AuthV2Guard } from '../auth-v2/auth-v2.guard';
+import { AuthGuard } from '../auth-guard/auth.guard';
 import { TokenUser } from '../common/types/request.type';
 import { User } from '../common/decorators/contexts/user.decorator';
 import { OAuth } from '../common/decorators/contexts/oauth.decorator';
@@ -24,7 +24,7 @@ export class OauthApiV2Controller {
   }
 
   @Post('/connect/:provider')
-  @UseGuards(AuthV2Guard, DynamicOAuthGuard)
+  @UseGuards(AuthGuard, DynamicOAuthGuard)
   async connectOAuth(
     @User() user: TokenUser,
     @OAuth() oauth: OAuthRequestUser,
@@ -38,7 +38,7 @@ export class OauthApiV2Controller {
   }
 
   @Post('/disconnect/:provider')
-  @UseGuards(AuthV2Guard, DynamicOAuthGuard)
+  @UseGuards(AuthGuard, DynamicOAuthGuard)
   async disconnectOAuth(
     @User() user: TokenUser,
     @OAuth() oauth: OAuthRequestUser,

@@ -13,6 +13,7 @@ import { UsersModule } from '../users/users.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { OauthV2Repository } from './oauth-v2.repository';
 import { PassportModule } from '@nestjs/passport';
+import { AuthGuardModule } from '../auth-guard/auth-guard.module';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { PassportModule } from '@nestjs/passport';
     AuthV2Module,
     HttpModule,
     UsersModule,
-    AuthV2Module,
+    AuthGuardModule,
     PrismaModule,
   ],
   providers: [

@@ -16,13 +16,13 @@ import {
 import { RequestProblemCollectDto } from './dto/RequestProblemCollectDto';
 import { ApiGlobalErrorResponses } from '../common/decorators/swagger/ApiGlobalErrorResponse';
 import { ProblemsCollectService } from './problems-collect.service';
-import { AuthV2Guard } from '../auth-v2/auth-v2.guard';
+import { AuthGuard } from '../auth-guard/auth.guard';
 
 @ApiTags('문제 수집 관련 API')
 @ApiBearerAuth('Authorization')
 @ApiBadRequestErrorResponse()
 @ApiGlobalErrorResponses()
-@UseGuards(AuthV2Guard)
+@UseGuards(AuthGuard)
 @Controller('api/v1/problems/collect')
 export class ProblemsCollectController {
   constructor(

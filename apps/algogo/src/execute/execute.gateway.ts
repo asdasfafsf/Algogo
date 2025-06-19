@@ -27,7 +27,7 @@ import { CustomHttpException } from '../common/errors/CustomHttpException';
 import { ExecuteWsExceptionFilter } from './filter/execute-ws-exception.filter';
 import { CustomError } from '../common/types/error.type';
 import { TokenUser } from '../common/types/request.type';
-import { WsAuthV2Guard } from '../auth-v2/ws.auth-v2.guard';
+import { WsAuthGuard } from '../auth-guard/ws.auth.guard';
 
 class AuthSocket extends Socket {
   messageCount: number;
@@ -42,7 +42,7 @@ class AuthSocket extends Socket {
 export class ExecuteGateway {
   constructor(
     private readonly executeService: ExecuteService,
-    private readonly wsAuthGurad: WsAuthV2Guard,
+    private readonly wsAuthGurad: WsAuthGuard,
     private readonly logger: CustomLogger,
     @Inject(WsConfig.KEY)
     private readonly wsConfig: ConfigType<typeof WsConfig>,
@@ -132,7 +132,7 @@ export class ExecuteGateway {
       whitelist: true,
     }),
   )
-  @UseGuards(WsAuthV2Guard)
+  @UseGuards(WsAuthGuard)
   @UseFilters(ExecuteWsExceptionFilter)
   @SubscribeMessage('execute')
   async handleExecute(
