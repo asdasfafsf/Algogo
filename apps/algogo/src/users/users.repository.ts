@@ -84,4 +84,27 @@ export class UsersRepository {
       },
     });
   }
+
+  async insertLoginHistory({
+    userUuid,
+    type,
+    ip,
+    userAgent,
+  }: {
+    userUuid: string;
+    type: string;
+    ip: string;
+    userAgent: string;
+  }) {
+    await this.prismaService.userLoginHistory.create({
+      data: {
+        userUuid,
+        type,
+        ip,
+        userAgent,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    });
+  }
 }

@@ -83,4 +83,6 @@ export class UsersService {
       state: user.state as UserState,
     };
   }
+
+  async insertLoginHistory() {}
 }
