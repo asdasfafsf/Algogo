@@ -14,6 +14,9 @@ type OAuthConfig = {
   passReqToCallback?: boolean;
   state?: any;
   proxy?: boolean;
+  session?: boolean;
+  assignProperty?: string;
+  property?: string;
 };
 
 export function CustomOAuthStrategy(
@@ -24,13 +27,39 @@ export function CustomOAuthStrategy(
     readonly config: OAuthConfig;
 
     constructor(config: OAuthConfig) {
-      super({ ...config, callbackURL: '', passToReqCallback: true });
+      super({ 
+        ...config,
+        callbackURL: '',
+        session: false,
+        assignProperty: 'oauth',
+        property: 'oauth',
+        passReqToCallback: true,
+      });
+      this.config = {
+        ...config,
+        session: false,
+        assignProperty: 'oauth',
+        property: 'oauth',
+        passReqToCallback: true,
+      };
 
-      this.config = config;
+    }
+
+
+    // success(req: any, user: any, info: any) {
+    //   console.log('success', req, user, info);
+    //   req.oauth = user;
+    //   (this as any).success(user, info);
+    // }
+
+    async validate(req: any, accessToken: string, refreshToken: string, profile: any) {
+      req.oauth = profile;
+      console.log('req.oauth', req.oauth);
+      return req?.user ?? profile;
     }
 
     authenticate(req: Request, options: any) {
-      const newOptions = { ...options, ...this.config };
+      const newOptions = { ...options, ...this.config};
       const requestUrl = req.originalUrl;
       const { destination } = req.query;
       const callbackURL = this.getCallbackUrl(requestUrl);
@@ -42,8 +71,9 @@ export function CustomOAuthStrategy(
         });
       }
 
-      newOptions.callbackURL = callbackURL;
+      console.log('인증해')
 
+      newOptions.callbackURL = callbackURL;
       super.authenticate(req, newOptions);
     }
 
