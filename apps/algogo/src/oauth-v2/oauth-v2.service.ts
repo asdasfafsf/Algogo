@@ -14,6 +14,14 @@ export class OauthV2Service {
     private readonly authV2Service: AuthV2Service,
   ) {}
 
+
+
+ /**
+  * OAuth 상태 조회
+  * @param id 유저 아이디
+  * @param provider 프로바이더
+  * @returns OAuth 상태
+  */
   async getOAuthState({
     id,
     provider,
@@ -38,6 +46,15 @@ export class OauthV2Service {
     };
   }
 
+
+  /**
+   * 유저 등록 또는 로그인
+   * @param id 유저 아이디
+   * @param provider 프로바이더
+   * @param name 이름
+   * @param email 이메일
+   * @returns 액세스 토큰, 리프레시 토큰
+   */
   async registerOrLogin({
     id,
     provider,
@@ -52,7 +69,7 @@ export class OauthV2Service {
     const oauthState = await this.getOAuthState({ id, provider });
     let userUuid = '';
     if (oauthState.state === OAUTH_STATE.NEW) {
-      const user = await this.registerUser({ id, provider, name, email });
+      const user = await this.usersService.createUser({ id, provider, name, email });
       userUuid = user.uuid;
     } else if (oauthState.state === OAUTH_STATE.CONNECTED_AND_ACTIVE) {
       // 정상적으로 연동되었다면 로그인해야함.
@@ -69,9 +86,6 @@ export class OauthV2Service {
       throw new OAuthConflictException();
     }
 
-    console.log('userUuid', userUuid);
-    console.log('oauthState', oauthState);
-
     const { accessToken, refreshToken } = await this.authV2Service.login({
       userUuid: userUuid,
     });
@@ -82,24 +96,62 @@ export class OauthV2Service {
     };
   }
 
-  async registerUser({
+
+  /**
+   * OAuth 연동
+   * @param id 유저 아이디
+   * @param provider 프로바이더
+   * @param userUuid 유저 아이디
+   */
+  async connectOAuthProvider({
     id,
     provider,
-    name,
-    email,
+    userUuid,
   }: {
     id: string;
     provider: OAuthProvider;
-    name: string;
-    email: string;
+    userUuid: string;
   }) {
-    const user = await this.usersService.createUser({
-      provider,
-      id,
-      name,
-      email,
-    });
+    const oauthState = await this.getOAuthState({ id, provider });
+    if (oauthState.state === OAUTH_STATE.NEW) {
+      await this.oauthV2Repository.createUserOAuth({
+        id,
+        provider,
+        userUuid,
+      });
+    } else if (oauthState.state === OAUTH_STATE.CONNECTED_AND_ACTIVE) {
+      // 정상 아무것도 안함
+    } else if (oauthState.state === OAUTH_STATE.CONNECTED_AND_INACTIVE) {
+      await this.oauthV2Repository.updateUserOAuth({
+        id,
+        provider,
+        userUuid,
+        isActive: true,
+      });
+    } else if (oauthState.state === OAUTH_STATE.CONNECTED_TO_OTHER_ACCOUNT) {
+      throw new OAuthConflictException();
+    } else if (oauthState.state === OAUTH_STATE.DISCONNECTED_FROM_OTHER_ACCOUNT) {
+      throw new OAuthConflictException();
+    }
+  } 
 
-    return user;
+
+  async disconnectOAuthProvider({
+    id,
+    provider,
+    userUuid,
+  }: {
+    id: string;
+    provider: OAuthProvider;
+    userUuid: string;
+  }) {
+    const oauthState = await this.getOAuthState({ id, provider });
+    if (oauthState.state === OAUTH_STATE.NEW) {
+      throw new OAuthConflictException();
+    } else if (oauthState.state === OAUTH_STATE.CONNECTED_AND_ACTIVE) {
+      throw new OAuthConflictException();
+    } else if (oauthState.state === OAUTH_STATE.CONNECTED_AND_INACTIVE) {
+      throw new OAuthConflictException();
+    }
   }
 }
