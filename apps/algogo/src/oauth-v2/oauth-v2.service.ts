@@ -41,12 +41,12 @@ export class OauthV2Service {
 
     return {
       state: oauth.isActive
-        ? userUuid && oauth.userUuid !== userUuid
-          ? OAUTH_STATE.CONNECTED_TO_OTHER_ACCOUNT
-          : OAUTH_STATE.CONNECTED_AND_ACTIVE
-        : userUuid && oauth.userUuid !== userUuid
-          ? OAUTH_STATE.DISCONNECTED_FROM_OTHER_ACCOUNT
-          : OAUTH_STATE.CONNECTED_AND_INACTIVE,
+        ? userUuid && oauth.userUuid === userUuid
+          ? OAUTH_STATE.CONNECTED_AND_ACTIVE
+          : OAUTH_STATE.CONNECTED_TO_OTHER_ACCOUNT
+        : userUuid && oauth.userUuid === userUuid
+          ? OAUTH_STATE.CONNECTED_AND_INACTIVE
+          : OAUTH_STATE.DISCONNECTED_FROM_OTHER_ACCOUNT,
       user: oauth,
     };
   }
