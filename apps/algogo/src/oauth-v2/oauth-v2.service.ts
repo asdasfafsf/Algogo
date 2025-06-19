@@ -89,14 +89,19 @@ export class OauthV2Service {
       userUuid = oauthState.user.userUuid;
     } else if (oauthState.state === OAUTH_STATE.CONNECTED_AND_INACTIVE) {
       throw new OAuthConflictException();
-    } else if (oauthState.state === OAUTH_STATE.DISCONNECTED) {
-      throw new OAuthConflictException();
     } else if (oauthState.state === OAUTH_STATE.CONNECTED_TO_OTHER_ACCOUNT) {
       throw new OAuthConflictException();
     } else if (
       oauthState.state === OAUTH_STATE.DISCONNECTED_FROM_OTHER_ACCOUNT
     ) {
-      throw new OAuthConflictException();
+      // 로그인일때 우선 정지 안하고 그냥 로그인 시키자..
+      await this.oauthV2Repository.updateUserOAuth({
+        id,
+        provider,
+        userUuid: oauthState.user.userUuid,
+        isActive: true,
+      });
+      userUuid = oauthState.user.userUuid;
     }
 
     const { accessToken, refreshToken } = await this.authV2Service.login({
