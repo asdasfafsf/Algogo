@@ -18,14 +18,17 @@ export class OauthV2Service {
    * OAuth 상태 조회
    * @param id 유저 아이디
    * @param provider 프로바이더
+   * @param userUuid 유저 아이디
    * @returns OAuth 상태
    */
   async getOAuthState({
     id,
     provider,
+    userUuid,
   }: {
     id: string;
     provider: OAuthProvider;
+    userUuid?: string;
   }) {
     const oauth = await this.oauthV2Repository.findOne({ id, provider });
 
@@ -38,8 +41,12 @@ export class OauthV2Service {
 
     return {
       state: oauth.isActive
-        ? OAUTH_STATE.CONNECTED_AND_ACTIVE
-        : OAUTH_STATE.CONNECTED_AND_INACTIVE,
+        ? userUuid && oauth.userUuid !== userUuid
+          ? OAUTH_STATE.CONNECTED_TO_OTHER_ACCOUNT
+          : OAUTH_STATE.CONNECTED_AND_ACTIVE
+        : userUuid && oauth.userUuid !== userUuid
+          ? OAUTH_STATE.DISCONNECTED_FROM_OTHER_ACCOUNT
+          : OAUTH_STATE.CONNECTED_AND_INACTIVE,
       user: oauth,
     };
   }
