@@ -44,12 +44,6 @@ export function CustomOAuthStrategy(
       };
     }
 
-    // success(req: any, user: any, info: any) {
-    //   console.log('success', req, user, info);
-    //   req.oauth = user;
-    //   (this as any).success(user, info);
-    // }
-
     async validate(
       req: any,
       accessToken: string,
@@ -57,7 +51,6 @@ export function CustomOAuthStrategy(
       profile: any,
     ) {
       req.oauth = profile;
-      console.log('req.oauth', req.oauth);
       return req?.user ?? profile;
     }
 
@@ -79,10 +72,10 @@ export function CustomOAuthStrategy(
     }
 
     getCallbackUrl(requestUrl: string): string {
-      if (requestUrl.includes('connect')) {
-        return this.config.connectCallbackURL;
-      } else if (requestUrl.includes('disconnect')) {
+      if (requestUrl.includes('disconnect')) {
         return this.config.disconnectCallbackURL;
+      } else if (requestUrl.includes('connect')) {
+        return this.config.connectCallbackURL;
       }
       return this.config.callbackURL;
     }

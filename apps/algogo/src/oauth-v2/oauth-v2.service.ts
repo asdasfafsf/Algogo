@@ -103,6 +103,8 @@ export class OauthV2Service {
    * @param id 유저 아이디
    * @param provider 프로바이더
    * @param userUuid 유저 아이디
+   * @returns null;
+   * @throws OAuthConflictException;
    */
   async connectOAuthProvider({
     id,
@@ -138,6 +140,14 @@ export class OauthV2Service {
     }
   }
 
+  /**
+   * OAuth 연동 해제
+   * @param id 유저 아이디
+   * @param provider 프로바이더
+   * @param userUuid 유저 아이디
+   * @returns null;
+   * @throws OAuthConflictException;
+   */
   async disconnectOAuthProvider({
     id,
     provider,
@@ -147,13 +157,11 @@ export class OauthV2Service {
     provider: OAuthProvider;
     userUuid: string;
   }) {
-    const oauthState = await this.getOAuthState({ id, provider });
-    if (oauthState.state === OAUTH_STATE.NEW) {
-      throw new OAuthConflictException();
-    } else if (oauthState.state === OAUTH_STATE.CONNECTED_AND_ACTIVE) {
-      throw new OAuthConflictException();
-    } else if (oauthState.state === OAUTH_STATE.CONNECTED_AND_INACTIVE) {
-      throw new OAuthConflictException();
-    }
+    await this.oauthV2Repository.updateUserOAuth({
+      id,
+      provider,
+      userUuid,
+      isActive: false,
+    });
   }
 }
