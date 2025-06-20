@@ -1,79 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
-  "sourceRoot": "apps/algogo/src",
+  "sourceRoot": "src",
   "compilerOptions": {
-    "deleteOutDir": true,
-    "webpack": false,
-    "tsConfigPath": "apps/algogo/tsconfig.app.json",
-    "watchAssets": true,
-    "assets": [
-      {
-        "include": "../src/config/env/*.env",
-        "outDir": "./dist/apps/algogo/src"
-      }
-    ]
-  },
-  "monorepo": true,
-  "root": "apps/algogo",
-  "projects": {
-    "algogo": {
-      "type": "application",
-      "root": "apps/algogo",
-      "entryFile": "main",
-      "sourceRoot": "apps/algogo/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/algogo/tsconfig.app.json",
-        "assets": [
-          {
-            "include": "../src/config/env/*.env",
-            "outDir": "./dist/apps/algogo/src"
-          }
-        ],
-        "watchAssets": true
-      }
-    },
-    "crawler": {
-      "type": "application",
-      "root": "apps/crawler",
-      "entryFile": "main",
-      "sourceRoot": "apps/crawler/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/crawler/tsconfig.app.json",
-        "assets": [
-          {
-            "include": "../src/config/env/*.env",
-            "outDir": "./dist/apps/crawler"
-          }
-        ]
-      }
-    },
-    "compiler": {
-      "type": "application",
-      "root": "apps/compiler",
-      "entryFile": "main",
-      "sourceRoot": "apps/compiler/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/compiler/tsconfig.app.json"
-      }
-    },
-    "filter": {
-      "type": "library",
-      "root": "libs/filter",
-      "entryFile": "index",
-      "sourceRoot": "libs/filter/src",
-      "compilerOptions": {
-        "tsConfigPath": "libs/filter/tsconfig.lib.json"
-      }
-    },
-    "interceptor": {
-      "type": "library",
-      "root": "libs/interceptor",
-      "entryFile": "index",
-      "sourceRoot": "libs/interceptor/src",
-      "compilerOptions": {
-        "tsConfigPath": "libs/interceptor/tsconfig.lib.json"
-      }
-    }
+    "deleteOutDir": true
   }
 }
