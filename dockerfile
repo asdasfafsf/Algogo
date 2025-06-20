@@ -1,5 +1,5 @@
 # --- 1) build stage ---
-FROM node:22-slim AS builder
+FROM node:22 AS builder
 WORKDIR /usr/src/app
 
 RUN npm i -g pnpm
@@ -17,7 +17,7 @@ COPY . .
 RUN pnpm build                           # dist 생성
 
 # --- 2) runtime ---
-FROM node:22-slim AS runner
+FROM node:22 AS runner
 WORKDIR /usr/src/app
 RUN npm i -g pnpm
 
