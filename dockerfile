@@ -24,6 +24,7 @@ RUN npm i -g pnpm
 # 필요한 파일만 복사
 COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/package.json ./
+COPY --from=builder /usr/src/app/pnpm-lock.yaml ./
 COPY --from=builder /usr/src/app/prisma ./prisma
 
 # 프로덕션 의존성만 설치
