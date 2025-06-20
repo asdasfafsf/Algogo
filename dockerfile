@@ -1,30 +1,40 @@
-# Base image
-FROM node:22
+# --- Step 1: Build Stage ---
+FROM node:22-alpine AS builder
 
-# Install PM2 and pnpm globally
-RUN npm install -g pm2
+# Install pnpm globally
 RUN npm install -g pnpm
-RUN npm install -g @nestjs/cli
 
 # Create app directory
 WORKDIR /usr/src/app
 
-# Copy the app source code and the .env file
-COPY . .
-COPY apps/algogo/src/config/env/.production.env /usr/src/app/.env
-COPY libs/prisma/schema.prisma /usr/src/app/libs/prisma/schema.prisma
+# Copy package.json and lock file
+COPY package.json pnpm-lock.yaml prisma ./
 
-# Install dependencies using pnpm
+# Install all dependencies (including devDependencies)
 RUN pnpm install
+RUN npx prisma generate
 
-# Generate Prisma Client
-RUN npx prisma generate --schema=libs/prisma/schema.prisma
+# Copy the app source code
+COPY . .
 
-# Build the app (NestJS production build)
-RUN pnpm build algogo
+# Build the app
+RUN pnpm build
 
-# Expose the app port
-EXPOSE 3000
+# --- Step 2: Runtime Stage ---
+FROM node:22-alpine AS runner
 
-# Use PM2 to run the NestJS application via pnpm start
-CMD ["pnpm", "start", "algogo"]
+RUN npm install -g pnpm
+
+WORKDIR /usr/src/app
+
+COPY --from=builder /usr/src/app/dist ./dist
+COPY --from=builder /usr/src/app/package.json ./
+COPY --from=builder /usr/src/app/pnpm-lock.yaml ./
+COPY --from=builder /usr/src/app/prisma ./prisma
+
+RUN npx prisma generate
+RUN pnpm install --prod
+# RUN npx prisma generate
+
+
+CMD ["node", "dist/main.js"]

@@ -9,7 +9,7 @@ build/
 .git/
 
 # 환경 변수 파일 (필요한 경우 주석 처리)
-# .env
+.env
 
 # 로그 파일
 npm-debug.log
