@@ -2,12 +2,13 @@
 FROM node:22-alpine AS builder
 WORKDIR /usr/src/app
 
-RUN apk add --no-cache openssl          # prisma musl 엔진용(필요 없으면 삭제)
+RUN apk add --no-cache openssl vips-dev build-base python3 make g++  # sharp 의존성 추가
 RUN npm i -g pnpm
 
 # ① 의존성
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile       # devDeps 포함
+RUN pnpm rebuild sharp                    # sharp Alpine용 재빌드 추가
 
 # ② Prisma Client
 COPY prisma ./prisma
@@ -20,6 +21,7 @@ RUN pnpm build                           # dist 생성
 # --- 2) runtime ---
 FROM node:22-alpine AS runner
 WORKDIR /usr/src/app
+RUN apk add --no-cache vips              # vips 런타임 라이브러리 추가
 RUN npm i -g pnpm
 
 # 필요한 파일만 복사
