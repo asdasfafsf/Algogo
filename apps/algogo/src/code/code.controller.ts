@@ -10,7 +10,6 @@ import {
   Patch,
   Post,
   Put,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import { CodeService } from './code.service';
@@ -61,8 +60,8 @@ export class CodeController {
     description: '코드 설정을 찾을 수 없음',
   })
   @Get('/setting')
-  async getCodeSetting(@Req() req: AuthRequest) {
-    const codeSetting = await this.codeService.getCodeSetting(req.userUuid);
+  async getCodeSetting(@User() user: TokenUser) {
+    const codeSetting = await this.codeService.getCodeSetting(user.sub);
     return codeSetting;
   }
 
@@ -76,11 +75,11 @@ export class CodeController {
   })
   @Put('/setting')
   async updateCodeSetting(
-    @Req() req: AuthRequest,
     @Body() requestUpsertCodeSettingDto: RequestUpsertCodeSettingDto,
+    @User() user: TokenUser,
   ) {
-    const { userUuid } = req;
-    const dto = { userUuid, ...requestUpsertCodeSettingDto };
+    const { sub } = user;
+    const dto = { userUuid: sub, ...requestUpsertCodeSettingDto };
     await this.codeService.upsertCodeSetting(dto);
     return null;
   }
