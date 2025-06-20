@@ -1,40 +1,35 @@
-# --- Step 1: Build Stage ---
+# --- 1) build stage ---
 FROM node:22-alpine AS builder
-
-# Install pnpm globally
-RUN npm install -g pnpm
-
-# Create app directory
 WORKDIR /usr/src/app
 
-# Copy package.json and lock file
-COPY package.json pnpm-lock.yaml prisma ./
+RUN apk add --no-cache openssl          # prisma musl 엔진용(필요 없으면 삭제)
+RUN npm i -g pnpm
 
-# Install all dependencies (including devDependencies)
-RUN pnpm install
-RUN npx prisma generate
+# ① 의존성
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile       # devDeps 포함
 
-# Copy the app source code
+# ② Prisma Client
+COPY prisma ./prisma
+RUN pnpx prisma generate                 # @prisma/client + .prisma 생성
+
+# ③ 애플리케이션 소스
 COPY . .
+RUN pnpm build                           # dist 생성
 
-# Build the app
-RUN pnpm build
-
-# --- Step 2: Runtime Stage ---
+# --- 2) runtime ---
 FROM node:22-alpine AS runner
-
-RUN npm install -g pnpm
-
 WORKDIR /usr/src/app
+RUN npm i -g pnpm
 
+# 필요한 파일만 복사
 COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/package.json ./
 COPY --from=builder /usr/src/app/pnpm-lock.yaml ./
 COPY --from=builder /usr/src/app/prisma ./prisma
 
-RUN npx prisma generate
-RUN pnpm install --prod
-# RUN npx prisma generate
+# 프로덕션 의존성만 설치
+RUN pnpm install --prod --frozen-lockfile --no-optional
+RUN pnpx prisma generate
 
-
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/main.js"] 
