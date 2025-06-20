@@ -64,9 +64,7 @@ import { AuthGuardModule } from './auth-guard/auth-guard.module';
       ],
     }),
     ConfigModule.forRoot({
-      envFilePath: [
-        `${__dirname}/config/env/.${process.env.NODE_ENV ?? 'production'}.env`,
-      ],
+      envFilePath: [`.${process.env.NODE_ENV ?? 'production'}.env`],
       load: [
         crawlerConfig,
         s3Config,
