@@ -10,7 +10,7 @@ import {
 import { HttpAdapterHost } from '@nestjs/core';
 import { CustomHttpException } from 'apps/algogo/src/common/errors/CustomHttpException';
 import { Logger } from 'winston';
-import { CustomError } from '../../../apps/algogo/src/common/types/error.type';
+import { CustomError } from '../common/types/error.type';
 
 @Injectable()
 @Catch()

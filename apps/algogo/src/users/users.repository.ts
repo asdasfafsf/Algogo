@@ -104,7 +104,7 @@ export class UsersRepository {
         userUuid,
         type,
         ip,
-        userAgent
+        userAgent,
       },
     });
   }

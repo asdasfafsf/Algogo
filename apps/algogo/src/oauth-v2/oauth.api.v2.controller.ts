@@ -15,7 +15,10 @@ export class OauthApiV2Controller {
 
   @Post('/:provider')
   @UseGuards(DynamicOAuthGuard)
-  async oauth(@OAuth() oauth: OAuthRequestUser, @RequestMetadata() metadata: Metadata) {
+  async oauth(
+    @OAuth() oauth: OAuthRequestUser,
+    @RequestMetadata() metadata: Metadata,
+  ) {
     const { accessToken, refreshToken } =
       await this.oauthV2Service.registerOrLogin({
         ...oauth,

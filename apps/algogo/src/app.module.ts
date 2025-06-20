@@ -18,8 +18,8 @@ import s3Config from './config/s3Config';
 import { PrismaModule } from './prisma/prisma.module';
 import * as winston from 'winston';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
-import { AllExceptionsFilter } from '@libs/filter/src';
-import { ResponseInterceptor } from '@libs/interceptor/src';
+import { AllExceptionsFilter } from './filters/all-exceptions.filter';
+import { ResponseInterceptor } from './interceptors/response-interceptor';
 import { UsersModule } from './users/users.module';
 import { RedisModule } from './redis/redis.module';
 import { JwtModule } from './jwt/jwt.module';
@@ -98,7 +98,7 @@ import { AuthGuardModule } from './auth-guard/auth-guard.module';
     CrawlerModule,
     ProblemsModule,
     S3Module,
-    ImageModule,  
+    ImageModule,
     PrismaModule,
     UsersModule,
     RedisModule.forRootAsync({

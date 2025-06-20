@@ -14,6 +14,12 @@ export interface Response<T> {
   data: T;
 }
 
+/**
+ * 응답 인터셉터
+ * 응답 데이터를 처리하고 응답 형식을 정의합니다.
+ * @param T 응답 데이터 타입
+ * @returns 응답 데이터
+ */
 @Injectable()
 export class ResponseInterceptor<T> implements NestInterceptor<T, Response<T>> {
   intercept(

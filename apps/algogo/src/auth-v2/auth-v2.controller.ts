@@ -42,7 +42,10 @@ export class AuthV2Controller {
   @HttpCode(200)
   @UseGuards(AuthRefreshGuard)
   @Post('/refresh')
-  async refresh(@Req() req: RefreshTokenRequest, @RequestMetadata() metadata: Metadata) {
+  async refresh(
+    @Req() req: RefreshTokenRequest,
+    @RequestMetadata() metadata: Metadata,
+  ) {
     const { user } = req;
     const { accessToken, refreshToken } = await this.authV2Service.refresh({
       userUuid: user.sub,
