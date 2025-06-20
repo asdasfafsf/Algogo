@@ -2,12 +2,10 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { ProblemSiteNotFoundException } from './errors/ProblemSiteNotFoundException';
 import { ProblemsCollectRepository } from './problems-collect.repository';
 import { RedisService } from '../redis/redis.service';
-import { ProblemUpdateLimitException } from './errors/ProblemUpdateLimitException';
 import { CrawlerService } from '../crawler/crawler.service';
 import { ResponseProblemContent } from './dto/ResponseProblemContent';
 import { ImageService } from '../image/image.service';
 import { S3Service } from '../s3/s3.service';
-import { TooManyProblemsCollectException } from './errors/ToManyProblemsCollectException';
 import { CustomLogger } from '../logger/custom-logger';
 @Injectable()
 export class ProblemsCollectService {
@@ -21,54 +19,8 @@ export class ProblemsCollectService {
   ) {}
 
   async collect({ url, userNo }: { url: string; userNo: number }) {
-    const requestCount = await this.redisService.get(
-      `problemCollectCount_${userNo}`,
-    );
-    if (requestCount && Number(requestCount) >= 10) {
-      throw new TooManyProblemsCollectException();
-    }
-
-    await this.redisService.set(
-      `problemCollectCount_${userNo}`,
-      (Number(requestCount || 0) + 1).toString(),
-      this.getSecondsUntilMidnight(),
-    );
-
-    const { source, sourceId } = this.parse(url);
-
-    const oldProblem = await this.problemsCollectRepository.getProblem({
-      source,
-      sourceId,
-    });
-
-    if (oldProblem) {
-      const now = new Date();
-      const updatedAt = oldProblem.updatedAt;
-
-      if (now.getDate() === updatedAt.getDate()) {
-        throw new ProblemUpdateLimitException();
-      }
-    }
-
-    const result = await this.crawlerService.getProblem(source, sourceId);
-    const contentList = await this.postProcess(
-      result.data.contentList,
-      source,
-      sourceId,
-    );
-
-    const problem = await this.problemsCollectRepository.upsertProblem({
-      ...result.data,
-      contentList,
-    });
-    await this.problemsCollectRepository.insertCollectionLog({
-      userNo,
-      url,
-      state: '0',
-      cause: '',
-    });
-
-    return problem.uuid;
+    console.log(url, userNo);
+    throw new Error('Not implemented');
   }
 
   private getSecondsUntilMidnight() {

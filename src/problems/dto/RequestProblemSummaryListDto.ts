@@ -1,7 +1,7 @@
 import { IsNumber, IsIn, Min, IsOptional, IsEnum } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { ProblemType } from 'apps/algogo/src/common/enums/ProblemTypeEnum';
+import { ProblemType } from '../../common/enums/ProblemTypeEnum';
 import { ProblemSort } from '../enum/ProblemSortEnum';
 
 export class RequestProblemSummaryListDto {

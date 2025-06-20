@@ -3,8 +3,8 @@ import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import crawlerConfig from '../config/crawlerConfig';
 import { ConfigType } from '@nestjs/config';
 import { catchError, firstValueFrom, of } from 'rxjs';
-import { ResponseDto } from '@libs/core/dto/ResponseDto';
-import { ResponseProblemDto } from '@libs/core/dto/ResponseProblemDto';
+import { ResponseDto } from '../common/dto/ResponseDto';
+import { ResponseProblemDto } from '../problems/dto/ResponseProblemDto';
 import { Logger } from 'winston';
 
 @Injectable()

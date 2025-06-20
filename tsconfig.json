@@ -16,43 +16,6 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false,
-    "paths": {
-      "@libs/*": [
-        "libs/*"
-      ],
-      "@app/exception-filter": [
-        "libs/exception-filter/src"
-      ],
-      "@app/exception-filter/*": [
-        "libs/exception-filter/src/*"
-      ],
-      "@apps/lib/mobules/exception-filter": [
-        "libs/exception-filter/src"
-      ],
-      "@apps/lib/mobules/exception-filter/*": [
-        "libs/exception-filter/src/*"
-      ],
-      "@app/module": [
-        "libs/module/src"
-      ],
-      "@app/module/*": [
-        "libs/module/src/*"
-      ],
-      "@app/interceptor": [
-        "libs/interceptor/src"
-      ],
-      "@app/interceptor/*": [
-        "libs/interceptor/src/*"
-      ]
-    }
-  },
-  "include": [
-    "apps/**/*",
-    "libs/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+    "noFallthroughCasesInSwitch": false
+  }
 }

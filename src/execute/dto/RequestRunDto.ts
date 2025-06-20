@@ -1,4 +1,4 @@
-import { RequestExecuteInputDto } from '@libs/core/dto/RequestExecuteInputDto';
+import { RequestExecuteInputDto } from './RequestExecuteInputDto';
 import { LanguageProvider } from '../../common/enums/LanguageProviderEnum';
 
 export class RequestRunDto {
