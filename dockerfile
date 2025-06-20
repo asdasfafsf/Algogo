@@ -6,7 +6,7 @@ RUN npm i -g pnpm
 
 # ① 의존성
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile       # devDeps 포함
+RUN pnpm install
 
 # ② Prisma Client
 COPY prisma ./prisma
@@ -28,7 +28,7 @@ COPY --from=builder /usr/src/app/pnpm-lock.yaml ./
 COPY --from=builder /usr/src/app/prisma ./prisma
 
 # 프로덕션 의존성만 설치
-RUN pnpm install --prod --frozen-lockfile
+RUN pnpm install --prod
 RUN pnpx prisma generate
 
 CMD ["node", "dist/main.js"] 
