@@ -4,7 +4,7 @@ import { ProblemsCollectRepository } from './problems-collect.repository';
 import { RedisService } from '../redis/redis.service';
 import { ProblemUpdateLimitException } from './errors/ProblemUpdateLimitException';
 import { CrawlerService } from '../crawler/crawler.service';
-import { ResponseProblemContent } from '@libs/core/dto/ResponseProblemContent';
+import { ResponseProblemContent } from './dto/ResponseProblemContent';
 import { ImageService } from '../image/image.service';
 import { S3Service } from '../s3/s3.service';
 import { TooManyProblemsCollectException } from './errors/ToManyProblemsCollectException';

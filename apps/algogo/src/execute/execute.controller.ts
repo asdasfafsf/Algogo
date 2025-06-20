@@ -7,7 +7,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ExecuteService } from './execute.service';
-import { RequestExecuteDto } from '@libs/core/dto/RequestExecuteDto';
+import { RequestExecuteDto } from './dto/RequestExecuteDto';
 import { ApiExcludeEndpoint } from '@nestjs/swagger';
 import { CustomLogger } from '../logger/custom-logger';
 import { AuthGuard } from '../auth-guard/auth.guard';
