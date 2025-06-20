@@ -33,7 +33,7 @@ export class ProblemsReportController {
   })
   @Post('/')
   async report(
-    @Req() req: AuthRequest,
+    @Req() req: any,
     @Body() requestProblemReportDto: RequestProblemReportDto,
   ) {
     const { userNo } = req;

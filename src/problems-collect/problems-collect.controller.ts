@@ -85,7 +85,7 @@ export class ProblemsCollectController {
   @Post('/')
   async collectProblem(
     @Body() requestProblemCollectDto: RequestProblemCollectDto,
-    @Req() req: AuthRequest,
+    @Req() req: any,
   ) {
     const { url } = requestProblemCollectDto;
     const { userNo } = req;
