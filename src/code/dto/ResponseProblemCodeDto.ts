@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { LanguageProvider } from '../../common/enums/LanguageProviderEnum';
+import { LanguageProvider } from '../../common/types/language.type';
+import { LANGUAGE_PROVIDER } from 'src/common/constants/language.constant';
 
 export class ResponseProblemCodeDto {
   @ApiProperty({
@@ -10,7 +11,7 @@ export class ResponseProblemCodeDto {
 
   @ApiProperty({
     description: '사용 언어를 나타냅니다.',
-    example: LanguageProvider.NODEJS, // 실제 enum의 값으로 수정하세요.
+    example: LANGUAGE_PROVIDER.NODEJS, // 실제 enum의 값으로 수정하세요.
   })
   language: LanguageProvider;
 

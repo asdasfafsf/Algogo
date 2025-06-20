@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { LanguageProvider } from '../../common/enums/LanguageProviderEnum';
+import { LanguageProvider } from '../../common/types/language.type';
 import { IsString, IsUUID, IsEnum, IsNotEmpty } from 'class-validator';
 import { MaxBytes } from '../../common/decorators/MaxBytes';
+import { LANGUAGE_PROVIDER } from 'src/common/constants/language.constant';
 
 export default class RequestUpsertProblemCodeDto {
   @ApiProperty({
@@ -27,7 +28,9 @@ export default class RequestUpsertProblemCodeDto {
     description: '프로그래밍 언어',
     example: 'javascript',
   })
-  @IsEnum(LanguageProvider, { message: '지원하지 않는 프로그래밍 언어입니다.' })
+  @IsEnum(LANGUAGE_PROVIDER, {
+    message: '지원하지 않는 프로그래밍 언어입니다.',
+  })
   @IsNotEmpty({ message: '프로그래밍 언어는 필수 입력값입니다.' })
   language: LanguageProvider;
 }

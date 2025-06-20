@@ -4,7 +4,7 @@ import RequestUpsertCodeSettingDto from './dto/RequestUpsertCodeSettingDto';
 import { NotFoundCodeSettingException } from './errors/NotFoundCodeSettingException';
 import { NotFoundCodeTemplateException } from './errors/NotFoundCodeTemplateException';
 import { ResponseCodeTemplateResult } from './dto/ResponseCodeTemplateResult';
-import { LanguageProvider } from '../common/enums/LanguageProviderEnum';
+import { LanguageProvider } from '../common/types/language.type';
 import RequestUpsertDefaultCodeTemplateDto from './dto/RequestUpsertDefaultCodeTemplateDto';
 import { CodeTemplateLimitExceededException } from './errors/CodeTemplateLimitExceededException';
 import RequestUpsertCodeTemplateDto from './dto/RequestUpdateCodeTemplateDto';

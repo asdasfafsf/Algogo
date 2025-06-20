@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsUUID, ValidateIf } from 'class-validator';
-import { LanguageProvider } from '../../common/enums/LanguageProviderEnum';
+import { LanguageProvider } from '../../common/types/language.type';
+import { LANGUAGE_PROVIDER } from '../../common/constants/language.constant';
 
 export default class RequestUpsertDefaultCodeTemplateDto {
   @ApiProperty({
@@ -21,11 +22,11 @@ export default class RequestUpsertDefaultCodeTemplateDto {
   @ApiProperty({
     description: '프로그래밍 언어',
     required: true,
-    example: LanguageProvider.PYTHON,
-    enum: LanguageProvider,
+    example: LANGUAGE_PROVIDER.PYTHON,
+    enum: LANGUAGE_PROVIDER,
     nullable: false,
   })
-  @IsEnum(LanguageProvider, {
+  @IsEnum(LANGUAGE_PROVIDER, {
     message: '지원하지 않는 프로그래밍 언어입니다.',
   })
   language: LanguageProvider;

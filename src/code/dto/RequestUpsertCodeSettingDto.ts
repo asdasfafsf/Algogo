@@ -1,7 +1,8 @@
 import { IsNumber, IsOptional, Min, Max, IsIn, IsEnum } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { LanguageProvider } from '../../common/enums/LanguageProviderEnum';
+import { LanguageProvider } from '../../common/types/language.type';
 import { ApiProperty } from '@nestjs/swagger';
+import { LANGUAGE_PROVIDER } from '../../common/constants/language.constant';
 
 export default class RequestUpsertCodeSettingDto {
   @ApiProperty({
@@ -57,11 +58,11 @@ export default class RequestUpsertCodeSettingDto {
 
   @ApiProperty({
     description: '기본 프로그래밍 언어',
-    enum: LanguageProvider,
+    enum: LANGUAGE_PROVIDER,
     required: false,
   })
   @IsOptional()
-  @IsEnum(LanguageProvider, { message: '유효한 언어가 아닙니다' })
+  @IsEnum(LANGUAGE_PROVIDER, { message: '유효한 언어가 아닙니다' })
   defaultLanguage?: LanguageProvider;
 
   @ApiProperty({

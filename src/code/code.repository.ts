@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { LanguageProvider } from '../common/enums/LanguageProviderEnum';
+import { LanguageProvider } from '../common/types/language.type';
 
 @Injectable()
 export class CodeRepository {

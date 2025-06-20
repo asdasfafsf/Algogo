@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { LanguageProvider } from '../../common/enums/LanguageProviderEnum';
+import { LanguageProvider } from '../../common/types/language.type';
 
 export class ResponseCodeSettingDto {
   @ApiProperty({

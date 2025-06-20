@@ -1,5 +1,6 @@
-import { LanguageProvider } from '../../common/enums/LanguageProviderEnum';
+import { LanguageProvider } from '../../common/types/language.type';
 import { ApiProperty } from '@nestjs/swagger';
+import { LANGUAGE_PROVIDER } from 'src/common/constants/language.constant';
 
 export default class ResponseCodeTemplateSummary {
   @ApiProperty({
@@ -16,8 +17,8 @@ export default class ResponseCodeTemplateSummary {
 
   @ApiProperty({
     description: '프로그래밍 언어 제공자',
-    enum: LanguageProvider,
-    example: LanguageProvider.CPP,
+    enum: LANGUAGE_PROVIDER,
+    example: LANGUAGE_PROVIDER.CPP,
   })
   language: LanguageProvider;
 
