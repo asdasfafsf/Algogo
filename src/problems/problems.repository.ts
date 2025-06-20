@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { ProblemType } from '../common/enums/ProblemTypeEnum';
+import { ProblemType } from '../common/types/problem.type';
 import { ProblemSort } from './enum/ProblemSortEnum';
 import { Prisma } from '@prisma/client';
 

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ProblemType } from '../../common/enums/ProblemTypeEnum';
+import { ProblemType } from '../../common/types/problem.type';
 
 export class ResponseProblemSummaryDto {
   @ApiProperty({

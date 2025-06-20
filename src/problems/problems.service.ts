@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ProblemsRepository } from './problems.repository';
-import { ProblemType } from '../common/enums/ProblemTypeEnum';
+import { ProblemType } from '../common/types/problem.type';
 import { ResponseProblemDto } from './dto/ResponseProblemDto';
 import { ResponseProblemContentDto } from './dto/ResponseProblemContentDto';
 import { CustomLogger } from '../logger/custom-logger';
