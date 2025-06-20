@@ -28,7 +28,7 @@ COPY --from=builder /usr/src/app/pnpm-lock.yaml ./
 COPY --from=builder /usr/src/app/prisma ./prisma
 
 # 프로덕션 의존성만 설치
-RUN pnpm install --prod --frozen-lockfile --no-optional
+RUN pnpm install --prod --frozen-lockfile
 RUN pnpx prisma generate
 
 CMD ["node", "dist/main.js"] 
