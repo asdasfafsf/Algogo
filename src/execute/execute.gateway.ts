@@ -61,6 +61,12 @@ export class ExecuteGateway {
     clearTimeout(timeout);
 
     const { user, id } = socket;
+
+    if (!user) {
+      socket.disconnect();
+      return;
+    }
+
     const preSocketId = await this.redisService.get(
       `${this.wsConfig.wsTag}_${user.sub}`,
     );
