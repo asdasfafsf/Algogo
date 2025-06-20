@@ -88,11 +88,11 @@ export class ExecuteGateway {
     const { user } = socket;
 
     const savedSocketId = await this.redisService.get(
-      `${this.wsConfig.wsTag}_${user.sub}`,
+      `${this.wsConfig.wsTag}_${user?.sub}`,
     );
 
     if (!savedSocketId || savedSocketId === socket.id) {
-      await this.redisService.del(`${this.wsConfig.wsTag}_${user.sub}`);
+      await this.redisService.del(`${this.wsConfig.wsTag}_${user?.sub}`);
     }
   }
 
