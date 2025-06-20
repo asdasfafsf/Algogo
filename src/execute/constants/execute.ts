@@ -1,6 +1,0 @@
-export const EXECUTE_CODE = {
-  SUCCESS: '0000',
-  TIMEOUT: '9000',
-  RUMTIME_ERROR: '9001',
-  ERROR: '9999',
-};
