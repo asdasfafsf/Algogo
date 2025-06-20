@@ -6,8 +6,8 @@ import {
 } from '@nestjs/jwt';
 import jwtConfig from '../config/jwtConfig';
 import { ConfigType } from '@nestjs/config';
-import { JwtTokenExpiredException } from './errors/JwtTokenExpiredException';
-import { JwtInvalidTokenException } from './errors/JwtInvalidTokenException';
+import { JwtTokenExpiredException } from '../common/errors/token/JwtTokenExpiredException';
+import { JwtInvalidTokenException } from '../common/errors/token/JwtInvalidTokenException';
 
 @Injectable()
 export class JwtService {
@@ -75,7 +75,7 @@ export class JwtService {
    * @returns 디코딩된 토큰
    * @throws JwtInvalidTokenException - 토큰이 유효하지 않은 경우
    */
-  async decode(token: string): Promise<JwtToken> {
+  async decode(token: string) {
     try {
       return this.nestJwtService.decode(token);
     } catch (e) {
