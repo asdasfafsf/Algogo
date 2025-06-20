@@ -97,7 +97,8 @@ export class OauthV2Service {
       });
       userUuid = oauthState.user.userUuid;
     } else if (oauthState.state === OAUTH_STATE.CONNECTED_TO_OTHER_ACCOUNT) {
-      throw new OAuthConflictException();
+      // 정상적으로 연동되었다면 로그인해야함.
+      userUuid = oauthState.user.userUuid;
     } else if (
       oauthState.state === OAUTH_STATE.DISCONNECTED_FROM_OTHER_ACCOUNT
     ) {
