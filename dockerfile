@@ -9,8 +9,8 @@ COPY package.json ./
 RUN pnpm install
 
 # ② Prisma Client
-COPY prisma ./prisma
-RUN pnpx prisma generate
+COPY prisma/schema.prisma /usr/src/app/prisma/schema.prisma
+RUN npx prisma generate --schema=prisma/schema.prisma
 
 # ③ 애플리케이션 소스
 COPY . .
@@ -26,6 +26,6 @@ COPY --from=builder /usr/src/app/package.json ./
 COPY --from=builder /usr/src/app/prisma ./prisma
 
 RUN pnpm install --prod
-RUN pnpx prisma generate
+RUN npx prisma generate --schema=prisma/schema.prisma
 
 CMD ["node", "dist/main.js"] 
