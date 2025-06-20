@@ -21,6 +21,7 @@ describe('AuthV2Service 단위 테스트', () => {
 
   const mockUsersService: Partial<UsersService> = {
     validateUser: jest.fn(),
+    insertLoginHistory: jest.fn(),
   };
 
   const mockCache: Partial<Cache> = {

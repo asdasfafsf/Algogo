@@ -8,7 +8,6 @@ import { JwtMissingTokenException } from '../common/errors/token/JwtMissingToken
 
 describe('AuthGuard 단위 테스트', () => {
   let guard: AuthGuard;
-  let jwtService: JwtService;
 
   const mockJwtService = {
     verify: jest.fn(),
@@ -16,27 +15,26 @@ describe('AuthGuard 단위 테스트', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        AuthGuard,
-        { provide: JwtService, useValue: mockJwtService },
-      ],
+      providers: [AuthGuard, { provide: JwtService, useValue: mockJwtService }],
     }).compile();
 
     guard = module.get<AuthGuard>(AuthGuard);
-    jwtService = module.get<JwtService>(JwtService);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  const createMockContext = (headers: any = {}, cookies: any = {}): ExecutionContext => {
+  const createMockContext = (
+    headers: any = {},
+    cookies: any = {},
+  ): ExecutionContext => {
     const mockRequest = {
       headers,
       cookies,
       user: undefined,
     };
-    
+
     return {
       switchToHttp: () => ({
         getRequest: () => mockRequest,
@@ -51,7 +49,7 @@ describe('AuthGuard 단위 테스트', () => {
       const mockContext = createMockContext({
         authorization: 'Bearer valid-token',
       });
-      
+
       mockJwtService.verify.mockResolvedValue(mockPayload);
 
       // Act
@@ -72,7 +70,7 @@ describe('AuthGuard 단위 테스트', () => {
       await expect(guard.canActivate(mockContext)).rejects.toThrow(
         JwtMissingTokenException,
       );
-      
+
       expect(mockJwtService.verify).not.toHaveBeenCalled();
     });
 
@@ -86,7 +84,7 @@ describe('AuthGuard 단위 테스트', () => {
       await expect(guard.canActivate(mockContext)).rejects.toThrow(
         JwtMissingTokenException,
       );
-      
+
       expect(mockJwtService.verify).not.toHaveBeenCalled();
     });
 
@@ -100,7 +98,7 @@ describe('AuthGuard 단위 테스트', () => {
       await expect(guard.canActivate(mockContext)).rejects.toThrow(
         JwtMissingTokenException,
       );
-      
+
       expect(mockJwtService.verify).not.toHaveBeenCalled();
     });
 
@@ -114,7 +112,7 @@ describe('AuthGuard 단위 테스트', () => {
       await expect(guard.canActivate(mockContext)).rejects.toThrow(
         JwtMissingTokenException,
       );
-      
+
       expect(mockJwtService.verify).not.toHaveBeenCalled();
     });
 
@@ -123,14 +121,14 @@ describe('AuthGuard 단위 테스트', () => {
       const mockContext = createMockContext({
         authorization: 'Bearer invalid-token',
       });
-      
+
       mockJwtService.verify.mockRejectedValue(new JwtInvalidTokenException());
 
       // Act & Assert
       await expect(guard.canActivate(mockContext)).rejects.toThrow(
         JwtInvalidTokenException,
       );
-      
+
       expect(mockJwtService.verify).toHaveBeenCalledWith('invalid-token');
     });
 
@@ -139,14 +137,14 @@ describe('AuthGuard 단위 테스트', () => {
       const mockContext = createMockContext({
         authorization: 'Bearer expired-token',
       });
-      
+
       mockJwtService.verify.mockRejectedValue(new JwtTokenExpiredException());
 
       // Act & Assert
       await expect(guard.canActivate(mockContext)).rejects.toThrow(
         JwtTokenExpiredException,
       );
-      
+
       expect(mockJwtService.verify).toHaveBeenCalledWith('expired-token');
     });
 
@@ -155,9 +153,9 @@ describe('AuthGuard 단위 테스트', () => {
       const mockPayload = { sub: 'user-uuid', iat: 1234567890 };
       const mockContext = createMockContext(
         {}, // headers
-        { authorization: 'Bearer cookie-token' } // cookies
+        { authorization: 'Bearer cookie-token' }, // cookies
       );
-      
+
       mockJwtService.verify.mockResolvedValue(mockPayload);
 
       // Act
@@ -175,9 +173,9 @@ describe('AuthGuard 단위 테스트', () => {
       const mockPayload = { sub: 'user-uuid', iat: 1234567890 };
       const mockContext = createMockContext(
         { authorization: 'Bearer header-token' }, // headers
-        { authorization: 'Bearer cookie-token' } // cookies
+        { authorization: 'Bearer cookie-token' }, // cookies
       );
-      
+
       mockJwtService.verify.mockResolvedValue(mockPayload);
 
       // Act
@@ -201,10 +199,11 @@ describe('AuthGuard 단위 테스트', () => {
           authorization: testCases[i],
         });
 
-        if (i === 2) { // 마지막만 성공
+        if (i === 2) {
+          // 마지막만 성공
           const mockPayload = { sub: 'user-uuid', iat: 1234567890 };
           mockJwtService.verify.mockResolvedValue(mockPayload);
-          
+
           const result = await guard.canActivate(mockContext);
           expect(result).toBe(true);
           expect(mockJwtService.verify).toHaveBeenCalledWith('token');
@@ -213,7 +212,7 @@ describe('AuthGuard 단위 테스트', () => {
             JwtMissingTokenException,
           );
         }
-        
+
         jest.clearAllMocks();
       }
     });
@@ -221,7 +220,7 @@ describe('AuthGuard 단위 테스트', () => {
 
   describe('extractTokenFromHeader', () => {
     it('private 메서드이므로 직접 테스트하지 않고 canActivate를 통해 간접 테스트', () => {
-      // extractTokenFromHeader는 private 메서드이므로 
+      // extractTokenFromHeader는 private 메서드이므로
       // canActivate 테스트를 통해 충분히 검증됩니다.
       expect(true).toBe(true);
     });
