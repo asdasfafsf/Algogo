@@ -78,6 +78,11 @@ export class UsersRepository {
         email: false,
         createdAt: false,
         updatedAt: false,
+        userRoleList: {
+          select: {
+            role: true,
+          },
+        },
       },
       where: {
         uuid,

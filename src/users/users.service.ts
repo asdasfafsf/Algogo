@@ -7,6 +7,7 @@ import { UserInactiveException } from '../common/errors/user/UserInactiveExcepti
 import { UserNotFoundException } from '../common/errors/user/UserNotFoundException';
 import { UserState, UserSummary } from '../common/types/user.type';
 import { USER_STATE } from '../common/constants/user.constant';
+import { Role } from '../common/types/roles.type';
 
 @Injectable()
 export class UsersService {
@@ -81,6 +82,7 @@ export class UsersService {
     return {
       ...user,
       state: user.state as UserState,
+      roles: user.userRoleList.map((role) => role.role as Role),
     };
   }
 

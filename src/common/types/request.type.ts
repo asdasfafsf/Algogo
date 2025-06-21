@@ -1,7 +1,9 @@
 import { Request } from 'express';
+import { Role } from './roles.type';
 
 export type TokenUser = {
   sub: string;
+  roles: Role[];
 };
 
 export type AuthRequest = Request & {

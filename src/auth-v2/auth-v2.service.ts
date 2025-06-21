@@ -1,13 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '../jwt/jwt.service';
 import { UsersService } from '../users/users.service';
-import { TokenGeneratePayload, TokenPayload } from '../common/types/auth.type';
+import { TokenPayload } from '../common/types/auth.type';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { JwtInvalidTokenException } from '../common/errors/token/JwtInvalidTokenException';
 import JwtConfig from '../config/jwtConfig';
 import { ConfigType } from '@nestjs/config';
 import { CustomLogger } from '../logger/custom-logger';
+import { TokenUser } from 'src/common/types/request.type';
 @Injectable()
 export class AuthV2Service {
   constructor(
@@ -37,6 +38,7 @@ export class AuthV2Service {
 
     const { accessToken, refreshToken } = await this.generateToken({
       sub: user.uuid,
+      roles: user.roles,
     });
 
     await this.saveRefreshToken(user.uuid, refreshToken);
@@ -76,6 +78,7 @@ export class AuthV2Service {
     const { accessToken, refreshToken: newRefreshToken } =
       await this.generateToken({
         sub: user.uuid,
+        roles: user.roles,
       });
 
     await this.saveRefreshToken(user.uuid, newRefreshToken);
@@ -130,13 +133,18 @@ export class AuthV2Service {
    * @param payload - 토큰 생성 페이로드
    * @returns 생성된 토큰
    */
-  async generateToken(payload: TokenGeneratePayload) {
+  async generateToken(payload: TokenUser) {
     const accessToken = await this.jwtService.sign(
-      payload,
+      {
+        sub: payload.sub,
+        roles: payload.roles,
+      },
       this.jwtConfig.jwtAccessTokenExpiresIn,
     );
     const refreshToken = await this.jwtService.sign(
-      payload,
+      {
+        sub: payload.sub,
+      },
       this.jwtConfig.jwtRefreshTokenExpiresIn,
     );
 
