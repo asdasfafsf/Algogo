@@ -8,6 +8,7 @@ import { UsersService } from '../users/users.service';
 import JwtConfig from '../config/jwtConfig';
 import { JwtInvalidTokenException } from '../common/errors/token/JwtInvalidTokenException';
 import { CustomLogger } from '../logger/custom-logger';
+import { Role } from '../common/types/roles.type';
 
 describe('AuthV2Service 단위 테스트', () => {
   let authService: AuthV2Service;
@@ -201,7 +202,7 @@ describe('AuthV2Service 단위 테스트', () => {
   ──────────────────────── */
   it('generateToken() : 액세스 토큰과 리프레시 토큰을 생성한다', async () => {
     // Arrange
-    const payload = { sub: 'uuid-123' };
+    const payload = { sub: 'uuid-123', roles: ['VIP'] as Role[] };
     const accessToken = 'access';
     const refreshToken = 'refresh';
 
@@ -215,14 +216,23 @@ describe('AuthV2Service 단위 테스트', () => {
     // Assert
     expect(result).toEqual({ accessToken, refreshToken });
     expect(mockJwtService.sign).toHaveBeenCalledTimes(2);
+
+    // 액세스 토큰: roles 포함
     expect(mockJwtService.sign).toHaveBeenNthCalledWith(
       1,
-      payload,
+      {
+        sub: payload.sub,
+        roles: payload.roles,
+      },
       mockJwtConfig.jwtAccessTokenExpiresIn,
     );
+
+    // 리프레시 토큰: roles 제외 (sub만 포함)
     expect(mockJwtService.sign).toHaveBeenNthCalledWith(
       2,
-      payload,
+      {
+        sub: payload.sub,
+      },
       mockJwtConfig.jwtRefreshTokenExpiresIn,
     );
   });

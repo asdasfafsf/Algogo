@@ -243,8 +243,21 @@ model User {
     problemCodeList          ProblemCode[]          @relation("UserToProblemCode")
     userLoginHistoryList     UserLoginHistory[]     @relation("UserToUserLoginHistory")
     userSessionList          UserSession[]          @relation("UserToUserSession")
+    userRoleList             UserRole[]             @relation("UserToUserRole")
 
     @@map("USER")
+}
+
+model UserRole {
+    no        Int      @id @default(autoincrement()) @map("USER_ROLE_NO")
+    userUuid  String   @map("USER_UUID")
+    role      String   @map("USER_ROLE_ROLE")
+    createdAt DateTime @default(now()) @map("USER_ROLE_CREATED_AT")
+    updatedAt DateTime @updatedAt @map("USER_ROLE_UPDATED_AT")
+
+    User User @relation("UserToUserRole", fields: [userUuid], references: [uuid])
+
+    @@map("USER_ROLE")
 }
 
 model UserLoginHistory {
