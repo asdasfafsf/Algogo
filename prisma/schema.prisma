@@ -244,6 +244,7 @@ model User {
     userLoginHistoryList     UserLoginHistory[]     @relation("UserToUserLoginHistory")
     userSessionList          UserSession[]          @relation("UserToUserSession")
     userRoleList             UserRole[]             @relation("UserToUserRole")
+    problemSiteAccountList   ProblemSiteAccount[]   @relation("UserToProblemSiteAccount")
 
     @@map("USER")
 }
@@ -519,4 +520,22 @@ model ProblemCode {
     @@index([userUuid, problemUuid])
     @@index([updatedAt])
     @@map("PROBLEM_CODE")
+}
+
+model ProblemSiteAccount {
+    no           Int      @id @default(autoincrement()) @map("PROBLEM_SITE_ACCOUNT_NO")
+    userUuid     String   @map("USER_UUID")
+    provider     String   @map("PROBLEM_SITE_ACCOUNT_PROVIDER")
+    handle       String   @map("PROBLEM_SITE_ACCOUNT_HANDLE")
+    createdAt    DateTime @default(now()) @map("PROBLEM_SITE_ACCOUNT_CREATED_AT")
+    updatedAt    DateTime @default(now()) @updatedAt @map("PROBLEM_SITE_ACCOUNT_UPDATED_AT")
+    lastSyncedAt DateTime @default(now()) @map("PROBLEM_SITE_ACCOUNT_LAST_SYNCED_AT")
+    solvedCount  Int      @default(0) @map("PROBLEM_SITE_ACCOUNT_SOLVED_COUNT")
+    failedCount  Int      @default(0) @map("PROBLEM_SITE_ACCOUNT_FAILED_COUNT")
+    rank         String   @default("UNRANKED") @map("PROBLEM_SITE_ACCOUNT_RANK")
+
+    User User @relation("UserToProblemSiteAccount", fields: [userUuid], references: [uuid])
+
+    @@unique([userUuid, provider])
+    @@map("PROBLEM_SITE_ACCOUNT")
 }
