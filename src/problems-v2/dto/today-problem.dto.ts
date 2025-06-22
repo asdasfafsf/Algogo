@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { UserProblemState } from '../../common/types/user.type';
 
 export class TodayProblemDto {
   @ApiProperty({
@@ -79,4 +80,10 @@ export class TodayProblemDto {
     example: '입문',
   })
   difficulty: string;
+
+  @ApiProperty({
+    description: '문제 상태',
+    example: 'NONE',
+  })
+  state: UserProblemState;
 }

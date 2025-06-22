@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ProblemType } from '../types/problem.type';
+import { UserProblemState } from 'src/common/types/user.type';
 
 export class ProblemSummaryDto {
   @ApiProperty({
@@ -75,4 +76,10 @@ export class ProblemSummaryDto {
     example: ['그래프 탐색'],
   })
   typeList: ProblemType[];
+
+  @ApiProperty({
+    description: '문제 상태',
+    example: 'NONE',
+  })
+  state: UserProblemState;
 }
