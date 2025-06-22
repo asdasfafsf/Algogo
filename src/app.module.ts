@@ -48,6 +48,7 @@ import type { RedisClientOptions } from 'redis';
 import { RequestMetadataMiddleware } from './middlewares/RequestMetadataMiddleware';
 import { AuthGuardModule } from './auth-guard/auth-guard.module';
 import { AuthorizationModule } from './authorization/authorization.module';
+import { ProblemSiteModule } from './problem-site/problem-site.module';
 
 @Module({
   imports: [
@@ -118,6 +119,7 @@ import { AuthorizationModule } from './authorization/authorization.module';
     OauthV2Module,
     AuthGuardModule,
     AuthorizationModule,
+    ProblemSiteModule,
   ],
 
   controllers: [AppController],
