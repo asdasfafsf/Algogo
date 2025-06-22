@@ -5,6 +5,9 @@ import { Prisma } from '@prisma/client';
 import { ProblemSort } from './types/problem.type';
 import { PROBLEM_SORT_MAP } from './constants/problems-sort';
 import { ProblemSummaryDto } from './dto/problem-summary.dto';
+import { USER_PROBLEM_STATE } from '../common/constants/user.constant';
+import { UserProblemState } from '../common/types/user.type';
+
 @Injectable()
 export class ProblemsV2Repository {
   constructor(private readonly prismaService: PrismaService) {}
@@ -53,7 +56,9 @@ export class ProblemsV2Repository {
     return orderBy;
   }
 
-  async getProblemSumamryByTitle(dto: InquiryProblemsSummaryDto) {
+  async getProblemSumamryByTitle(
+    dto: InquiryProblemsSummaryDto & { userUuid?: string },
+  ) {
     const { pageNo, pageSize, sort, levelList, typeList, title } = dto;
 
     const filters: string[] = [];
@@ -101,25 +106,36 @@ export class ProblemsV2Repository {
 
     const rawList = await this.prismaService.$queryRaw<ProblemSummaryDto[]>(
       Prisma.sql`
-      SELECT
-        p.PROBLEM_V2_UUID AS uuid,
-        p.PROBLEM_V2_TITLE AS title,
-        p.PROBLEM_V2_LEVEL AS level,
-        p.PROBLEM_V2_LEVEL_TEXT AS levelText,
-        p.PROBLEM_V2_ANSWER_RATE AS answerRate,
-        p.PROBLEM_V2_SUBMIT_COUNT AS submitCount,
-        p.PROBLEM_V2_ANSWER_COUNT AS answerCount,
-        p.PROBLEM_V2_ANSWER_PEOPLE_COUNT AS answerPeopleCount,
-        p.PROBLEM_V2_SOURCE AS source,
-        p.PROBLEM_V2_SOURCE_ID AS sourceId,
-        p.PROBLEM_V2_SOURCE_URL AS sourceUrl
-      FROM PROBLEM_V2 p
-      WHERE MATCH(p.PROBLEM_V2_TITLE) AGAINST(${title} IN BOOLEAN MODE)
-      ${Prisma.raw(whereClause)}
-      ${Prisma.raw(orderClause)}
-      LIMIT 1000;
-    `,
+        SELECT
+          p.PROBLEM_V2_UUID AS uuid,
+          p.PROBLEM_V2_TITLE AS title,
+          p.PROBLEM_V2_LEVEL AS level,
+          p.PROBLEM_V2_LEVEL_TEXT AS levelText,
+          p.PROBLEM_V2_ANSWER_RATE AS answerRate,
+          p.PROBLEM_V2_SUBMIT_COUNT AS submitCount,
+          p.PROBLEM_V2_ANSWER_COUNT AS answerCount,
+          p.PROBLEM_V2_ANSWER_PEOPLE_COUNT AS answerPeopleCount,
+          p.PROBLEM_V2_SOURCE AS source,
+          p.PROBLEM_V2_SOURCE_ID AS sourceId,
+          p.PROBLEM_V2_SOURCE_URL AS sourceUrl,
+          ${Prisma.raw(
+            dto.userUuid
+              ? `COALESCE(ups.STATE, 'NONE') AS state`
+              : `'NONE' AS state`,
+          )}
+        FROM PROBLEM_V2 p
+        ${Prisma.raw(
+          dto.userUuid
+            ? `LEFT JOIN USER_PROBLEM_STATE ups ON ups.PROBLEM_UUID = p.PROBLEM_V2_UUID AND ups.USER_UUID = '${dto.userUuid}'`
+            : '',
+        )}
+        WHERE MATCH(p.PROBLEM_V2_TITLE) AGAINST(${title} IN BOOLEAN MODE)
+        ${Prisma.raw(whereClause)}
+        ${Prisma.raw(orderClause)}
+        LIMIT 1000;
+      `,
     );
+
     const filtered = (rawList as ProblemSummaryDto[]).filter((item) => {
       const title = item.title.toLowerCase();
       const search = dto.title.toLowerCase();
@@ -137,7 +153,10 @@ export class ProblemsV2Repository {
       pageNo,
     };
   }
-  async getProblemsSummary(dto: InquiryProblemsSummaryDto) {
+
+  async getProblemsSummary(
+    dto: InquiryProblemsSummaryDto & { userUuid?: string },
+  ) {
     const { pageNo, pageSize, sort, levelList, typeList, title } = dto;
 
     const where: Prisma.ProblemV2WhereInput = {};
@@ -175,6 +194,16 @@ export class ProblemsV2Repository {
         source: true,
         sourceId: true,
         sourceUrl: true,
+        userProblemStateList: dto.userUuid
+          ? {
+              select: {
+                state: true,
+              },
+              where: {
+                userUuid: dto.userUuid,
+              },
+            }
+          : undefined,
       },
       where,
       orderBy,
@@ -182,16 +211,23 @@ export class ProblemsV2Repository {
       take,
     });
 
+    const mappedProblemList = problemList.map((problem) => ({
+      ...problem,
+      state: (problem.userProblemStateList?.[0]?.state ??
+        USER_PROBLEM_STATE.NONE) as UserProblemState,
+      userProblemStateList: undefined,
+    }));
+
     return {
-      problemList,
+      problemList: mappedProblemList,
       totalCount,
       pageSize,
       pageNo,
     };
   }
 
-  async getProblem(uuid: string) {
-    return this.prismaService.problemV2.findUnique({
+  async getProblem({ uuid, userUuid }: { uuid: string; userUuid?: string }) {
+    const problem = await this.prismaService.problemV2.findUnique({
       select: {
         no: false,
         uuid: true,
@@ -231,6 +267,16 @@ export class ProblemsV2Repository {
             name: true,
           },
         },
+        userProblemStateList: userUuid
+          ? {
+              select: {
+                state: true,
+              },
+              where: {
+                userUuid,
+              },
+            }
+          : false,
         inputOutputList: {
           select: {
             order: true,
@@ -269,16 +315,20 @@ export class ProblemsV2Repository {
         uuid,
       },
     });
+
+    return problem;
   }
 
   async getTodayProblems({
     startDate,
     endDate,
+    userUuid,
   }: {
     startDate: Date;
     endDate: Date;
+    userUuid?: string;
   }) {
-    return this.prismaService.todayProblem.findMany({
+    const todayProblems = await this.prismaService.todayProblem.findMany({
       select: {
         problemUuid: true,
         problemV2: {
@@ -298,6 +348,16 @@ export class ProblemsV2Repository {
                 name: true,
               },
             },
+            userProblemStateList: userUuid
+              ? {
+                  select: {
+                    state: true,
+                  },
+                  where: {
+                    userUuid,
+                  },
+                }
+              : false,
           },
         },
       },
@@ -308,5 +368,16 @@ export class ProblemsV2Repository {
         },
       },
     });
+
+    const mappedTodayProblems = todayProblems.map((todayProblem) => ({
+      ...todayProblem.problemV2,
+      userProblemStateList: undefined,
+      uuid: todayProblem.problemUuid,
+      typeList: todayProblem.problemV2.typeList.map((type) => type.name),
+      state: (todayProblem.problemV2.userProblemStateList?.[0]?.state ??
+        USER_PROBLEM_STATE.NONE) as UserProblemState,
+    }));
+
+    return mappedTodayProblems;
   }
 }

@@ -14,6 +14,8 @@ import { ProblemDto } from './dto/problem.dto';
 import { CommonApiResponse } from '../common/decorators/swagger/CommonApiResponse';
 import { ProblemsV2Service } from './problems-v2.service';
 import { TodayProblemDto } from './dto/today-problem.dto';
+import { TokenUser } from '../common/types/request.type';
+import { User } from '../common/decorators/contexts/user.decorator';
 
 @ApiTags('문제 API V2')
 @ApiBadRequestErrorResponse()
@@ -32,8 +34,14 @@ export class ProblemsV2Controller {
     isArray: true,
   })
   @Get('/')
-  async getProblems(@Query() query: InquiryProblemsSummaryDto) {
-    return this.problemsV2Service.getProblemsSummary(query);
+  async getProblems(
+    @Query() query: InquiryProblemsSummaryDto,
+    @User() user: TokenUser,
+  ) {
+    return this.problemsV2Service.getProblemsSummary({
+      ...query,
+      userUuid: user?.sub,
+    });
   }
 
   @ApiOperation({
@@ -48,8 +56,11 @@ export class ProblemsV2Controller {
   })
   @Get('/today')
   @HttpCode(HttpStatus.OK)
-  async getTodayProblems() {
-    return this.problemsV2Service.getTodayProblems(0);
+  async getTodayProblems(@User() user: TokenUser) {
+    return this.problemsV2Service.getTodayProblems({
+      userUuid: user?.sub,
+      addDays: 0,
+    });
   }
 
   @ApiOperation({
@@ -63,7 +74,13 @@ export class ProblemsV2Controller {
     isArray: false,
   })
   @Get('/:problemUuid')
-  async getProblem(@Param('problemUuid') uuid: string) {
-    return this.problemsV2Service.getProblem(uuid);
+  async getProblem(
+    @Param('problemUuid') uuid: string,
+    @User() user: TokenUser,
+  ) {
+    return this.problemsV2Service.getProblem({
+      uuid,
+      userUuid: user?.sub,
+    });
   }
 }

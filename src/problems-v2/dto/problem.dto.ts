@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { ProblemType } from '../types/problem.type';
 import { ProblemInputOutputDto } from './problem-input-output.dto';
 import { ProblemSubtaskDto } from './problem-subtask.dto';
+import { UserProblemState } from '../../common/types/user.type';
 
 export class ProblemDto {
   @ApiProperty({
@@ -265,4 +266,10 @@ export class ProblemDto {
     type: [String],
   })
   languageLimitList: string[];
+
+  @ApiProperty({
+    description: '문제 상태',
+    example: 'NONE',
+  })
+  state: UserProblemState;
 }

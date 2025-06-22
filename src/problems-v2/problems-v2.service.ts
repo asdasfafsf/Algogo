@@ -3,14 +3,18 @@ import { ProblemsV2Repository } from './problems-v2.repository';
 import { InquiryProblemsSummaryDto } from './dto/inquiry-problems-summary.dto';
 import { CustomNotFoundException } from '../common/errors/CustomNotFoundException';
 import { ProblemDto } from './dto/problem.dto';
-import { ProblemType } from './types/problem.type';
 import { TodayProblemDto } from './dto/today-problem.dto';
+import { UserProblemState } from '../common/types/user.type';
+import { ProblemType } from './types/problem.type';
+import { USER_PROBLEM_STATE } from 'src/common/constants/user.constant';
 
 @Injectable()
 export class ProblemsV2Service {
   constructor(private readonly problemsV2Repository: ProblemsV2Repository) {}
 
-  async getProblemsSummary(dto: InquiryProblemsSummaryDto) {
+  async getProblemsSummary(
+    dto: InquiryProblemsSummaryDto & { userUuid?: string },
+  ) {
     const MYSQL_FULLTEXT_DELIMITERS = ['+', '-', '<', '>', '@', '~', '*'];
 
     const hasTitle = !!dto.title;
@@ -26,8 +30,11 @@ export class ProblemsV2Service {
     return this.problemsV2Repository.getProblemsSummary(dto);
   }
 
-  async getProblem(uuid: string): Promise<ProblemDto> {
-    const problem = await this.problemsV2Repository.getProblem(uuid);
+  async getProblem(dto: {
+    uuid: string;
+    userUuid?: string;
+  }): Promise<ProblemDto> {
+    const problem = await this.problemsV2Repository.getProblem(dto);
 
     if (!problem) {
       throw new CustomNotFoundException({
@@ -38,19 +45,24 @@ export class ProblemsV2Service {
 
     return {
       ...problem,
-      typeList: problem.typeList.map((type) => type.name as ProblemType),
+      state: (problem.userProblemStateList?.[0]?.state ??
+        USER_PROBLEM_STATE.NONE) as UserProblemState,
+      typeList: problem.typeList.map(
+        (type) => type.name as ProblemType,
+      ) as ProblemType[],
       languageLimitList: problem.languageLimitList.map(
         (languageLimit) => languageLimit.language,
       ),
-      subTaskList: problem.subTaskList.map((subTask) => ({
-        order: subTask.order,
-        title: subTask.title,
-        content: subTask.content,
-      })),
     };
   }
 
-  async getTodayProblems(addDays: number): Promise<TodayProblemDto[]> {
+  async getTodayProblems({
+    userUuid,
+    addDays,
+  }: {
+    userUuid?: string;
+    addDays: number;
+  }): Promise<TodayProblemDto[]> {
     const servedAt = new Date();
     const startDate = new Date(servedAt.setDate(servedAt.getDate() + addDays));
     startDate.setHours(0, 0, 0, 0);
@@ -62,15 +74,15 @@ export class ProblemsV2Service {
     const todayProblems = await this.problemsV2Repository.getTodayProblems({
       startDate,
       endDate,
+      userUuid,
     });
 
     return todayProblems.map((todayProblem) => ({
-      uuid: todayProblem.problemUuid,
-      ...todayProblem.problemV2,
-      typeList: todayProblem.problemV2.typeList.map((elem) => elem.name),
+      ...todayProblem,
+      userProblemStateList: undefined,
       difficulty:
         ['입문', '초급', '중급', '고급', '심화'][
-          Math.floor(todayProblem.problemV2.level / 4)
+          Math.floor(todayProblem.level / 4)
         ] ?? '알 수 없음',
     }));
   }
