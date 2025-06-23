@@ -6,7 +6,7 @@ import { AuthRefreshGuard } from './auth-refresh.guard';
 
 @Module({
   imports: [JwtModule],
-  providers: [AuthGuard,WsAuthGuard, AuthRefreshGuard],
+  providers: [AuthGuard, WsAuthGuard, AuthRefreshGuard],
   exports: [AuthGuard, WsAuthGuard, AuthRefreshGuard, JwtModule],
 })
 export class AuthGuardModule {}

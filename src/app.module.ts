@@ -47,6 +47,8 @@ import { redisStore } from 'cache-manager-redis-store';
 import type { RedisClientOptions } from 'redis';
 import { RequestMetadataMiddleware } from './middlewares/RequestMetadataMiddleware';
 import { AuthGuardModule } from './auth-guard/auth-guard.module';
+import { AuthorizationModule } from './authorization/authorization.module';
+import { ProblemSiteModule } from './problem-site/problem-site.module';
 
 @Module({
   imports: [
@@ -116,6 +118,8 @@ import { AuthGuardModule } from './auth-guard/auth-guard.module';
     AuthV2Module,
     OauthV2Module,
     AuthGuardModule,
+    AuthorizationModule,
+    ProblemSiteModule,
   ],
 
   controllers: [AppController],

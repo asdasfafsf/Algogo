@@ -155,14 +155,15 @@ model ProblemV2 {
     languageLimitList ProblemV2LanguageLimit[]
     todayProblemList  TodayProblem[]
 
-    customExample        String?       @map("PROBLEM_V2_CUSTOM_EXAMPLE") @db.Text()
-    customImplementation String?       @map("PROBLEM_V2_CUSTOM_IMPLEMENTATION") @db.Text()
-    customGrader         String?       @map("PROBLEM_V2_CUSTOM_GRADER") @db.Text()
-    customNotes          String?       @map("PROBLEM_V2_CUSTOM_NOTES") @db.Text()
-    customAttachment     String?       @map("PROBLEM_V2_CUSTOM_ATTACHMENT") @db.Text()
-    problemSource        String?       @map("PROBLEM_V2_PROBLEM_SOURCE") @db.Text()
-    customSample         String?       @map("PROBLEM_V2_CUSTOM_SAMPLE") @db.Text()
-    ProblemCode          ProblemCode[] @relation("ProblemToProblemCode")
+    customExample        String?            @map("PROBLEM_V2_CUSTOM_EXAMPLE") @db.Text()
+    customImplementation String?            @map("PROBLEM_V2_CUSTOM_IMPLEMENTATION") @db.Text()
+    customGrader         String?            @map("PROBLEM_V2_CUSTOM_GRADER") @db.Text()
+    customNotes          String?            @map("PROBLEM_V2_CUSTOM_NOTES") @db.Text()
+    customAttachment     String?            @map("PROBLEM_V2_CUSTOM_ATTACHMENT") @db.Text()
+    problemSource        String?            @map("PROBLEM_V2_PROBLEM_SOURCE") @db.Text()
+    customSample         String?            @map("PROBLEM_V2_CUSTOM_SAMPLE") @db.Text()
+    ProblemCode          ProblemCode[]      @relation("ProblemToProblemCode")
+    userProblemStateList UserProblemState[] @relation("ProblemToUserProblemState")
 
     @@unique([source, sourceId])
     @@index([source, sourceId])
@@ -243,8 +244,22 @@ model User {
     problemCodeList          ProblemCode[]          @relation("UserToProblemCode")
     userLoginHistoryList     UserLoginHistory[]     @relation("UserToUserLoginHistory")
     userSessionList          UserSession[]          @relation("UserToUserSession")
+    userRoleList             UserRole[]             @relation("UserToUserRole")
+    problemSiteAccountList   ProblemSiteAccount[]   @relation("UserToProblemSiteAccount")
 
     @@map("USER")
+}
+
+model UserRole {
+    no        Int      @id @default(autoincrement()) @map("USER_ROLE_NO")
+    userUuid  String   @map("USER_UUID")
+    role      String   @map("USER_ROLE_ROLE")
+    createdAt DateTime @default(now()) @map("USER_ROLE_CREATED_AT")
+    updatedAt DateTime @default(now()) @updatedAt @map("USER_ROLE_UPDATED_AT")
+
+    User User @relation("UserToUserRole", fields: [userUuid], references: [uuid])
+
+    @@map("USER_ROLE")
 }
 
 model UserLoginHistory {
@@ -254,7 +269,7 @@ model UserLoginHistory {
     ip        String   @map("USER_LOGIN_HISTORY_IP")
     userAgent String?  @map("USER_LOGIN_HISTORY_USER_AGENT")
     createdAt DateTime @default(now()) @map("USER_LOGIN_HISTORY_CREATED_AT")
-    updatedAt DateTime @updatedAt @map("USER_LOGIN_HISTORY_UPDATED_AT")
+    updatedAt DateTime @default(now()) @updatedAt @map("USER_LOGIN_HISTORY_UPDATED_AT")
 
     User User @relation("UserToUserLoginHistory", fields: [userUuid], references: [uuid])
 
@@ -337,7 +352,6 @@ model Problem {
     typeList          ProblemType[]        @relation("ProblemToProblemType")
     contentList       ProblemContent[]     @relation("ProblemToProblemContent")
     inputOutputList   ProblemInputOutput[] @relation("ProblemToProblemInputOutput")
-    userList          UserProblemState[]   @relation("ProblemToUserProblemState")
     problemReportList ProblemReport[]      @relation("ProblemToProblemReport")
 
     @@unique([source, sourceId])
@@ -396,20 +410,24 @@ model ProblemInputOutput {
 }
 
 model UserProblemState {
-    userNo    Int
-    problemNo Int
-    state     Int
-    User      User    @relation("UserToUserProblemState", fields: [userNo], references: [no])
-    Problem   Problem @relation("ProblemToUserProblemState", fields: [problemNo], references: [no])
+    userUuid    String @map("USER_UUID")
+    problemUuid String @map("PROBLEM_UUID")
+    state       String @default("NOT_STARTED") @map("STATE") // NOT_STARTED, IN_PROGRESS, SOLVED, GAVE_UP
 
-    @@unique([userNo, problemNo])
+    // 최소한의 메타데이터
+    solvedAt  DateTime? @map("SOLVED_AT")
+    createdAt DateTime  @default(now()) @map("CREATED_AT")
+    updatedAt DateTime  @updatedAt @map("UPDATED_AT")
+
+    // 관계
+    User      User      @relation("UserToUserProblemState", fields: [userUuid], references: [uuid])
+    ProblemV2 ProblemV2 @relation("ProblemToUserProblemState", fields: [problemUuid], references: [uuid])
+
+    @@unique([userUuid, problemUuid])
+    @@index([userUuid])
+    @@index([problemUuid])
+    @@index([state])
     @@map("USER_PROBLEM_STATE")
-}
-
-enum UserState {
-    DORMANT // 휴면
-    ACTIVE // 활동
-    SUSPENDED // 정지
 }
 
 model ProblemReport {
@@ -506,4 +524,22 @@ model ProblemCode {
     @@index([userUuid, problemUuid])
     @@index([updatedAt])
     @@map("PROBLEM_CODE")
+}
+
+model ProblemSiteAccount {
+    no           Int      @id @default(autoincrement()) @map("PROBLEM_SITE_ACCOUNT_NO")
+    userUuid     String   @map("USER_UUID")
+    provider     String   @map("PROBLEM_SITE_ACCOUNT_PROVIDER")
+    handle       String   @map("PROBLEM_SITE_ACCOUNT_HANDLE")
+    createdAt    DateTime @default(now()) @map("PROBLEM_SITE_ACCOUNT_CREATED_AT")
+    updatedAt    DateTime @default(now()) @updatedAt @map("PROBLEM_SITE_ACCOUNT_UPDATED_AT")
+    lastSyncedAt DateTime @default(now()) @map("PROBLEM_SITE_ACCOUNT_LAST_SYNCED_AT")
+    solvedCount  Int      @default(0) @map("PROBLEM_SITE_ACCOUNT_SOLVED_COUNT")
+    failedCount  Int      @default(0) @map("PROBLEM_SITE_ACCOUNT_FAILED_COUNT")
+    rank         String   @default("UNRANKED") @map("PROBLEM_SITE_ACCOUNT_RANK")
+
+    User User @relation("UserToProblemSiteAccount", fields: [userUuid], references: [uuid])
+
+    @@unique([userUuid, provider])
+    @@map("PROBLEM_SITE_ACCOUNT")
 }
