@@ -5,6 +5,7 @@ import {
   Param,
   Query,
   HttpCode,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBadRequestErrorResponse } from '../common/decorators/swagger/ApiBadRequestErrorResponse';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -16,10 +17,12 @@ import { ProblemsV2Service } from './problems-v2.service';
 import { TodayProblemDto } from './dto/today-problem.dto';
 import { TokenUser } from '../common/types/request.type';
 import { User } from '../common/decorators/contexts/user.decorator';
+import { DecodeGuard } from 'src/auth-guard/decode-guard';
 
 @ApiTags('문제 API V2')
 @ApiBadRequestErrorResponse()
 @Controller('api/v2/problems')
+@UseGuards(DecodeGuard)
 export class ProblemsV2Controller {
   constructor(private readonly problemsV2Service: ProblemsV2Service) {}
 
