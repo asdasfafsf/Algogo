@@ -4,6 +4,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { ProblemType, ProblemSort } from '../types/problem.type';
 import { PROBLEM_TYPE_MAP } from '../constants/problems-type';
 import { PROBLEM_SORT_MAP } from '../constants/problems-sort';
+import { UserProblemState } from '../../common/types/user.type';
+import { USER_PROBLEM_STATE } from '../../common/constants/user.constant';
 
 export class InquiryProblemsSummaryDto {
   @Transform(({ value }) => (value !== undefined ? Number(value) : 1))
@@ -73,4 +75,17 @@ export class InquiryProblemsSummaryDto {
     required: false,
   })
   sort: ProblemSort = PROBLEM_SORT_MAP.DEFAULT;
+
+  @IsOptional()
+  @IsEnum(Object.values(USER_PROBLEM_STATE), {
+    message: '올바른 상태가 아닙니다',
+    each: true,
+  })
+  @ApiProperty({
+    description: '문제 상태',
+    default: [],
+    required: false,
+    isArray: true,
+  })
+  states?: UserProblemState[];
 }
