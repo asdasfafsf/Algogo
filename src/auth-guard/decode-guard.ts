@@ -15,12 +15,8 @@ export class DecodeGuard implements CanActivate {
       return true;
     }
 
-    try {
-      const payload = await this.jwtService.verify(token);
-      request.user = payload;
-    } catch (error) {
-      request.user = null;
-    }
+    const payload = await this.jwtService.verify(token);
+    request.user = payload;
 
     return true;
   }
