@@ -59,7 +59,7 @@ export class ProblemsV2Repository {
   async getProblemSumamryByTitle(
     dto: InquiryProblemsSummaryDto & { userUuid?: string },
   ) {
-    const { pageNo, pageSize, sort, levelList, typeList, title } = dto;
+    const { pageNo, pageSize, sort, levelList, typeList, title, states } = dto;
 
     const filters: string[] = [];
 
@@ -77,6 +77,48 @@ export class ProblemsV2Repository {
           AND t.name IN (${typeList.map((v) => `'${v}'`).join(',')})
         )
       `);
+    }
+
+    // states 필터링: states.length == 0일 때는 전체, 필터가 있을 때는 해당 상태만
+    if (states && states.length > 0 && dto.userUuid) {
+      // NONE과 NULL을 동일하게 처리
+      const hasNoneState = states.includes('NONE' as any);
+      const otherStates = states.filter((state) => state !== 'NONE');
+
+      if (hasNoneState && otherStates.length > 0) {
+        // NONE과 다른 상태들이 모두 포함된 경우
+        filters.push(`
+          (NOT EXISTS (
+            SELECT 1 FROM USER_PROBLEM_STATE ups2
+            WHERE ups2.PROBLEM_UUID = p.PROBLEM_V2_UUID
+            AND ups2.USER_UUID = '${dto.userUuid}'
+          ) OR EXISTS (
+            SELECT 1 FROM USER_PROBLEM_STATE ups2
+            WHERE ups2.PROBLEM_UUID = p.PROBLEM_V2_UUID
+            AND ups2.USER_UUID = '${dto.userUuid}'
+            AND ups2.STATE IN (${otherStates.map((state) => `'${state}'`).join(',')})
+          ))
+        `);
+      } else if (hasNoneState) {
+        // NONE만 포함된 경우 (상태가 없는 문제들)
+        filters.push(`
+          NOT EXISTS (
+            SELECT 1 FROM USER_PROBLEM_STATE ups2
+            WHERE ups2.PROBLEM_UUID = p.PROBLEM_V2_UUID
+            AND ups2.USER_UUID = '${dto.userUuid}'
+          )
+        `);
+      } else {
+        // 다른 상태들만 포함된 경우
+        filters.push(`
+          EXISTS (
+            SELECT 1 FROM USER_PROBLEM_STATE ups2
+            WHERE ups2.PROBLEM_UUID = p.PROBLEM_V2_UUID
+            AND ups2.USER_UUID = '${dto.userUuid}'
+            AND ups2.STATE IN (${otherStates.map((state) => `'${state}'`).join(',')})
+          )
+        `);
+      }
     }
 
     const whereClause = filters.length ? `AND ${filters.join(' AND ')}` : '';
@@ -157,7 +199,7 @@ export class ProblemsV2Repository {
   async getProblemsSummary(
     dto: InquiryProblemsSummaryDto & { userUuid?: string },
   ) {
-    const { pageNo, pageSize, sort, levelList, typeList, title } = dto;
+    const { pageNo, pageSize, sort, levelList, typeList, title, states } = dto;
 
     const where: Prisma.ProblemV2WhereInput = {};
 
@@ -171,6 +213,49 @@ export class ProblemsV2Repository {
 
     if (title) {
       where.title = { contains: title };
+    }
+
+    // states 필터링: states.length == 0일 때는 전체, 필터가 있을 때는 해당 상태만
+    if (states && states.length > 0 && dto.userUuid) {
+      // NONE과 NULL을 동일하게 처리
+      const hasNoneState = states.includes('NONE' as any);
+      const otherStates = states.filter((state) => state !== 'NONE');
+
+      if (hasNoneState && otherStates.length > 0) {
+        // NONE과 다른 상태들이 모두 포함된 경우
+        where.OR = [
+          {
+            userProblemStateList: {
+              none: {
+                userUuid: dto.userUuid,
+              },
+            },
+          },
+          {
+            userProblemStateList: {
+              some: {
+                userUuid: dto.userUuid,
+                state: { in: otherStates },
+              },
+            },
+          },
+        ];
+      } else if (hasNoneState) {
+        // NONE만 포함된 경우 (상태가 없는 문제들)
+        where.userProblemStateList = {
+          none: {
+            userUuid: dto.userUuid,
+          },
+        };
+      } else {
+        // 다른 상태들만 포함된 경우
+        where.userProblemStateList = {
+          some: {
+            userUuid: dto.userUuid,
+            state: { in: otherStates },
+          },
+        };
+      }
     }
 
     const orderBy = this.getProblemOrderBy(sort);
