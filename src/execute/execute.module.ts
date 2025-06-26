@@ -9,6 +9,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { CryptoModule } from '../crypto/crypto.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AuthGuardModule } from '../auth-guard/auth-guard.module';
+import { RateLimitModule } from '../rate-limit/rate-limit.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { AuthGuardModule } from '../auth-guard/auth-guard.module';
     CryptoModule,
     AuthGuardModule,
     EventEmitterModule.forRoot(),
+    RateLimitModule,
   ],
   controllers: [ExecuteController],
   providers: [ExecuteService, ExecuteGateway],

@@ -49,6 +49,7 @@ import { RequestMetadataMiddleware } from './middlewares/RequestMetadataMiddlewa
 import { AuthGuardModule } from './auth-guard/auth-guard.module';
 import { AuthorizationModule } from './authorization/authorization.module';
 import { ProblemSiteModule } from './problem-site/problem-site.module';
+import { RateLimitModule } from './rate-limit/rate-limit.module';
 
 @Module({
   imports: [
@@ -120,6 +121,7 @@ import { ProblemSiteModule } from './problem-site/problem-site.module';
     AuthGuardModule,
     AuthorizationModule,
     ProblemSiteModule,
+    RateLimitModule,
   ],
 
   controllers: [AppController],
