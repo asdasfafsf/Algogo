@@ -6,10 +6,10 @@ export class ExecutionRateLimitService {
   constructor(private readonly redisService: RedisService) {}
 
   private readonly requestBucketCapacity = 20;
-  private readonly requestRefillRate = 20;
+  private readonly requestRefillRate = 20 / 60;
 
-  private readonly usageBucketCapacity = 0.1;
-  private readonly usageRefillRate = 0.1 / 60;
+  private readonly usageBucketCapacity = 20;
+  private readonly usageRefillRate = 20 / 60;
 
   async tryConsumeRequestToken(userUuid: string): Promise<boolean> {
     const lua = `
@@ -27,15 +27,24 @@ export class ExecutionRateLimitService {
       local reqElapsed = now - reqLast
       reqTokens = math.min(requestCap, reqTokens + reqElapsed * requestRate)
 
-      if reqTokens < 1 then return {0, reqTokens} end
+      local use = redis.call("HMGET", usageKey, "tokens", "last")
+      local useTokens = tonumber(use[1]) or usageCap
+      local useLast = tonumber(use[2]) or now
+      local useElapsed = now - useLast
+      useTokens = math.min(usageCap, useTokens + useElapsed * usageRate)
+
+      if reqTokens < 1 or useTokens <= 0 then return {0, reqTokens, useTokens} end
 
       redis.call("HMSET", requestKey, "tokens", reqTokens - 1, "last", now)
       redis.call("EXPIRE", requestKey, 60)
 
-      return {1, reqTokens - 1}
+      redis.call("HMSET", usageKey, "tokens", useTokens, "last", now)
+      redis.call("EXPIRE", usageKey, 60)
+
+      return {1, reqTokens - 1, useTokens}
     `;
     const now = Math.floor(Date.now() / 1000);
-    const [allowed] = await this.redisService.eval<[number, number]>(
+    const [allowed, _] = await this.redisService.eval<[number, number, number]>(
       lua,
       2,
       `compiler_request:${userUuid}`,
@@ -46,6 +55,7 @@ export class ExecutionRateLimitService {
       this.usageBucketCapacity,
       this.usageRefillRate,
     );
+
 
     return allowed === 1;
   }

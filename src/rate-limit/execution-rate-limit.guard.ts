@@ -18,8 +18,12 @@ export class ExecutionRateLimitGuard implements CanActivate {
 
 
     if (!allowed) {
-      throw new Error('Rate limit exceeded');
+      throw new WsException({
+        code: 'RATE_LIMIT_EXCEEDED',
+        message: 'Rate limit exceeded',
+      });
     }
+
     return true;
   }
 }
