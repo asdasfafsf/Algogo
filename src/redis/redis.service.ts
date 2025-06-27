@@ -15,21 +15,20 @@ export class RedisService implements OnModuleDestroy {
   ) {}
 
   async set(key: string, value: string, ttl?: number): Promise<void> {
-    await this.redisClient.set(key, value, {
-      EX: ttl,
-    });
+    await this.redisClient.set(key, value, ttl ? { EX: ttl } : undefined);
   }
 
   async get(key: string): Promise<string | null> {
-    return this.redisClient.get(key);
+    return await this.redisClient.get(key);
   }
 
   async del(key: string): Promise<void> {
     await this.redisClient.del(key);
+    return;
   }
 
   async keys(pattern: string): Promise<string[]> {
-    return this.redisClient.keys(pattern);
+    return await this.redisClient.keys(pattern);
   }
 
   async subscribe(channel: string) {
@@ -46,6 +45,19 @@ export class RedisService implements OnModuleDestroy {
 
   async publish(channel: string, message: string) {
     return await this.redisPubClient.publish(channel, message);
+  }
+
+  async eval<T = unknown>(
+    script: string,
+    numKeys: number,
+    ...keysAndArgs: (string | number)[]
+  ): Promise<T> {
+    const keys = keysAndArgs.slice(0, numKeys).map(String);
+    const args = keysAndArgs.slice(numKeys).map(String);
+    return (await this.redisClient.eval(script, {
+      keys,
+      arguments: args,
+    })) as T;
   }
 
   onModuleDestroy() {
