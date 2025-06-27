@@ -12,6 +12,7 @@ import {
   Injectable,
   UseFilters,
   UseGuards,
+  UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -28,6 +29,8 @@ import { ExecuteWsExceptionFilter } from './filter/execute-ws-exception.filter';
 import { CustomError } from '../common/types/error.type';
 import { TokenUser } from '../common/types/request.type';
 import { WsAuthGuard } from '../auth-guard/ws.auth.guard';
+import { ExecutionRateLimitGuard } from '../rate-limit/execution-rate-limit.guard';
+import { ExecutionRateLimitInterceptor } from '../rate-limit/execution-rate-limit.interceptor';
 
 class AuthSocket extends Socket {
   messageCount: number;
@@ -138,8 +141,9 @@ export class ExecuteGateway {
       whitelist: true,
     }),
   )
-  @UseGuards(WsAuthGuard)
+  @UseGuards(WsAuthGuard, ExecutionRateLimitGuard)
   @UseFilters(ExecuteWsExceptionFilter)
+  @UseInterceptors(ExecutionRateLimitInterceptor)
   @SubscribeMessage('execute')
   async handleExecute(
     @MessageBody() requestExecuteDto: any,
