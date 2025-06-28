@@ -17,7 +17,7 @@ import { ProblemsV2Service } from './problems-v2.service';
 import { TodayProblemDto } from './dto/today-problem.dto';
 import { TokenUser } from '../common/types/request.type';
 import { User } from '../common/decorators/contexts/user.decorator';
-import { DecodeGuard } from 'src/auth-guard/decode-guard';
+import { DecodeGuard } from '../auth-guard/decode-guard';
 
 @ApiTags('문제 API V2')
 @ApiBadRequestErrorResponse()

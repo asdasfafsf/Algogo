@@ -6,6 +6,8 @@ import { validate } from 'class-validator';
 import { PROBLEM_SORT_MAP } from './constants/problems-sort';
 import { PROBLEM_TYPE_MAP } from './constants/problems-type';
 import { ProblemsV2Service } from './problems-v2.service';
+import { TokenUser } from '../common/types/request.type';
+import { JwtService } from '../jwt/jwt.service';
 
 describe('ProblemsV2Controller', () => {
   let controller: ProblemsV2Controller;
@@ -15,6 +17,12 @@ describe('ProblemsV2Controller', () => {
     const mockProblemsV2Service = {
       getProblemsSummary: jest.fn(),
       getProblem: jest.fn(),
+      getTodayProblems: jest.fn(),
+    };
+
+    const mockJwtService = {
+      verify: jest.fn().mockResolvedValue({ sub: 'test-user-uuid', roles: [] }),
+      sign: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -23,6 +31,10 @@ describe('ProblemsV2Controller', () => {
         {
           provide: ProblemsV2Service,
           useValue: mockProblemsV2Service,
+        },
+        {
+          provide: JwtService,
+          useValue: mockJwtService,
         },
       ],
     }).compile();
@@ -141,16 +153,28 @@ describe('ProblemsV2Controller', () => {
   describe('getProblems', () => {
     it('서비스의 getProblemsSummary 메소드를 올바른 파라미터로 호출해야 함', async () => {
       const dto = { pageNo: 2, pageSize: 20 };
-      await controller.getProblems(dto as InquiryProblemsSummaryDto);
-      expect(problemsV2Service.getProblemsSummary).toHaveBeenCalledWith(dto);
+      const mockUser: TokenUser = { sub: 'test-user-uuid', roles: [] };
+
+      await controller.getProblems(dto as InquiryProblemsSummaryDto, mockUser);
+
+      expect(problemsV2Service.getProblemsSummary).toHaveBeenCalledWith({
+        ...dto,
+        userUuid: mockUser.sub,
+      });
     });
   });
 
   describe('getProblem', () => {
     it('서비스의 getProblem 메소드를 올바른 UUID로 호출해야 함', async () => {
       const uuid = '123e4567-e89b-12d3-a456-426614174000';
-      await controller.getProblem(uuid);
-      expect(problemsV2Service.getProblem).toHaveBeenCalledWith(uuid);
+      const mockUser: TokenUser = { sub: 'test-user-uuid', roles: [] };
+
+      await controller.getProblem(uuid, mockUser);
+
+      expect(problemsV2Service.getProblem).toHaveBeenCalledWith({
+        uuid,
+        userUuid: mockUser.sub,
+      });
     });
   });
 });

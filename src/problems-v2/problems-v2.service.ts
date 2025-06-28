@@ -6,7 +6,7 @@ import { ProblemDto } from './dto/problem.dto';
 import { TodayProblemDto } from './dto/today-problem.dto';
 import { UserProblemState } from '../common/types/user.type';
 import { ProblemType } from './types/problem.type';
-import { USER_PROBLEM_STATE } from 'src/common/constants/user.constant';
+import { USER_PROBLEM_STATE } from '../common/constants/user.constant';
 
 @Injectable()
 export class ProblemsV2Service {
