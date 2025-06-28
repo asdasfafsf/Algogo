@@ -24,13 +24,13 @@ export class ExecutionRateLimitInterceptor implements NestInterceptor {
     const started = Date.now();
     return next.handle().pipe(
       finalize(() => {
-        const duration = (Date.now() - started) / 1000;
-        if (userUuid)
-          console.log('commitExecutionDuration', userUuid, duration);
+        if (userUuid) {
+          const duration = (Date.now() - started) / 1000;
           this.executionRateLimitService.commitExecutionDuration(
             userUuid,
             duration,
           );
+        }
       }),
     );
   }
