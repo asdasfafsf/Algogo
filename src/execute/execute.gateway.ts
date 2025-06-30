@@ -56,6 +56,7 @@ export class ExecuteGateway {
   private server: Server;
 
   async handleConnection(socket: AuthSocket) {
+    socket.lastRequestTime = Math.floor(new Date().getTime() / 1000);
     const timeout = setTimeout(async () => {
       await this.redisService.unsubscribe(socket.id);
       socket.disconnect();
@@ -70,7 +71,6 @@ export class ExecuteGateway {
       return;
     }
 
-    socket.lastRequestTime = Math.floor(new Date().getTime() / 1000);
     socket.messageCount = 0;
   }
 
@@ -126,7 +126,7 @@ export class ExecuteGateway {
   ) {
     const { id } = socket;
     const requestRunDto = { id, ...requestExecuteDto };
-    socket.lastRequestTime = new Date().getTime();
+    socket.lastRequestTime = Math.floor(new Date().getTime() / 1000);
 
     try {
       const response = await this.executeService.run(requestRunDto);
@@ -171,10 +171,6 @@ export class ExecuteGateway {
         this.logger.log(
           `비활성 소켓 정리: ${socketId}, 마지막 요청 시간: ${authSocket.lastRequestTime || 'undefined'}`,
         );
-
-        // Redis 연결 정리
-        await this.redisService.unsubscribe(socketId);
-
         // 소켓 연결 종료
         authSocket.disconnect();
       }
