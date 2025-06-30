@@ -15,6 +15,7 @@ import { ProblemDto } from './dto/problem.dto';
 import { CommonApiResponse } from '../common/decorators/swagger/CommonApiResponse';
 import { ProblemsV2Service } from './problems-v2.service';
 import { TodayProblemDto } from './dto/today-problem.dto';
+import { InquiryTodayProblemsDto } from './dto/inquiry-today-problems.dto';
 import { TokenUser } from '../common/types/request.type';
 import { User } from '../common/decorators/contexts/user.decorator';
 import { DecodeGuard } from '../auth-guard/decode-guard';
@@ -59,10 +60,13 @@ export class ProblemsV2Controller {
   })
   @Get('/today')
   @HttpCode(HttpStatus.OK)
-  async getTodayProblems(@User() user: TokenUser) {
+  async getTodayProblems(
+    @User() user: TokenUser,
+    @Query() query: InquiryTodayProblemsDto,
+  ) {
     return this.problemsV2Service.getTodayProblems({
       userUuid: user?.sub,
-      addDays: 0,
+      addDays: query.day || 0,
     });
   }
 
