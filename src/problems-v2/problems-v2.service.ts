@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { ProblemsV2Repository } from './problems-v2.repository';
 import { InquiryProblemsSummaryDto } from './dto/inquiry-problems-summary.dto';
-import { CustomNotFoundException } from '../common/errors/CustomNotFoundException';
 import { ProblemDto } from './dto/problem.dto';
 import { TodayProblemDto } from './dto/today-problem.dto';
 import { UserProblemState } from '../common/types/user.type';
 import { ProblemType } from './types/problem.type';
-import { USER_PROBLEM_STATE } from 'src/common/constants/user.constant';
+import { USER_PROBLEM_STATE } from '../common/constants/user.constant';
+import { ProblemNotFoundException } from '../common/errors/problem/ProblemNotFoundException';
 
 @Injectable()
 export class ProblemsV2Service {
@@ -18,9 +18,11 @@ export class ProblemsV2Service {
     const MYSQL_FULLTEXT_DELIMITERS = ['+', '-', '<', '>', '@', '~', '*'];
 
     const hasTitle = !!dto.title;
-    const hasSpecial = MYSQL_FULLTEXT_DELIMITERS.some((delimiter) =>
-      dto.title.includes(delimiter),
-    );
+    const hasSpecial =
+      hasTitle &&
+      MYSQL_FULLTEXT_DELIMITERS.some((delimiter) =>
+        dto.title.includes(delimiter),
+      );
     const canNgramSearch = hasTitle && dto.title.length > 1 && !hasSpecial;
 
     if (canNgramSearch) {
@@ -37,10 +39,7 @@ export class ProblemsV2Service {
     const problem = await this.problemsV2Repository.getProblem(dto);
 
     if (!problem) {
-      throw new CustomNotFoundException({
-        code: 'PROBLEM_NOT_FOUND',
-        message: '존재하지 않는 문제입니다',
-      });
+      throw new ProblemNotFoundException();
     }
 
     return {
@@ -64,11 +63,12 @@ export class ProblemsV2Service {
     addDays: number;
   }): Promise<TodayProblemDto[]> {
     const servedAt = new Date();
-    const startDate = new Date(servedAt.setDate(servedAt.getDate() + addDays));
+    const startDate = new Date(servedAt);
+    startDate.setDate(startDate.getDate() + addDays);
     startDate.setHours(0, 0, 0, 0);
-    const endDate = new Date(
-      servedAt.setDate(servedAt.getDate() + addDays + 1),
-    );
+
+    const endDate = new Date(servedAt);
+    endDate.setDate(endDate.getDate() + addDays + 1);
     endDate.setHours(0, 0, 0, 0);
 
     const todayProblems = await this.problemsV2Repository.getTodayProblems({
