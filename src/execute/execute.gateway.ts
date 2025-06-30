@@ -56,6 +56,7 @@ export class ExecuteGateway {
   private server: Server;
 
   async handleConnection(socket: AuthSocket) {
+    socket.lastRequestTime = Math.floor(new Date().getTime() / 1000);
     const timeout = setTimeout(async () => {
       await this.redisService.unsubscribe(socket.id);
       socket.disconnect();
@@ -63,40 +64,14 @@ export class ExecuteGateway {
     await this.redisService.subscribe(socket.id);
     clearTimeout(timeout);
 
-    const { user, id } = socket;
+    const { user } = socket;
 
     if (!user) {
       socket.disconnect();
       return;
     }
 
-    const preSocketId = await this.redisService.get(
-      `${this.wsConfig.wsTag}_${user.sub}`,
-    );
-
-    await this.redisService.set(`${this.wsConfig.wsTag}_${user.sub}`, id);
-
-    if (preSocketId) {
-      const prevSocket = this.server.sockets.sockets.get(preSocketId);
-      if (prevSocket?.connected) {
-        prevSocket.disconnect();
-      }
-    }
-
-    socket.lastRequestTime = Math.floor(new Date().getTime() / 1000);
     socket.messageCount = 0;
-  }
-
-  async handleDisconnect(socket: AuthSocket) {
-    const { user } = socket;
-
-    const savedSocketId = await this.redisService.get(
-      `${this.wsConfig.wsTag}_${user?.sub}`,
-    );
-
-    if (!savedSocketId || savedSocketId === socket.id) {
-      await this.redisService.del(`${this.wsConfig.wsTag}_${user?.sub}`);
-    }
   }
 
   @SubscribeMessage('auth')
@@ -151,7 +126,7 @@ export class ExecuteGateway {
   ) {
     const { id } = socket;
     const requestRunDto = { id, ...requestExecuteDto };
-    socket.lastRequestTime = new Date().getTime();
+    socket.lastRequestTime = Math.floor(new Date().getTime() / 1000);
 
     try {
       const response = await this.executeService.run(requestRunDto);
@@ -180,27 +155,33 @@ export class ExecuteGateway {
 
   @Cron('0 * * * *')
   async clearConnection() {
-    const pattern = `${this.wsConfig.wsTag}_*`;
-    const keys = await this.redisService.keys(pattern);
-    const currentDateTime = Math.floor(new Date().getTime() / 1000);
-    for (const key of keys) {
-      const socketId = await this.redisService.get(key);
+    const now = Math.floor(new Date().getTime() / 1000);
+    const tenMinutesAgo = now - 600; // 10분 = 600초
 
-      if (socketId) {
-        const socket = this.server.sockets.sockets.get(socketId) as AuthSocket;
+    const connectedSockets = this.server.sockets.sockets;
 
-        if (socket) {
-          if (currentDateTime - socket.lastRequestTime > 60 * 59) {
-            socket.disconnect();
-          }
-        }
+    for (const [socketId, socket] of connectedSockets) {
+      const authSocket = socket as AuthSocket;
+
+      // lastRequestTime이 10분 이상 지났거나 설정되지 않은 경우
+      if (
+        !authSocket.lastRequestTime ||
+        authSocket.lastRequestTime < tenMinutesAgo
+      ) {
+        this.logger.log(
+          `비활성 소켓 정리: ${socketId}, 마지막 요청 시간: ${authSocket.lastRequestTime || 'undefined'}`,
+        );
+        // 소켓 연결 종료
+        authSocket.disconnect();
       }
     }
+
+    this.logger.log(`커넥션 정리 완료. 총 연결 수: ${connectedSockets.size}`);
   }
 
   @OnEvent('execute')
   async subscribeExecute(payload: any) {
-    const { id } = payload;
-    this.server.to(id).emit('executeResult', { ...payload, id: undefined });
+    const { id, ...message } = payload;
+    this.server.to(id).emit('executeResult', message);
   }
 }

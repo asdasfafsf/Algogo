@@ -16,7 +16,6 @@ export class ExecutionRateLimitGuard implements CanActivate {
       user.sub,
     );
 
-
     if (!allowed) {
       throw new WsException({
         code: 'RATE_LIMIT_EXCEEDED',
