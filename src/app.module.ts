@@ -43,13 +43,12 @@ import bullmqConfig from './config/bullmqConfig';
 import wsConfig from './config/wsConfig';
 import LoggerConfig from './config/LoggerConfig';
 import { CacheModule } from '@nestjs/cache-manager';
-import { redisStore } from 'cache-manager-redis-store';
-import type { RedisClientOptions } from 'redis';
 import { RequestMetadataMiddleware } from './middlewares/RequestMetadataMiddleware';
 import { AuthGuardModule } from './auth-guard/auth-guard.module';
 import { AuthorizationModule } from './authorization/authorization.module';
 import { ProblemSiteModule } from './problem-site/problem-site.module';
 import { RateLimitModule } from './rate-limit/rate-limit.module';
+import { createKeyv } from '@keyv/redis';
 
 @Module({
   imports: [
@@ -84,14 +83,14 @@ import { RateLimitModule } from './rate-limit/rate-limit.module';
       isGlobal: true,
       validationSchema,
     }),
-    CacheModule.registerAsync<RedisClientOptions>({
+    CacheModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (config: ConfigType<typeof redisConfig>) => ({
-        store: redisStore,
-        host: config.host,
-        port: config.port,
-        password: config.password,
-      }),
+      useFactory: async (config: ConfigType<typeof redisConfig>) => {
+        const redisUri = `redis://:${config.password}@${config.host}:${config.port}`;
+        return {
+          stores: [createKeyv(redisUri)],
+        };
+      },
       inject: [redisConfig.KEY],
       isGlobal: true,
     }),
