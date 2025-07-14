@@ -15,8 +15,6 @@ export type OAuthRequestUser = {
   accessToken: string;
 };
 
-
-
 export type OAuthConnectRequest = OAuthRequest & {
   params: {
     provider: OAuthProvider;

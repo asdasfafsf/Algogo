@@ -8,16 +8,10 @@ import { CryptoModule } from '../crypto/crypto.module';
 import { ImageModule } from '../image/image.module';
 import { AuthGuardModule } from '../auth-guard/auth-guard.module';
 
-@Module({ 
+@Module({
   controllers: [MeController],
   providers: [MeService, MeRepository],
-  imports: [
-    PrismaModule,
-    AuthGuardModule,
-    S3Module,
-    CryptoModule,
-    ImageModule,
-  ],
+  imports: [PrismaModule, AuthGuardModule, S3Module, CryptoModule, ImageModule],
   exports: [],
 })
 export class MeModule {}
