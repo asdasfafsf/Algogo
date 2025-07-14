@@ -1,3 +1,3 @@
 export enum ProblemSite {
-    BOJ = 'BOJ'
+  BOJ = 'BOJ',
 }

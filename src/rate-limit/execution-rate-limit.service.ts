@@ -56,7 +56,6 @@ export class ExecutionRateLimitService {
       this.usageRefillRate,
     );
 
-
     return allowed === 1;
   }
 

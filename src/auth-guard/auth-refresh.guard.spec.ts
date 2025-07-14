@@ -204,6 +204,138 @@ describe('AuthRefreshGuard 단위 테스트', () => {
       });
     });
 
+    // 새로운 쿠키 토큰 파싱 테스트들
+    it('쿠키의 refresh_token을 우선적으로 파싱한다', async () => {
+      // Arrange
+      const mockPayload = { sub: 'user-uuid', iat: 1234567890 };
+      const refreshToken = 'cookie-refresh-token';
+      const mockContext = createMockContext(
+        {}, // headers
+        { refresh_token: refreshToken }, // cookies
+      );
+
+      mockJwtService.verify.mockResolvedValue(mockPayload);
+
+      // Act
+      const result = await guard.canActivate(mockContext);
+      const request = mockContext.switchToHttp().getRequest();
+
+      // Assert
+      expect(result).toBe(true);
+      expect(mockJwtService.verify).toHaveBeenCalledWith(refreshToken);
+      expect(request.user).toEqual({
+        ...mockPayload,
+        refreshToken: refreshToken,
+      });
+    });
+
+    it('refresh_token 쿠키가 Authorization 헤더보다 우선순위가 높다', async () => {
+      // Arrange
+      const mockPayload = { sub: 'user-uuid', iat: 1234567890 };
+      const cookieToken = 'cookie-refresh-token';
+      const headerToken = 'header-refresh-token';
+      const mockContext = createMockContext(
+        { authorization: `Bearer ${headerToken}` }, // headers
+        { refresh_token: cookieToken }, // cookies
+      );
+
+      mockJwtService.verify.mockResolvedValue(mockPayload);
+
+      // Act
+      const result = await guard.canActivate(mockContext);
+      const request = mockContext.switchToHttp().getRequest();
+
+      // Assert
+      expect(result).toBe(true);
+      expect(mockJwtService.verify).toHaveBeenCalledWith(cookieToken);
+      expect(request.user).toEqual({
+        ...mockPayload,
+        refreshToken: cookieToken,
+      });
+    });
+
+    it('refresh_token 쿠키가 authorization 쿠키보다 우선순위가 높다', async () => {
+      // Arrange
+      const mockPayload = { sub: 'user-uuid', iat: 1234567890 };
+      const newRefreshToken = 'new-refresh-token';
+      const oldRefreshToken = 'old-refresh-token';
+      const mockContext = createMockContext(
+        {}, // headers
+        {
+          refresh_token: newRefreshToken,
+          authorization: `Bearer ${oldRefreshToken}`,
+        }, // cookies
+      );
+
+      mockJwtService.verify.mockResolvedValue(mockPayload);
+
+      // Act
+      const result = await guard.canActivate(mockContext);
+      const request = mockContext.switchToHttp().getRequest();
+
+      // Assert
+      expect(result).toBe(true);
+      expect(mockJwtService.verify).toHaveBeenCalledWith(newRefreshToken);
+      expect(request.user).toEqual({
+        ...mockPayload,
+        refreshToken: newRefreshToken,
+      });
+    });
+
+    it('토큰 파싱 우선순위가 올바르다: refresh_token 쿠키 > Authorization 헤더 > authorization 쿠키', async () => {
+      // Arrange
+      const mockPayload = { sub: 'user-uuid', iat: 1234567890 };
+
+      // Test case 1: refresh_token 쿠키만 있을 때
+      const refreshToken1 = 'refresh-token-cookie';
+      const mockContext1 = createMockContext(
+        {},
+        { refresh_token: refreshToken1 },
+      );
+      mockJwtService.verify.mockResolvedValue(mockPayload);
+
+      let result = await guard.canActivate(mockContext1);
+      let request = mockContext1.switchToHttp().getRequest();
+
+      expect(result).toBe(true);
+      expect(mockJwtService.verify).toHaveBeenCalledWith(refreshToken1);
+      expect(request.user.refreshToken).toBe(refreshToken1);
+
+      jest.clearAllMocks();
+
+      // Test case 2: Authorization 헤더만 있을 때
+      const refreshToken2 = 'header-token';
+      const mockContext2 = createMockContext(
+        { authorization: `Bearer ${refreshToken2}` },
+        {},
+      );
+      mockJwtService.verify.mockResolvedValue(mockPayload);
+
+      result = await guard.canActivate(mockContext2);
+      request = mockContext2.switchToHttp().getRequest();
+
+      expect(result).toBe(true);
+      expect(mockJwtService.verify).toHaveBeenCalledWith(refreshToken2);
+      expect(request.user.refreshToken).toBe(refreshToken2);
+
+      jest.clearAllMocks();
+
+      // Test case 3: authorization 쿠키만 있을 때
+      const refreshToken3 = 'auth-cookie-token';
+      const mockContext3 = createMockContext(
+        {},
+        { authorization: `Bearer ${refreshToken3}` },
+      );
+      mockJwtService.verify.mockResolvedValue(mockPayload);
+
+      result = await guard.canActivate(mockContext3);
+      request = mockContext3.switchToHttp().getRequest();
+
+      expect(result).toBe(true);
+      expect(mockJwtService.verify).toHaveBeenCalledWith(refreshToken3);
+      expect(request.user.refreshToken).toBe(refreshToken3);
+    });
+
     it('정확한 Bearer 대소문자만 인식한다', async () => {
       // Arrange
       const testCases = [
