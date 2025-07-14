@@ -186,6 +186,105 @@ describe('AuthGuard 단위 테스트', () => {
       expect(mockJwtService.verify).toHaveBeenCalledWith('header-token');
     });
 
+    // 새로운 쿠키 토큰 파싱 테스트들
+    it('쿠키의 access_token을 우선적으로 파싱한다', async () => {
+      // Arrange
+      const mockPayload = { sub: 'user-uuid', iat: 1234567890 };
+      const mockContext = createMockContext(
+        {}, // headers
+        { access_token: 'cookie-access-token' }, // cookies
+      );
+
+      mockJwtService.verify.mockResolvedValue(mockPayload);
+
+      // Act
+      const result = await guard.canActivate(mockContext);
+      const request = mockContext.switchToHttp().getRequest();
+
+      // Assert
+      expect(result).toBe(true);
+      expect(mockJwtService.verify).toHaveBeenCalledWith('cookie-access-token');
+      expect(request.user).toEqual(mockPayload);
+    });
+
+    it('access_token 쿠키가 Authorization 헤더보다 우선순위가 높다', async () => {
+      // Arrange
+      const mockPayload = { sub: 'user-uuid', iat: 1234567890 };
+      const mockContext = createMockContext(
+        { authorization: 'Bearer header-token' }, // headers
+        { access_token: 'cookie-access-token' }, // cookies
+      );
+
+      mockJwtService.verify.mockResolvedValue(mockPayload);
+
+      // Act
+      const result = await guard.canActivate(mockContext);
+
+      // Assert
+      expect(result).toBe(true);
+      expect(mockJwtService.verify).toHaveBeenCalledWith('cookie-access-token');
+    });
+
+    it('access_token 쿠키가 authorization 쿠키보다 우선순위가 높다', async () => {
+      // Arrange
+      const mockPayload = { sub: 'user-uuid', iat: 1234567890 };
+      const mockContext = createMockContext(
+        {}, // headers
+        {
+          access_token: 'new-cookie-token',
+          authorization: 'Bearer old-cookie-token',
+        }, // cookies
+      );
+
+      mockJwtService.verify.mockResolvedValue(mockPayload);
+
+      // Act
+      const result = await guard.canActivate(mockContext);
+
+      // Assert
+      expect(result).toBe(true);
+      expect(mockJwtService.verify).toHaveBeenCalledWith('new-cookie-token');
+    });
+
+    it('토큰 파싱 우선순위가 올바르다: access_token 쿠키 > Authorization 헤더 > authorization 쿠키', async () => {
+      // Arrange
+      const mockPayload = { sub: 'user-uuid', iat: 1234567890 };
+
+      // Test case 1: access_token 쿠키만 있을 때
+      const mockContext1 = createMockContext(
+        {},
+        { access_token: 'access-token-cookie' },
+      );
+      mockJwtService.verify.mockResolvedValue(mockPayload);
+
+      await guard.canActivate(mockContext1);
+      expect(mockJwtService.verify).toHaveBeenCalledWith('access-token-cookie');
+
+      jest.clearAllMocks();
+
+      // Test case 2: Authorization 헤더만 있을 때
+      const mockContext2 = createMockContext(
+        { authorization: 'Bearer header-token' },
+        {},
+      );
+      mockJwtService.verify.mockResolvedValue(mockPayload);
+
+      await guard.canActivate(mockContext2);
+      expect(mockJwtService.verify).toHaveBeenCalledWith('header-token');
+
+      jest.clearAllMocks();
+
+      // Test case 3: authorization 쿠키만 있을 때
+      const mockContext3 = createMockContext(
+        {},
+        { authorization: 'Bearer auth-cookie-token' },
+      );
+      mockJwtService.verify.mockResolvedValue(mockPayload);
+
+      await guard.canActivate(mockContext3);
+      expect(mockJwtService.verify).toHaveBeenCalledWith('auth-cookie-token');
+    });
+
     it('정확한 Bearer 대소문자만 인식한다', async () => {
       // Arrange
       const testCases = [

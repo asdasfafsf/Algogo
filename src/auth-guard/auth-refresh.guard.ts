@@ -21,12 +21,20 @@ export class AuthRefreshGuard implements CanActivate {
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
+    // 1. 쿠키의 refresh_token을 우선 확인
+    const cookieToken = request?.cookies?.refresh_token;
+    if (cookieToken) {
+      return cookieToken;
+    }
+
+    // 2. Authorization 헤더에서 Bearer 토큰 확인
     const [typeFromHeader, tokenFromHeader] =
       request?.headers['authorization']?.split(' ') ?? [];
     if (typeFromHeader === 'Bearer' && tokenFromHeader) {
       return tokenFromHeader;
     }
 
+    // 3. 기존 authorization 쿠키에서 Bearer 토큰 확인 (하위 호환성)
     const [typeFromCookie, tokenFromCookie] =
       request?.cookies?.authorization?.split(' ') ?? [];
     if (typeFromCookie === 'Bearer' && tokenFromCookie) {
