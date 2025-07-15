@@ -153,4 +153,14 @@ export class AuthV2Service {
       refreshToken,
     };
   }
+
+  async logout({
+    userUuid,
+    refreshToken,
+  }: {
+    userUuid: string;
+    refreshToken: string;
+  }) {
+    await this.cacheManager.del(`${userUuid}:${refreshToken}`);
+  }
 }

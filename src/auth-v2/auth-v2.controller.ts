@@ -7,7 +7,7 @@ import {
   HttpCode,
 } from '@nestjs/common';
 import { AuthV2Service } from './auth-v2.service';
-import { RefreshTokenRequest } from '../common/types/request.type';
+import { RefreshTokenRequest, TokenUser } from '../common/types/request.type';
 import { AuthRefreshGuard } from '../auth-guard/auth-refresh.guard';
 import {
   ApiTags,
@@ -18,10 +18,12 @@ import {
 import { ApiGlobalErrorResponses } from '../common/decorators/swagger/ApiGlobalErrorResponse';
 import { RequestMetadata as Metadata } from '../common/types/request.type';
 import { RequestMetadata } from '../common/decorators/contexts/request-metadata.decorator';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { Inject } from '@nestjs/common';
 import JwtConfig from '../config/jwtConfig';
 import { ConfigType } from '@nestjs/config';
+import { User } from 'src/common/decorators/contexts/user.decorator';
+import { AuthGuard } from 'src/auth-guard/auth.guard';
 
 @ApiTags('Auth V2')
 @ApiBearerAuth('Authorization')
@@ -88,5 +90,34 @@ export class AuthV2Controller {
       accessToken,
       refreshToken,
     };
+  }
+
+  @ApiOperation({
+    summary: '로그아웃',
+    description: '로그아웃 합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '로그아웃 성공',
+  })
+  @HttpCode(200)
+  @UseGuards(AuthGuard)
+  @Post('/logout')
+  async logout(
+    @User() user: TokenUser,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const refreshToken = req?.cookies?.refresh_token;
+
+    await this.authV2Service.logout({
+      userUuid: user.sub,
+      refreshToken,
+    });
+
+    res.clearCookie('access_token');
+    res.clearCookie('refresh_token');
+
+    return;
   }
 }
