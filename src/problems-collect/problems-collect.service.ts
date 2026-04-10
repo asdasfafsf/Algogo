@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ProblemSiteNotFoundException } from './errors/ProblemSiteNotFoundException';
 import { ImageUploadFailedException } from './errors/ImageUploadFailedException';
+import { NotImplementedException } from '../common/errors/NotImplementedException';
 import { ProblemsCollectRepository } from './problems-collect.repository';
 import { RedisService } from '../redis/redis.service';
 import { CrawlerService } from '../crawler/crawler.service';
@@ -21,7 +22,7 @@ export class ProblemsCollectService {
 
   async collect({ url, userNo }: { url: string; userNo: string }) {
     this.logger.debug('collect', { url, userNo });
-    throw new Error('Not implemented');
+    throw new NotImplementedException();
   }
 
   private getSecondsUntilMidnight() {
