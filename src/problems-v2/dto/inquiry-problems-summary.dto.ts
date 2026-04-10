@@ -6,6 +6,7 @@ import { PROBLEM_TYPE_MAP } from '../constants/problems-type';
 import { PROBLEM_SORT_MAP } from '../constants/problems-sort';
 import { UserProblemState } from '../../common/types/user.type';
 import { USER_PROBLEM_STATE } from '../../common/constants/user.constant';
+import { ALLOWED_PAGE_SIZES, DEFAULT_PAGE_SIZE } from '../../common/constants/pagination.constant';
 
 export class InquiryProblemsSummaryDto {
   @Transform(({ value }) => (value !== undefined ? Number(value) : 1))
@@ -21,15 +22,15 @@ export class InquiryProblemsSummaryDto {
   })
   pageNo?: number = 1;
 
-  @IsIn([10, 20, 50], { message: '10, 20 또는 50 단위로만 조회가 가능합니다.' })
-  @Transform(({ value }) => (value !== undefined ? Number(value) : 10))
+  @IsIn([...ALLOWED_PAGE_SIZES], { message: '10, 20 또는 50 단위로만 조회가 가능합니다.' })
+  @Transform(({ value }) => (value !== undefined ? Number(value) : DEFAULT_PAGE_SIZE))
   @ApiProperty({
     description: '페이지 사이즈',
-    minimum: 10,
-    default: 10,
+    minimum: DEFAULT_PAGE_SIZE,
+    default: DEFAULT_PAGE_SIZE,
     type: Number,
   })
-  pageSize?: number = 10;
+  pageSize?: number = DEFAULT_PAGE_SIZE;
 
   @IsOptional()
   @ApiProperty({

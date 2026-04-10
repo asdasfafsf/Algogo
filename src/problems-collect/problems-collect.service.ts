@@ -20,7 +20,7 @@ export class ProblemsCollectService {
   ) {}
 
   async collect({ url, userNo }: { url: string; userNo: string }) {
-    console.log(url, userNo);
+    this.logger.debug('collect', { url, userNo });
     throw new Error('Not implemented');
   }
 
