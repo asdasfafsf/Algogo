@@ -25,7 +25,7 @@ export class JwtService {
    * @returns 생성된 토큰
    */
   async sign(
-    payload: any,
+    payload: Record<string, unknown>,
     expiresIn?: string | number,
     secret: string = this.config.jwtSecret ?? '',
   ) {

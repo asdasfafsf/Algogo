@@ -1,4 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
+import { Request } from 'express';
 import googleOAuthConfig from '../config/googleOAuthConfig';
 import { ConfigType } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
@@ -31,7 +32,7 @@ export class GoogleOauthStrategy extends CustomOAuthStrategy(
     });
   }
 
-  async validate(req: any, accessToken: string, refreshToken: string) {
+  async validate(req: Request & { oauth?: Record<string, unknown>; user?: Record<string, unknown> }, accessToken: string, refreshToken: string) {
     const userInfo = await this.getUserInfo(accessToken);
     const { sub, name, email } = userInfo;
 

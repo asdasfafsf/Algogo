@@ -12,7 +12,7 @@ export type OAuthConfig = {
   disconnectCallbackURL: string;
   scope?: string | string[];
   passReqToCallback?: boolean;
-  state?: unknown;
+  state?: string | Record<string, unknown>;
   proxy?: boolean;
   session?: boolean;
   assignProperty?: string;
@@ -46,7 +46,7 @@ export function CustomOAuthStrategy(
     }
 
     async validate(
-      req: Record<string, unknown>,
+      req: Request & { oauth?: Record<string, unknown>; user?: Record<string, unknown> },
       accessToken: string,
       refreshToken: string,
       profile: Record<string, unknown>,
@@ -56,10 +56,7 @@ export function CustomOAuthStrategy(
     }
 
     authenticate(req: Request, options: Record<string, unknown>) {
-      const newOptions: Record<string, unknown> = {
-        ...options,
-        ...this.config,
-      };
+      const newOptions: Record<string, unknown> = { ...options, ...this.config };
       const requestUrl = req.originalUrl;
       const { destination } = req.query;
       const callbackURL = this.getCallbackUrl(requestUrl);

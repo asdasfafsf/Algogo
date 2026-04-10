@@ -29,31 +29,31 @@ export class CustomLogger {
     });
   }
 
-  log(message: string, meta: any = {}, callback?: () => void) {
+  log(message: string, meta: Record<string, unknown> = {}, callback?: () => void) {
     this.logger.info(message, { context: this.context, ...meta }, callback);
   }
 
-  error(message: string, meta: any = {}, callback?: () => void) {
+  error(message: string, meta: Record<string, unknown> = {}, callback?: () => void) {
     this.logger.error(message, { context: this.context, ...meta }, callback);
   }
 
-  warn(message: string, meta: any = {}, callback?: () => void) {
+  warn(message: string, meta: Record<string, unknown> = {}, callback?: () => void) {
     this.logger.warn(message, { context: this.context, ...meta }, callback);
   }
 
-  debug(message: string, meta: any = {}, callback?: () => void) {
+  debug(message: string, meta: Record<string, unknown> = {}, callback?: () => void) {
     this.logger.debug(message, { context: this.context, ...meta }, callback);
   }
 
-  verbose(message: string, meta: any = {}, callback?: () => void) {
+  verbose(message: string, meta: Record<string, unknown> = {}, callback?: () => void) {
     this.logger.verbose(message, { context: this.context, ...meta }, callback);
   }
 
-  http(message: string, meta: any = {}, callback?: () => void) {
+  http(message: string, meta: Record<string, unknown> = {}, callback?: () => void) {
     this.logger.http(message, { context: this.context, ...meta }, callback);
   }
 
-  silly(message: string, meta: any = {}, callback?: () => void) {
+  silly(message: string, meta: Record<string, unknown> = {}, callback?: () => void) {
     this.logger.silly(message, { context: this.context, ...meta }, callback);
   }
 }

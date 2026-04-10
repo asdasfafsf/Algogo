@@ -11,6 +11,7 @@ import RequestProblemReportDto from './dto/RequestProblemReportDto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiBadRequestErrorResponse } from '../common/decorators/swagger/ApiBadRequestErrorResponse';
 import { AuthGuard } from '../auth-guard/auth.guard';
+import { Request } from 'express';
 @ApiTags('문제 문의 관련 API')
 @ApiBadRequestErrorResponse()
 @UseGuards(AuthGuard)
@@ -33,10 +34,10 @@ export class ProblemsReportController {
   })
   @Post('/')
   async report(
-    @Req() req: any,
+    @Req() req: Request & { userNo?: number },
     @Body() requestProblemReportDto: RequestProblemReportDto,
   ) {
-    const { userNo } = req;
+    const userNo = req.userNo ?? 0;
     const reportDto = { ...requestProblemReportDto, userNo };
     await this.problemsReportService.reportProblem(reportDto);
 

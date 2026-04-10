@@ -1,11 +1,11 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { Queue, QueueEvents } from 'bullmq';
+import { uuidv7 } from 'uuidv7';
 import bullmqConfig from '../config/bullmqConfig';
 import { ConfigType } from '@nestjs/config';
-import { uuidv7 } from 'uuidv7';
 import { CustomLogger } from '../logger/custom-logger';
-import { RequestRunDto } from './dto/RequestRunDto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { RequestRunDto } from './dto/RequestRunDto';
 
 @Injectable()
 export class ExecuteService implements OnModuleInit {
@@ -46,10 +46,10 @@ export class ExecuteService implements OnModuleInit {
     this.queueEvents.on('progress', (progress) => {
       this.logger.silly('progress', { progress });
 
-      const typedProgress = progress as any;
-      if (typedProgress.data.stage === 'execute') {
+      const progressData = progress as { data: Record<string, unknown>; jobId: string };
+      if (progressData.data.stage === 'execute') {
         this.eventEmitter.emit('execute', {
-          ...typedProgress.data,
+          ...progressData.data,
           stage: undefined,
         });
       }
@@ -60,7 +60,7 @@ export class ExecuteService implements OnModuleInit {
     return `${provider}_${Math.floor(new Date().getTime() / 1000)}_${uuidv7()}`;
   }
 
-  async run(requestExecuteDto: RequestRunDto): Promise<any> {
+  async run(requestExecuteDto: RequestRunDto): Promise<Record<string, unknown> | { processTime: number; memory: number; code: string; result: string }> {
     try {
       const job = await this.queue.add('run', requestExecuteDto, {
         attempts: 2,
@@ -70,11 +70,11 @@ export class ExecuteService implements OnModuleInit {
       const timeout = 1000 * (requestExecuteDto.inputList.length * 2) + 3000;
       const result = await job.waitUntilFinished(this.queueEvents, timeout);
 
-      return result;
+      return result as Record<string, unknown>;
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
+      const message = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(message);
-      if (message?.includes('timed out before finishing')) {
+      if (message.includes('timed out before finishing')) {
         return {
           processTime: 0,
           memory: 0,

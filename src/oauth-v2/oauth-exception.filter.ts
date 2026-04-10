@@ -13,8 +13,8 @@ import { CustomLogger } from '../logger/custom-logger';
 export class OAuthExceptionFilter implements ExceptionFilter {
   constructor(private readonly logger: CustomLogger) {}
 
-  catch(exception: any, host: ArgumentsHost) {
-    this.logger.error('oauth exception', exception);
+  catch(exception: unknown, host: ArgumentsHost) {
+    this.logger.error('oauth exception', { exception: String(exception) });
 
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
