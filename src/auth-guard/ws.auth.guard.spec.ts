@@ -4,7 +4,7 @@ import { WsException } from '@nestjs/websockets';
 
 import { WsAuthGuard } from './ws.auth.guard';
 import { JwtService } from '../jwt/jwt.service';
-import { CustomLogger } from '../logger/custom-logger';
+import { AppLogger } from '../logger/app-logger';
 
 describe('WsAuthGuard', () => {
   let guard: WsAuthGuard;
@@ -16,7 +16,7 @@ describe('WsAuthGuard', () => {
   const mockLogger = {
     error: jest.fn(),
     log: jest.fn(),
-  } as unknown as CustomLogger;
+  } as unknown as AppLogger;
 
   /* ────────── Helper: Context Mock ────────── */
   const createWsContext = (client: any): ExecutionContext =>
@@ -32,7 +32,7 @@ describe('WsAuthGuard', () => {
       providers: [
         WsAuthGuard,
         { provide: JwtService, useValue: mockJwtService },
-        { provide: CustomLogger, useValue: mockLogger },
+        { provide: AppLogger, useValue: mockLogger },
       ],
     }).compile();
 

@@ -7,7 +7,7 @@ import { JwtService } from '../jwt/jwt.service';
 import { UsersService } from '../users/users.service';
 import JwtConfig from '../config/jwtConfig';
 import { JwtInvalidTokenException } from '../common/errors/token/JwtInvalidTokenException';
-import { CustomLogger } from '../logger/custom-logger';
+import { AppLogger } from '../logger/app-logger';
 import { Role } from '../common/types/roles.type';
 
 describe('AuthV2Service 단위 테스트', () => {
@@ -31,7 +31,7 @@ describe('AuthV2Service 단위 테스트', () => {
     del: jest.fn(),
   };
 
-  const mockLogger: Partial<CustomLogger> = {
+  const mockLogger: Partial<AppLogger> = {
     log: jest.fn(),
   };
 
@@ -50,7 +50,7 @@ describe('AuthV2Service 단위 테스트', () => {
         { provide: UsersService, useValue: mockUsersService },
         { provide: CACHE_MANAGER, useValue: mockCache },
         { provide: JwtConfig.KEY, useValue: mockJwtConfig },
-        { provide: CustomLogger, useValue: mockLogger },
+        { provide: AppLogger, useValue: mockLogger },
       ],
     }).compile();
 

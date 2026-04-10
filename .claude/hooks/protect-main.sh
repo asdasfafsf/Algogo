@@ -32,4 +32,10 @@ if echo "$COMMAND" | grep -qE 'git commit'; then
   fi
 fi
 
+# ALGOGO-* 브랜치 수동 생성 차단 → /work 커맨드 사용 강제
+if echo "$COMMAND" | grep -qE '(checkout -b|switch -c|branch )\s*ALGOGO-'; then
+  echo "ALGOGO-* 브랜치를 수동으로 만들 수 없습니다. /work 커맨드를 사용하세요." >&2
+  exit 2
+fi
+
 exit 0
