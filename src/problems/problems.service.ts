@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { ProblemNotFoundException } from '../common/errors/problem/ProblemNotFoundException';
 import { ProblemsRepository } from './problems.repository';
 import { ProblemType } from '../common/types/problem.type';
 import { ResponseProblemDto } from './dto/ResponseProblemDto';
@@ -53,7 +54,7 @@ export class ProblemsService {
       const problem = await this.problemsRepository.getProblem(uuid);
 
       if (!problem) {
-        throw new NotFoundException('문제를 찾을 수 없습니다.');
+        throw new ProblemNotFoundException();
       }
 
       return {

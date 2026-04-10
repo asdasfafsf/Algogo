@@ -1,5 +1,6 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ProblemSiteNotFoundException } from './errors/ProblemSiteNotFoundException';
+import { ImageUploadFailedException } from './errors/ImageUploadFailedException';
 import { ProblemsCollectRepository } from './problems-collect.repository';
 import { RedisService } from '../redis/redis.service';
 import { CrawlerService } from '../crawler/crawler.service';
@@ -63,7 +64,7 @@ export class ProblemsCollectService {
           const s3Result = await this.s3Service.upload(s3Key, webp);
 
           if (!s3Result) {
-            throw new BadRequestException('이미지 업로드 오류');
+            throw new ImageUploadFailedException();
           }
 
           return {
