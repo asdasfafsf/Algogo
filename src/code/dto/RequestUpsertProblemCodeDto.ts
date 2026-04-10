@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { LanguageProvider } from '../../common/types/language.type';
 import { IsString, IsUUID, IsEnum, IsNotEmpty } from 'class-validator';
 import { MaxBytes } from '../../common/decorators/MaxBytes';
-import { LANGUAGE_PROVIDER } from 'src/common/constants/language.constant';
+import { LANGUAGE_PROVIDER } from '../../common/constants/language.constant';
 
 export default class RequestUpsertProblemCodeDto {
   @ApiProperty({

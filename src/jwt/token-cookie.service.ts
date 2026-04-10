@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { Response } from 'express';
 import JwtConfig from '../config/jwtConfig';
+import appConfig from '../config/appConfig';
 
 @Injectable()
 export class TokenCookieService {
@@ -10,8 +11,10 @@ export class TokenCookieService {
   constructor(
     @Inject(JwtConfig.KEY)
     private readonly jwtConfig: ConfigType<typeof JwtConfig>,
+    @Inject(appConfig.KEY)
+    private readonly appCfg: ConfigType<typeof appConfig>,
   ) {
-    this.isProduction = process.env.NODE_ENV !== 'development';
+    this.isProduction = !appCfg.isDevelopment;
   }
 
   setAuthCookies(

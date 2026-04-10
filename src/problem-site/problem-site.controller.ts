@@ -19,9 +19,9 @@ import { Roles } from '../common/decorators/authorization/roles.decorator';
 import { ROLES } from '../common/constants/roles.constants';
 import { ProblemSiteService } from './problem-site.service';
 import { CreateProblemSiteDto } from './dto/create-problem-site.dto';
-import { TokenUser } from 'src/common/types/request.type';
-import { User } from 'src/common/decorators/contexts/user.decorator';
-import { ProblemSiteProvider } from 'src/common/types/problem-site.type';
+import { TokenUser } from '../common/types/request.type';
+import { User } from '../common/decorators/contexts/user.decorator';
+import { ProblemSiteProvider } from '../common/types/problem-site.type';
 
 @ApiTags('문제 사이트 관리')
 @ApiBearerAuth('Authorization')

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ProblemType } from '../types/problem.type';
-import { UserProblemState } from 'src/common/types/user.type';
+import { UserProblemState } from '../../common/types/user.type';
 
 export class ProblemSummaryDto {
   @ApiProperty({
