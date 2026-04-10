@@ -63,7 +63,7 @@ export class CodeService {
     userUuid: string;
     uuid: string;
   }) {
-    const codeTemplate = this.codeRepository.getCodeTemplate({
+    const codeTemplate = await this.codeRepository.getCodeTemplate({
       userUuid,
       uuid,
     });
