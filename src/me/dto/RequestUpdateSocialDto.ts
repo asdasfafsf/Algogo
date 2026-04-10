@@ -6,8 +6,8 @@ export class RequestUpdateSocialDto {
   @IsIn(Object.values(SOCIAL_PROVIDER), {
     message: '소셜 타입이 잘못되었습니다.',
   })
-  provider: SocialProvider;
+  provider!: SocialProvider;
 
   @IsString({ message: '내용은 문자열이어야 합니다.' })
-  content: string;
+  content!: string;
 }

@@ -1,4 +1,4 @@
 export class RequestExecuteInputDto {
-  input: string;
-  seq: string;
+  input!: string;
+  seq!: string;
 }

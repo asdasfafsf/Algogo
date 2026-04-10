@@ -12,7 +12,7 @@ export default class RequestProblemReportDto {
   @IsNotEmpty({
     message: '문제 고유번호를 입력해주세요.',
   })
-  problemUuid: string;
+  problemUuid!: string;
 
   @ApiProperty({
     description: '문의 내용',
@@ -23,7 +23,7 @@ export default class RequestProblemReportDto {
   @IsNotEmpty({
     message: '문의 제목을 입력해주세요.',
   })
-  title: string;
+  title!: string;
 
   @ApiProperty({
     description: '문의 내용',
@@ -34,5 +34,5 @@ export default class RequestProblemReportDto {
   @IsNotEmpty({
     message: '문의 내용을 입력해주세요.',
   })
-  content: string;
+  content!: string;
 }

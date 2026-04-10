@@ -33,11 +33,11 @@ import { ExecutionRateLimitGuard } from '../rate-limit/execution-rate-limit.guar
 import { ExecutionRateLimitInterceptor } from '../rate-limit/execution-rate-limit.interceptor';
 
 class AuthSocket extends Socket {
-  messageCount: number;
-  user: TokenUser;
-  token: string;
-  lastRequestTime: number;
-  authErrorCount: number;
+  messageCount!: number;
+  user!: TokenUser;
+  token!: string;
+  lastRequestTime!: number;
+  authErrorCount!: number;
 }
 
 @WebSocketGateway()
@@ -53,7 +53,7 @@ export class ExecuteGateway {
   ) {}
 
   @WebSocketServer()
-  private server: Server;
+  private server!: Server;
 
   async handleConnection(socket: AuthSocket) {
     socket.lastRequestTime = Math.floor(new Date().getTime() / 1000);

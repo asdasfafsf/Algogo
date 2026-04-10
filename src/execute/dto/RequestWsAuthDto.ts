@@ -1,3 +1,3 @@
 export class RequestWsAuthDto {
-  token: string;
+  token!: string;
 }
