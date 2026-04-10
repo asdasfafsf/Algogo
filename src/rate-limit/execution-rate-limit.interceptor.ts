@@ -14,7 +14,7 @@ export class ExecutionRateLimitInterceptor implements NestInterceptor {
     private readonly executionRateLimitService: ExecutionRateLimitService,
   ) {}
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     if (context.getType() !== 'ws') {
       return next.handle();
     }

@@ -6,7 +6,7 @@ import { AppLogger } from '../../logger/app-logger';
 @Catch()
 export class ExecuteWsExceptionFilter implements WsExceptionFilter {
   constructor(private readonly logger: AppLogger) {}
-  catch(exception: CustomHttpException, host: ArgumentsHost) {
+  catch(exception: unknown, host: ArgumentsHost) {
     const client = host.switchToWs().getClient();
 
     if (exception instanceof CustomHttpException) {
