@@ -97,9 +97,9 @@ export class ExecuteGateway {
         code: '0000',
         result: '',
       });
-    } catch (e) {
-      if (e instanceof CustomHttpException) {
-        const response = e.getResponse() as CustomError;
+    } catch (error: unknown) {
+      if (error instanceof CustomHttpException) {
+        const response = error.getResponse() as CustomError;
         const { code, message } = response;
         socket.emit('auth', {
           code,
@@ -133,9 +133,9 @@ export class ExecuteGateway {
     try {
       const response = await this.executeService.run(requestRunDto);
       return response;
-    } catch (e) {
-      if (e instanceof CustomHttpException) {
-        const response = e.getResponse() as CustomError;
+    } catch (error: unknown) {
+      if (error instanceof CustomHttpException) {
+        const response = error.getResponse() as CustomError;
         const { code, message } = response;
         return {
           code,

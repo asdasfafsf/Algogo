@@ -23,8 +23,8 @@ export class WsAuthGuard implements CanActivate {
       const decodedToken = await this.jwtService.verify(encryptedToken);
       client.user = decodedToken;
       return true;
-    } catch (e) {
-      throw e;
+    } catch (error: unknown) {
+      throw error;
     }
   }
 
