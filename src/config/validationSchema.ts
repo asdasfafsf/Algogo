@@ -42,4 +42,7 @@ export const validationSchema = Joi.object({
   LOKI_USERNAME: Joi.string().default(''),
   LOKI_PASSWORD: Joi.string().default(''),
   LOKI_ENABLED: Joi.string().valid('true', 'false').default('false'),
+  TEMPO_ENABLED: Joi.string().valid('true', 'false').default('false'),
+  TEMPO_ENDPOINT: Joi.string().default(''),
+  TEMPO_AUTH_HEADER: Joi.string().default(''),
 });

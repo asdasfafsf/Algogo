@@ -19,6 +19,7 @@ export class AppLogger {
   private buildMeta(extra?: Record<string, unknown>) {
     return {
       requestId: this.cls.get?.('requestId'),
+      traceId: this.cls.get?.('traceId'),
       context: this.context,
       ...extra,
     };
