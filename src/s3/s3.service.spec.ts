@@ -1,10 +1,10 @@
 import { S3Service } from './s3.service';
-import s3Config from '../config/s3Config';
+import { PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+
+const mockSend = jest.fn().mockResolvedValue({});
 
 jest.mock('@aws-sdk/client-s3', () => ({
-  S3Client: jest.fn().mockImplementation(() => ({
-    send: jest.fn().mockResolvedValue({}),
-  })),
+  S3Client: jest.fn().mockImplementation(() => ({ send: mockSend })),
   PutObjectCommand: jest.fn(),
   DeleteObjectCommand: jest.fn(),
 }));
@@ -21,25 +21,64 @@ describe('S3Service', () => {
   };
 
   beforeEach(() => {
+    jest.clearAllMocks();
     service = new S3Service(mockConfig as never);
   });
 
   describe('upload', () => {
-    it('파일 URL을 반환한다', async () => {
+    it('PutObjectCommand를 올바른 파라미터로 호출하고 URL을 반환한다', async () => {
+      // Given
+      const body = Buffer.from('file-data');
+
       // When
-      const url = await service.upload('test/file.webp', Buffer.from('data'));
+      const url = await service.upload('user/photo.webp', body, 'image/webp');
 
       // Then
-      expect(url).toBe('https://s3.example.com/test-bucket/test/file.webp');
+      expect(PutObjectCommand).toHaveBeenCalledWith({
+        Bucket: 'test-bucket',
+        Key: 'user/photo.webp',
+        Body: body,
+        ACL: 'public-read',
+        ContentType: 'image/webp',
+      });
+      expect(mockSend).toHaveBeenCalled();
+      expect(url).toBe('https://s3.example.com/test-bucket/user/photo.webp');
+    });
+
+    it('ContentType 없이도 업로드 가능하다', async () => {
+      // When
+      const url = await service.upload('file.txt', Buffer.from('data'));
+
+      // Then
+      expect(PutObjectCommand).toHaveBeenCalledWith(
+        expect.objectContaining({ ContentType: undefined }),
+      );
+      expect(url).toBe('https://s3.example.com/test-bucket/file.txt');
     });
   });
 
   describe('removeObject', () => {
-    it('에러 없이 실행된다', async () => {
-      // When & Then
-      await expect(
-        service.removeObject('https://s3.example.com/test-bucket/test/file.webp'),
-      ).resolves.toBeUndefined();
+    it('endpoint prefix를 제거하고 DeleteObjectCommand를 호출한다', async () => {
+      // When
+      await service.removeObject('https://s3.example.com/test-bucket/user/photo.webp');
+
+      // Then
+      expect(DeleteObjectCommand).toHaveBeenCalledWith({
+        Bucket: 'test-bucket',
+        Key: '/test-bucket/user/photo.webp',
+      });
+      expect(mockSend).toHaveBeenCalled();
+    });
+
+    it('endpoint가 없는 키도 처리한다', async () => {
+      // When
+      await service.removeObject('user/photo.webp');
+
+      // Then
+      expect(DeleteObjectCommand).toHaveBeenCalledWith({
+        Bucket: 'test-bucket',
+        Key: 'user/photo.webp',
+      });
     });
   });
 });
