@@ -40,6 +40,7 @@ import wsConfig from './config/wsConfig';
 import LoggerConfig from './config/LoggerConfig';
 import appConfig from './config/appConfig';
 import lokiConfig from './config/lokiConfig';
+import tempoConfig from './config/tempoConfig';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ClsModule } from 'nestjs-cls';
 import { uuidv7 } from 'uuidv7';
@@ -57,6 +58,15 @@ import { createKeyv } from '@keyv/redis';
         mount: true,
         setup: (cls, req) => {
           cls.set('requestId', (req.headers['x-request-id'] as string) || uuidv7());
+          try {
+            const { trace } = require('@opentelemetry/api');
+            const span = trace.getActiveSpan();
+            if (span) {
+              cls.set('traceId', span.spanContext().traceId);
+            }
+          } catch {
+            // OpenTelemetry not available, skip
+          }
         },
       },
     }),
@@ -113,6 +123,7 @@ import { createKeyv } from '@keyv/redis';
         wsConfig,
         LoggerConfig,
         lokiConfig,
+        tempoConfig,
       ],
       isGlobal: true,
       validationSchema,
