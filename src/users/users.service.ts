@@ -1,7 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UsersRepository } from './users.repository';
 
-import { USER_NOT_FOUND_MESSAGE } from './constants';
 import { OAuthProvider } from '../common/types/oauth.type';
 import { UserInactiveException } from '../common/errors/user/UserInactiveException';
 import { UserNotFoundException } from '../common/errors/user/UserNotFoundException';
@@ -24,7 +23,7 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new NotFoundException(USER_NOT_FOUND_MESSAGE);
+      throw new UserNotFoundException();
     }
 
     return {
