@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { InquiryProblemsSummaryDto } from './dto/inquiry-problems-summary.dto';
 import { Prisma } from '@prisma/client';
-import { ProblemSort } from './types/problem.type';
-import { PROBLEM_SORT_MAP } from './constants/problems-sort';
+import { ProblemSort, PROBLEM_SORT } from '../common/constants/problem-sort.constant';
+import { getProblemOrderBy } from '../common/utils/problem-order-by.util';
 import { ProblemSummaryDto } from './dto/problem-summary.dto';
 import { USER_PROBLEM_STATE } from '../common/constants/user.constant';
 import { DEFAULT_PAGE_NO, DEFAULT_PAGE_SIZE, FULLTEXT_SEARCH_LIMIT } from '../common/constants/pagination.constant';
@@ -12,50 +12,6 @@ import { UserProblemState } from '../common/types/user.type';
 @Injectable()
 export class ProblemsV2Repository {
   constructor(private readonly prismaService: PrismaService) {}
-
-  private getProblemOrderBy(
-    sort: ProblemSort,
-  ):
-    | Prisma.ProblemOrderByWithRelationInput
-    | Prisma.ProblemOrderByWithRelationInput[] {
-    const orderBy: Prisma.ProblemOrderByWithRelationInput[] = [];
-
-    if (sort === PROBLEM_SORT_MAP.ANSWER_RATE_ASC) {
-      orderBy.push({
-        answerRate: 'asc',
-      });
-    } else if (sort === PROBLEM_SORT_MAP.ANSWER_RATE_DESC) {
-      orderBy.push({
-        answerRate: 'desc',
-      });
-    } else if (sort === PROBLEM_SORT_MAP.LEVEL_ASC) {
-      orderBy.push({
-        level: 'asc',
-      });
-    } else if (sort === PROBLEM_SORT_MAP.LEVEL_DESC) {
-      orderBy.push({
-        level: 'desc',
-      });
-    } else if (sort === PROBLEM_SORT_MAP.SUBMIT_COUNT_ASC) {
-      orderBy.push({
-        submitCount: 'asc',
-      });
-    } else if (sort === PROBLEM_SORT_MAP.SUBMIT_COUNT_DESC) {
-      orderBy.push({
-        submitCount: 'desc',
-      });
-    } else if (sort === PROBLEM_SORT_MAP.TITLE_ASC) {
-      orderBy.push({
-        title: 'asc',
-      });
-    } else if (sort === PROBLEM_SORT_MAP.TITLE_DESC) {
-      orderBy.push({
-        title: 'desc',
-      });
-    }
-
-    return orderBy;
-  }
 
   async getProblemSumamryByTitle(
     dto: InquiryProblemsSummaryDto & { userUuid?: string },
@@ -129,21 +85,21 @@ export class ProblemsV2Repository {
 
     const orderClause = (() => {
       switch (sort) {
-        case PROBLEM_SORT_MAP.ANSWER_RATE_DESC:
+        case PROBLEM_SORT.ANSWER_RATE_DESC:
           return Prisma.sql`ORDER BY p.PROBLEM_V2_ANSWER_RATE DESC`;
-        case PROBLEM_SORT_MAP.ANSWER_RATE_ASC:
+        case PROBLEM_SORT.ANSWER_RATE_ASC:
           return Prisma.sql`ORDER BY p.PROBLEM_V2_ANSWER_RATE ASC`;
-        case PROBLEM_SORT_MAP.LEVEL_ASC:
+        case PROBLEM_SORT.LEVEL_ASC:
           return Prisma.sql`ORDER BY p.PROBLEM_V2_LEVEL ASC`;
-        case PROBLEM_SORT_MAP.LEVEL_DESC:
+        case PROBLEM_SORT.LEVEL_DESC:
           return Prisma.sql`ORDER BY p.PROBLEM_V2_LEVEL DESC`;
-        case PROBLEM_SORT_MAP.SUBMIT_COUNT_ASC:
+        case PROBLEM_SORT.SUBMIT_COUNT_ASC:
           return Prisma.sql`ORDER BY p.PROBLEM_V2_SUBMIT_COUNT ASC`;
-        case PROBLEM_SORT_MAP.SUBMIT_COUNT_DESC:
+        case PROBLEM_SORT.SUBMIT_COUNT_DESC:
           return Prisma.sql`ORDER BY p.PROBLEM_V2_SUBMIT_COUNT DESC`;
-        case PROBLEM_SORT_MAP.TITLE_ASC:
+        case PROBLEM_SORT.TITLE_ASC:
           return Prisma.sql`ORDER BY p.PROBLEM_V2_TITLE ASC`;
-        case PROBLEM_SORT_MAP.TITLE_DESC:
+        case PROBLEM_SORT.TITLE_DESC:
           return Prisma.sql`ORDER BY p.PROBLEM_V2_TITLE DESC`;
         default:
           return Prisma.sql`ORDER BY p.PROBLEM_V2_NO ASC`;
@@ -265,7 +221,7 @@ export class ProblemsV2Repository {
       }
     }
 
-    const orderBy = this.getProblemOrderBy(sort);
+    const orderBy = getProblemOrderBy(sort);
     const skip = ((pageNo ?? DEFAULT_PAGE_NO) - 1) * (pageSize ?? DEFAULT_PAGE_SIZE);
     const take = pageSize ?? DEFAULT_PAGE_SIZE;
 
