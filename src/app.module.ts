@@ -27,7 +27,6 @@ import { CryptoModule } from './crypto/crypto.module';
 import { ExecuteModule } from './execute/execute.module';
 import { MeModule } from './me/me.module';
 import { LoggerModule } from './logger/logger.module';
-import { ProblemsReportModule } from './problems-report/problems-report.module';
 import { ProblemsCollectModule } from './problems-collect/problems-collect.module';
 import { CodeModule } from './code/code.module';
 import { ProblemsV2Module } from './problems-v2/problems-v2.module';
@@ -111,7 +110,6 @@ import { createKeyv } from '@keyv/redis';
     ExecuteModule,
     MeModule,
     LoggerModule,
-    ProblemsReportModule,
     ProblemsCollectModule,
     CodeModule,
     ProblemsV2Module,
