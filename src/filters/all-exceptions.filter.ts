@@ -61,13 +61,18 @@ export class AllExceptionsFilter implements ExceptionFilter {
       statusCode === HttpStatus.INTERNAL_SERVER_ERROR ||
       process.env.NODE_ENV === 'development'
     ) {
+      const sanitizedHeaders = {
+        ...request.headers,
+        authorization: '[REDACTED]',
+        cookie: '[REDACTED]',
+      };
       this.logger.error(`INTERNAL_SERVER_ERROR`, {
         ip: request.ip,
         url: request.url,
         exception: exception instanceof Error ? exception.toString() : String(exception),
         stackTrace: process.env.NODE_ENV === 'development' ? stackTrace : '',
         errorMessage,
-        headers: request.headers,
+        headers: sanitizedHeaders,
       });
     }
 
