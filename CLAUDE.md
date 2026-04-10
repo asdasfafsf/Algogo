@@ -5,9 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Rules
 
 - This project does NOT use MoAI. Do not apply MoAI orchestration, templates, or workflows.
-- CLAUDE.md contains summaries only. Detailed content lives in `docs/` and is linked from here.
-- When creating or updating documentation, follow this pattern: add a one-line summary here, write details in `docs/`.
-- Do NOT expand CLAUDE.md with full explanations. Keep each item to one line.
+- 문서는 코드를 읽는 것보다 문서를 읽는 게 나을 때만 작성한다. 코드로 알 수 있는 내용은 문서화하지 않는다.
 
 `.claude/rules/` 에 자동 로드됨:
 - `code.md` — TypeScript/NestJS 코딩 규칙 (Effective TS 기반, strict 타입 최우선)
@@ -35,11 +33,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Architecture
 
 NestJS monolith, MySQL/Prisma, Redis, BullMQ, S3, Socket.IO, JWT+OAuth.
-Details: [docs/architecture.md](docs/architecture.md)
 
 ## Workflow
 
-Team structure, phases, review/test rules.
+Linear 이슈 기반. 이슈 → 브랜치 → 코드 → 커밋 → PR → 머지 → Done.
 Details: [docs/workflow.md](docs/workflow.md)
 
 ## ADR
