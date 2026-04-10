@@ -1,6 +1,6 @@
 import { IsIn, IsString } from 'class-validator';
 import { SocialProvider } from '../../common/types/social.type';
-import { SOCIAL_PROVIDER } from 'src/common/constants/social.constant';
+import { SOCIAL_PROVIDER } from '../../common/constants/social.constant';
 
 export class RequestUpdateSocialDto {
   @IsIn(Object.values(SOCIAL_PROVIDER), {

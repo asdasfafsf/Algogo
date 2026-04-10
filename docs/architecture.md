@@ -18,7 +18,7 @@ NestJS-based algorithmic problem platform (single monolith). Package.json has mu
 Each module follows **Controller -> Service -> Repository** pattern with DTOs in a `dto/` subfolder.
 
 - **Auth & Users**: `auth-v2/`, `oauth-v2/`, `auth-guard/`, `authorization/`, `users/`, `me/`, `jwt/`
-- **Problems**: `problems/` (v1 legacy), `problems-v2/` (current), `problems-collect/`, `problems-report/`, `problem-site/`
+- **Problems**: `problems/` (v1 legacy), `problems-v2/` (current), `problems-collect/`, `problem-site/`
 - **Code Execution**: `execute/` (WebSocket gateway + BullMQ), `code/` (templates/settings), `rate-limit/`
 - **Infrastructure**: `prisma/`, `redis/`, `s3/`, `config/`, `crypto/`, `image/`, `logger/`
 - **Cross-cutting**: `common/` (decorators, types, errors), `filters/`, `interceptors/`, `middlewares/`
@@ -78,7 +78,7 @@ Environment files: `.development.env` (local), `.production.env` (prod). `NODE_E
 
 ## Key Conventions
 
-- **TypeScript**: `strictNullChecks: false`, `noImplicitAny: false`
+- **TypeScript**: `strict: true` (strictNullChecks, noImplicitAny 등 전부 활성)
 - **Imports**: Relative paths from `baseUrl: "./"`, no path aliases
 - **Swagger**: Available at `/api` in development mode only
 - **CORS**: `http://localhost:5173` allowed in development
@@ -87,4 +87,4 @@ Environment files: `.development.env` (local), `.production.env` (prod). `NODE_E
 - **Prisma column mapping**: `@@map()` and `@map()` to SCREAMING_SNAKE_CASE DB columns
 - **Composite unique keys**: `(source, sourceId)` on problems, `(userUuid, problemUuid, language)` on ProblemCode
 - **V1/V2 pattern**: Legacy modules (`problems/`, `auth/`) coexist with v2 replacements. New work should use v2 modules.
-- **Prisma schema**: Actual path is `prisma/schema.prisma`. Package.json scripts reference `libs/shared-prisma/prisma/schema.prisma` (outdated).
+- **Prisma schema**: `prisma/schema.prisma`

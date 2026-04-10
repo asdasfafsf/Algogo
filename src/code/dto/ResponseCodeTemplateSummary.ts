@@ -1,6 +1,6 @@
 import { LanguageProvider } from '../../common/types/language.type';
 import { ApiProperty } from '@nestjs/swagger';
-import { LANGUAGE_PROVIDER } from 'src/common/constants/language.constant';
+import { LANGUAGE_PROVIDER } from '../../common/constants/language.constant';
 
 export default class ResponseCodeTemplateSummary {
   @ApiProperty({

@@ -151,7 +151,6 @@ export class ExecuteGateway {
         processTime: 0,
         memory: 0,
       };
-    } finally {
     }
   }
 

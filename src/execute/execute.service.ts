@@ -88,7 +88,6 @@ export class ExecuteService implements OnModuleInit {
         code: '9999',
         result: '예외 오류',
       };
-    } finally {
     }
   }
 }
