@@ -6,7 +6,6 @@ export const validationSchema = Joi.object({
     .default('production'),
   FRONTEND_URL: Joi.string().default(''),
   DATABASE_URL: Joi.string().required(),
-  CRAWLER_URL: Joi.string().required(),
   SERVER_PORT: Joi.string().required(),
   S3_SECRET_KEY: Joi.string().required(),
   S3_ACCESS_KEY: Joi.string().required(),

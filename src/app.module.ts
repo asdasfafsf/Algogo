@@ -3,8 +3,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import { validationSchema } from './config/validationSchema';
-import { CrawlerModule } from './crawler/crawler.module';
-import crawlerConfig from './config/crawlerConfig';
 import { ProblemsModule } from './problems/problems.module';
 import { S3Module } from './s3/s3.module';
 import { ImageModule } from './image/image.module';
@@ -27,7 +25,6 @@ import { CryptoModule } from './crypto/crypto.module';
 import { ExecuteModule } from './execute/execute.module';
 import { MeModule } from './me/me.module';
 import { LoggerModule } from './logger/logger.module';
-import { ProblemsCollectModule } from './problems-collect/problems-collect.module';
 import { CodeModule } from './code/code.module';
 import { ProblemsV2Module } from './problems-v2/problems-v2.module';
 import { AuthV2Module } from './auth-v2/auth-v2.module';
@@ -69,7 +66,6 @@ import { createKeyv } from '@keyv/redis';
       envFilePath: [`.${process.env.NODE_ENV ?? 'production'}.env`],
       load: [
         appConfig,
-        crawlerConfig,
         s3Config,
         googleOAuthConfig,
         kakaoOAuthConfig,
@@ -96,7 +92,6 @@ import { createKeyv } from '@keyv/redis';
       isGlobal: true,
     }),
 
-    CrawlerModule,
     ProblemsModule,
     S3Module,
     ImageModule,
@@ -112,7 +107,6 @@ import { createKeyv } from '@keyv/redis';
     ExecuteModule,
     MeModule,
     LoggerModule,
-    ProblemsCollectModule,
     CodeModule,
     ProblemsV2Module,
     AuthV2Module,
