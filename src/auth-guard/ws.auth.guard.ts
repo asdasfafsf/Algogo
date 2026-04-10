@@ -1,14 +1,14 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { WsException } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
-import { CustomLogger } from '../logger/custom-logger';
+import { AppLogger } from '../logger/app-logger';
 import { JwtService } from '../jwt/jwt.service';
 
 @Injectable()
 export class WsAuthGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly logger: CustomLogger,
+    private readonly logger: AppLogger,
   ) {}
 
   async canActivate(context: ExecutionContext) {

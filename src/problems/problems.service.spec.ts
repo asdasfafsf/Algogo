@@ -1,14 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProblemsService } from './problems.service';
 import { ProblemsRepository } from './problems.repository';
-import { CustomLogger } from '../logger/custom-logger';
+import { AppLogger } from '../logger/app-logger';
 import { ProblemNotFoundException } from '../common/errors/problem/ProblemNotFoundException';
 import { PROBLEM_SORT } from '../common/constants/problem-sort.constant';
 
 describe('ProblemsService', () => {
   let service: ProblemsService;
   let repository: jest.Mocked<ProblemsRepository>;
-  let logger: jest.Mocked<CustomLogger>;
+  let logger: jest.Mocked<AppLogger>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -18,13 +18,13 @@ describe('ProblemsService', () => {
           provide: ProblemsRepository,
           useValue: { getProblemList: jest.fn(), getProblem: jest.fn() },
         },
-        { provide: CustomLogger, useValue: { error: jest.fn() } },
+        { provide: AppLogger, useValue: { error: jest.fn() } },
       ],
     }).compile();
 
     service = module.get(ProblemsService);
     repository = module.get(ProblemsRepository) as jest.Mocked<ProblemsRepository>;
-    logger = module.get(CustomLogger) as jest.Mocked<CustomLogger>;
+    logger = module.get(AppLogger) as jest.Mocked<AppLogger>;
   });
 
   afterEach(() => {

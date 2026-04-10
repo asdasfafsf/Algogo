@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExecuteService } from './execute.service';
 import bullmqConfig from '../config/bullmqConfig';
-import { CustomLogger } from '../logger/custom-logger';
+import { AppLogger } from '../logger/app-logger';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 describe('ExecuteService', () => {
@@ -29,7 +29,7 @@ describe('ExecuteService', () => {
       providers: [
         ExecuteService,
         { provide: bullmqConfig.KEY, useValue: mockConfig },
-        { provide: CustomLogger, useValue: mockLogger },
+        { provide: AppLogger, useValue: mockLogger },
         { provide: EventEmitter2, useValue: mockEventEmitter },
       ],
     }).compile();

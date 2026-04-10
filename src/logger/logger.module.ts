@@ -1,22 +1,9 @@
-import { Global, Module, Scope } from '@nestjs/common';
-import { CustomLogger } from './custom-logger';
-import LoggerConfig from '../config/LoggerConfig';
-import { ConfigType } from '@nestjs/config';
-import { INQUIRER } from '@nestjs/core';
+import { Global, Module } from '@nestjs/common';
+import { AppLogger } from './app-logger';
 
 @Global()
 @Module({
-  providers: [
-    {
-      provide: CustomLogger,
-      scope: Scope.TRANSIENT,
-      inject: [INQUIRER, LoggerConfig.KEY],
-      useFactory: (
-        parentClass: object,
-        loggerConfig: ConfigType<typeof LoggerConfig>,
-      ) => new CustomLogger(parentClass.constructor.name, loggerConfig),
-    },
-  ],
-  exports: [CustomLogger],
+  providers: [AppLogger],
+  exports: [AppLogger],
 })
 export class LoggerModule {}

@@ -4,7 +4,7 @@ import { MeRepository } from './me.repository';
 import { S3Service } from '../s3/s3.service';
 import { CryptoService } from '../crypto/crypto.service';
 import { ImageService } from '../image/image.service';
-import { CustomLogger } from '../logger/custom-logger';
+import { AppLogger } from '../logger/app-logger';
 import { UserNotFoundException } from '../common/errors/user/UserNotFoundException';
 
 describe('MeService', () => {
@@ -49,7 +49,7 @@ describe('MeService', () => {
           provide: ImageService,
           useValue: { toWebp: jest.fn().mockResolvedValue(Buffer.from('webp-data')) },
         },
-        { provide: CustomLogger, useValue: { error: jest.fn() } },
+        { provide: AppLogger, useValue: { error: jest.fn() } },
       ],
     }).compile();
 

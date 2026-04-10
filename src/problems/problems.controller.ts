@@ -11,7 +11,7 @@ import { ApiBadRequestErrorResponse } from '../common/decorators/swagger/ApiBadR
 import { ResponseProblemDto } from './dto/ResponseProblemDto';
 import { ResponseProblemSummaryListDto } from './dto/ResponseProblemSummaryListDto';
 import { ResponseDto } from '../common/dto/ResponseDto';
-import { CustomLogger } from '../logger/custom-logger';
+import { AppLogger } from '../logger/app-logger';
 import { RequestProblemSummaryListDto } from './dto/RequestProblemSummaryListDto';
 
 @ApiTags('[Deprecated] 문제 관련 API v1')
@@ -21,7 +21,7 @@ import { RequestProblemSummaryListDto } from './dto/RequestProblemSummaryListDto
 export class ProblemsController {
   constructor(
     private readonly problemsService: ProblemsService,
-    private readonly Logger: CustomLogger,
+    private readonly Logger: AppLogger,
   ) {}
 
   @ApiOperation({

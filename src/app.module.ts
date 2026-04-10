@@ -17,6 +17,7 @@ import * as winston from 'winston';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { AllExceptionsFilter } from './filters/all-exceptions.filter';
 import { ResponseInterceptor } from './interceptors/response-interceptor';
+import { RequestLogInterceptor } from './interceptors/request-log.interceptor';
 import { UsersModule } from './users/users.module';
 import { RedisModule } from './redis/redis.module';
 import { JwtModule } from './jwt/jwt.module';
@@ -39,6 +40,8 @@ import wsConfig from './config/wsConfig';
 import LoggerConfig from './config/LoggerConfig';
 import appConfig from './config/appConfig';
 import { CacheModule } from '@nestjs/cache-manager';
+import { ClsModule } from 'nestjs-cls';
+import { uuidv7 } from 'uuidv7';
 import { RequestMetadataMiddleware } from './middlewares/RequestMetadataMiddleware';
 import { AuthGuardModule } from './auth-guard/auth-guard.module';
 import { AuthorizationModule } from './authorization/authorization.module';
@@ -48,6 +51,14 @@ import { createKeyv } from '@keyv/redis';
 
 @Module({
   imports: [
+    ClsModule.forRoot({
+      middleware: {
+        mount: true,
+        setup: (cls, req) => {
+          cls.set('requestId', (req.headers['x-request-id'] as string) || uuidv7());
+        },
+      },
+    }),
     WinstonModule.forRoot({
       transports: [
         new winston.transports.Console({
@@ -125,6 +136,10 @@ import { createKeyv } from '@keyv/redis';
     {
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: RequestLogInterceptor,
     },
   ],
 })
