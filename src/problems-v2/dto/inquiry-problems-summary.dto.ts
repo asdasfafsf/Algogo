@@ -1,9 +1,9 @@
 import { IsNumber, IsIn, Min, IsOptional, IsEnum } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { ProblemType, ProblemSort } from '../types/problem.type';
+import { ProblemType } from '../types/problem.type';
 import { PROBLEM_TYPE_MAP } from '../constants/problems-type';
-import { PROBLEM_SORT_MAP } from '../constants/problems-sort';
+import { PROBLEM_SORT, ProblemSort } from '../../common/constants/problem-sort.constant';
 import { UserProblemState } from '../../common/types/user.type';
 import { USER_PROBLEM_STATE } from '../../common/constants/user.constant';
 import { ALLOWED_PAGE_SIZES, DEFAULT_PAGE_SIZE } from '../../common/constants/pagination.constant';
@@ -65,17 +65,17 @@ export class InquiryProblemsSummaryDto {
   typeList?: ProblemType[];
 
   @IsOptional()
-  @IsEnum(Object.values(PROBLEM_SORT_MAP), {
+  @IsEnum(Object.values(PROBLEM_SORT), {
     message: '올바른 정렬 방식이 아닙니다',
   })
   @ApiProperty({
     description: '문제 정렬',
-    default: PROBLEM_SORT_MAP.DEFAULT,
-    enum: Object.values(PROBLEM_SORT_MAP),
+    default: PROBLEM_SORT.DEFAULT,
+    enum: Object.values(PROBLEM_SORT),
     enumName: 'ProblemSort',
     required: false,
   })
-  sort: ProblemSort = PROBLEM_SORT_MAP.DEFAULT;
+  sort: ProblemSort = PROBLEM_SORT.DEFAULT;
 
   @IsOptional()
   @IsEnum(Object.values(USER_PROBLEM_STATE), {
