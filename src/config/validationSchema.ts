@@ -39,4 +39,8 @@ export const validationSchema = Joi.object({
   BULLMQ_PORT: Joi.number().required(),
   BULLMQ_PASSWORD: Joi.string().required(),
   BULLMQ_QUEUE_NAME: Joi.string().required(),
+  LOKI_HOST: Joi.string().default(''),
+  LOKI_USERNAME: Joi.string().default(''),
+  LOKI_PASSWORD: Joi.string().default(''),
+  LOKI_ENABLED: Joi.string().valid('true', 'false').default('false'),
 });
