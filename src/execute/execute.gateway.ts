@@ -21,7 +21,7 @@ import { RedisService } from '../redis/redis.service';
 import WsConfig from '../config/wsConfig';
 import { ConfigType } from '@nestjs/config';
 import { Cron } from '@nestjs/schedule';
-import { CustomLogger } from '../logger/custom-logger';
+import { AppLogger } from '../logger/app-logger';
 import { RequestWsAuthDto } from './dto/RequestWsAuthDto';
 import { OnEvent } from '@nestjs/event-emitter';
 import { CustomHttpException } from '../common/errors/CustomHttpException';
@@ -48,7 +48,7 @@ export class ExecuteGateway {
   constructor(
     private readonly executeService: ExecuteService,
     private readonly wsAuthGurad: WsAuthGuard,
-    private readonly logger: CustomLogger,
+    private readonly logger: AppLogger,
     @Inject(WsConfig.KEY)
     private readonly wsConfig: ConfigType<typeof WsConfig>,
     private readonly redisService: RedisService,

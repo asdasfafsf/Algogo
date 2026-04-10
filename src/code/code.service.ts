@@ -14,13 +14,13 @@ import { NotFoundProblemCode } from './errors/NotFoundProblemCode';
 import { RedisService } from '../redis/redis.service';
 import { MAX_CODE_TEMPLATE_COUNT } from './constants';
 import RequestUpsertProblemCodeDto from './dto/RequestUpsertProblemCodeDto';
-import { CustomLogger } from '../logger/custom-logger';
+import { AppLogger } from '../logger/app-logger';
 @Injectable()
 export class CodeService {
   constructor(
     private readonly redisService: RedisService,
     private readonly codeRepository: CodeRepository,
-    private readonly logger: CustomLogger,
+    private readonly logger: AppLogger,
   ) {}
 
   async getCodeSetting(userUuid: string) {

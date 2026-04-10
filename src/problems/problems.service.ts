@@ -4,14 +4,14 @@ import { ProblemsRepository } from './problems.repository';
 import { ProblemType } from '../common/types/problem.type';
 import { ResponseProblemDto } from './dto/ResponseProblemDto';
 import { ResponseProblemContentDto } from './dto/ResponseProblemContentDto';
-import { CustomLogger } from '../logger/custom-logger';
+import { AppLogger } from '../logger/app-logger';
 import { ResponseProblemSummaryListDto } from './dto/ResponseProblemSummaryListDto';
 import { RequestProblemSummaryListDto } from './dto/RequestProblemSummaryListDto';
 
 @Injectable()
 export class ProblemsService {
   constructor(
-    private readonly logger: CustomLogger,
+    private readonly logger: AppLogger,
     private readonly problemsRepository: ProblemsRepository,
   ) {}
 

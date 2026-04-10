@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CodeService } from './code.service';
 import { CodeRepository } from './code.repository';
 import { RedisService } from '../redis/redis.service';
-import { CustomLogger } from '../logger/custom-logger';
+import { AppLogger } from '../logger/app-logger';
 import { NotFoundCodeTemplateException } from './errors/NotFoundCodeTemplateException';
 
 describe('CodeService 단위 테스트', () => {
@@ -17,7 +17,7 @@ describe('CodeService 단위 테스트', () => {
     set: jest.fn(),
   };
 
-  const mockLogger: Partial<CustomLogger> = {
+  const mockLogger: Partial<AppLogger> = {
     log: jest.fn(),
     error: jest.fn(),
   };
@@ -30,7 +30,7 @@ describe('CodeService 단위 테스트', () => {
         CodeService,
         { provide: CodeRepository, useValue: mockCodeRepository },
         { provide: RedisService, useValue: mockRedisService },
-        { provide: CustomLogger, useValue: mockLogger },
+        { provide: AppLogger, useValue: mockLogger },
       ],
     }).compile();
 
