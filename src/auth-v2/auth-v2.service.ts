@@ -8,7 +8,7 @@ import { JwtInvalidTokenException } from '../common/errors/token/JwtInvalidToken
 import JwtConfig from '../config/jwtConfig';
 import { ConfigType } from '@nestjs/config';
 import { CustomLogger } from '../logger/custom-logger';
-import { TokenUser } from 'src/common/types/request.type';
+import { TokenUser } from '../common/types/request.type';
 @Injectable()
 export class AuthV2Service {
   constructor(

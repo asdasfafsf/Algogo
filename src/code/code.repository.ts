@@ -62,35 +62,29 @@ export class CodeRepository {
     });
   }
 
+  private async getDefaultTemplates(userUuid: string) {
+    const defaults = await this.prisma.codeDefaultTemplate.findMany({
+      where: { userUuid },
+      select: { codeTemplateNo: true },
+    });
+
+    return this.prisma.codeTemplate.findMany({
+      where: { no: { in: defaults.map((d) => d.codeTemplateNo) } },
+      select: {
+        language: true,
+        uuid: true,
+        name: true,
+        content: true,
+        description: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+  }
+
   async getCodeTemplateResult(userUuid: string) {
     const [defaultList, summaryList] = await Promise.all([
-      this.prisma.codeDefaultTemplate
-        .findMany({
-          where: { userUuid },
-          select: {
-            codeTemplateNo: true,
-          },
-        })
-        .then((defaults) =>
-          this.prisma.codeTemplate.findMany({
-            where: {
-              no: {
-                in: defaults.map((d) => d.codeTemplateNo),
-              },
-            },
-            select: {
-              language: true,
-              uuid: true,
-              name: true,
-              content: true,
-              description: true,
-              createdAt: true,
-              updatedAt: true,
-            },
-          }),
-        ),
-
-      // 전체 템플릿 목록
+      this.getDefaultTemplates(userUuid),
       this.prisma.codeTemplate.findMany({
         where: { userUuid },
         select: {
@@ -168,7 +162,7 @@ export class CodeRepository {
     return codeTemplateList;
   }
 
-  async upsertCodeDefaultTemplate({ userUuid, language, codeTemplateNo }) {
+  async upsertCodeDefaultTemplate({ userUuid, language, codeTemplateNo }: { userUuid: string; language: LanguageProvider; codeTemplateNo: number }) {
     await this.prisma.codeDefaultTemplate.upsert({
       update: {
         codeTemplateNo,

@@ -1,4 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
+import { Request } from 'express';
 import { ConfigType } from '@nestjs/config';
 import kakaoOAuthConfig from '../config/kakaoOAuthConfig';
 import { HttpService } from '@nestjs/axios';
@@ -20,16 +21,22 @@ export class KakaoOAuthStrategy extends CustomOAuthStrategy(
     private readonly httpService: HttpService,
   ) {
     super({
-      ...oauthConfig,
+      clientID: oauthConfig.clientID ?? '',
+      clientSecret: oauthConfig.clientSecret ?? '',
+      callbackURL: oauthConfig.callbackURL ?? '',
+      authorizationURL: oauthConfig.authorizationURL ?? '',
+      tokenURL: oauthConfig.tokenURL ?? '',
+      connectCallbackURL: oauthConfig.connectCallbackURL ?? '',
+      disconnectCallbackURL: oauthConfig.disconnectCallbackURL ?? '',
       scope: 'openid',
     });
   }
 
   async validate(
-    req: any,
+    req: Request & { oauth?: Record<string, unknown>; user?: Record<string, unknown> },
     accessToken: string,
     refreshToken: string,
-  ): Promise<any> {
+  ): Promise<Record<string, unknown>> {
     const userInfo = await this.getUserInfo(accessToken);
     const { sub, nickname, email } = userInfo;
 

@@ -6,21 +6,21 @@ export class ProblemInputOutputDto {
     example: 1,
     type: Number,
   })
-  order: number;
+  order!: number;
 
   @ApiProperty({
     description: '입력',
     example: '1 2 3 4',
     type: String,
   })
-  input: string;
+  input!: string;
 
   @ApiProperty({
     description: '출력',
     example: '1 2 3 4',
     type: String,
   })
-  output: string;
+  output!: string;
 
   @ApiProperty({
     description: '설명',

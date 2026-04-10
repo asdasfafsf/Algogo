@@ -1,4 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
+import { Request } from 'express';
 import googleOAuthConfig from '../config/googleOAuthConfig';
 import { ConfigType } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
@@ -20,12 +21,18 @@ export class GoogleOauthStrategy extends CustomOAuthStrategy(
     private readonly httpService: HttpService,
   ) {
     super({
-      ...oauthConfig,
+      clientID: oauthConfig.clientID ?? '',
+      clientSecret: oauthConfig.clientSecret ?? '',
+      callbackURL: oauthConfig.callbackURL ?? '',
+      authorizationURL: oauthConfig.authorizationURL ?? '',
+      tokenURL: oauthConfig.tokenURL ?? '',
+      connectCallbackURL: oauthConfig.connectCallbackURL ?? '',
+      disconnectCallbackURL: oauthConfig.disconnectCallbackURL ?? '',
       scope: ['profile', 'email'], // Google 전용 scope
     });
   }
 
-  async validate(req: any, accessToken: string, refreshToken: string) {
+  async validate(req: Request & { oauth?: Record<string, unknown>; user?: Record<string, unknown> }, accessToken: string, refreshToken: string) {
     const userInfo = await this.getUserInfo(accessToken);
     const { sub, name, email } = userInfo;
 

@@ -1,56 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProblemType } from '../common/types/problem.type';
-import { ProblemSort } from './enum/ProblemSortEnum';
-import { Prisma } from '@prisma/client';
+import { ProblemSort } from '../common/constants/problem-sort.constant';
+import { getProblemOrderBy } from '../common/utils/problem-order-by.util';
 
 @Injectable()
 export class ProblemsRepository {
   constructor(private readonly prismaService: PrismaService) {}
-
-  private getProblemOrderBy(
-    sort: ProblemSort,
-  ):
-    | Prisma.ProblemOrderByWithRelationInput
-    | Prisma.ProblemOrderByWithRelationInput[] {
-    const orderBy = [];
-
-    if (sort === ProblemSort.ANSWER_RATE_ASC) {
-      orderBy.push({
-        answerRate: 'asc',
-      });
-    } else if (sort === ProblemSort.ANSWER_RATE_DESC) {
-      orderBy.push({
-        answerRate: 'desc',
-      });
-    } else if (sort === ProblemSort.LEVEL_ASC) {
-      orderBy.push({
-        level: 'asc',
-      });
-    } else if (sort === ProblemSort.LEVEL_DESC) {
-      orderBy.push({
-        level: 'desc',
-      });
-    } else if (sort === ProblemSort.SUBMIT_COUNT_ASC) {
-      orderBy.push({
-        submitCount: 'asc',
-      });
-    } else if (sort === ProblemSort.SUBMIT_COUNT_DESC) {
-      orderBy.push({
-        submitCount: 'desc',
-      });
-    } else if (sort === ProblemSort.TITLE_ASC) {
-      orderBy.push({
-        title: 'asc',
-      });
-    } else if (sort === ProblemSort.TITLE_DESC) {
-      orderBy.push({
-        title: 'desc',
-      });
-    }
-
-    return orderBy;
-  }
   async getProblemList(
     pageNo: number,
     pageSize: number,
@@ -59,7 +15,7 @@ export class ProblemsRepository {
     typeList?: ProblemType[],
     title?: string,
   ) {
-    const orderBy = this.getProblemOrderBy(sort);
+    const orderBy = getProblemOrderBy(sort);
 
     const totalCount = await this.prismaService.problem.count({
       where: {
@@ -126,7 +82,7 @@ export class ProblemsRepository {
       },
     });
 
-    const orderBy = this.getProblemOrderBy(sort);
+    const orderBy = getProblemOrderBy(sort);
 
     const problemSummaryList = await this.prismaService.problem.findMany({
       select: {

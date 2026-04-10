@@ -18,5 +18,5 @@ export class RequestProblemCollectDto {
     type: String,
     format: 'url',
   })
-  url: string;
+  url!: string;
 }

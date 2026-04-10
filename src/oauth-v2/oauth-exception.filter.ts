@@ -2,19 +2,26 @@ import {
   ExceptionFilter,
   Catch,
   ArgumentsHost,
+  Inject,
   Injectable,
   HttpException,
 } from '@nestjs/common';
+import { ConfigType } from '@nestjs/config';
 import { Response } from 'express';
 import { CustomLogger } from '../logger/custom-logger';
+import appConfig from '../config/appConfig';
 
 @Injectable()
 @Catch()
 export class OAuthExceptionFilter implements ExceptionFilter {
-  constructor(private readonly logger: CustomLogger) {}
+  constructor(
+    private readonly logger: CustomLogger,
+    @Inject(appConfig.KEY)
+    private readonly appCfg: ConfigType<typeof appConfig>,
+  ) {}
 
-  catch(exception: any, host: ArgumentsHost) {
-    this.logger.error('oauth exception', exception);
+  catch(exception: unknown, host: ArgumentsHost) {
+    this.logger.error('oauth exception', { exception: String(exception) });
 
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -23,12 +30,12 @@ export class OAuthExceptionFilter implements ExceptionFilter {
         ? exception.message || '정의되지 않은 오류가 발생하였습니다'
         : '정의되지 않은 오류가 발생하였습니다';
 
+    const baseUrl = this.appCfg.isDevelopment
+      ? this.appCfg.frontendUrl
+      : '';
+
     response
       .status(302)
-      .redirect(
-        process.env.NODE_ENV === 'development'
-          ? `http://localhost:5173/error?message=${errorMessage}`
-          : `/error?message=${errorMessage}`,
-      );
+      .redirect(`${baseUrl}/error?message=${errorMessage}`);
   }
 }

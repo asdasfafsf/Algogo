@@ -21,6 +21,7 @@ import { Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MULTER_OPTION } from './me.constants';
 import { ResponseMeDto } from './dto/ResponseMeDto';
+import { RequestUpdateSocialDto } from './dto/RequestUpdateSocialDto';
 import { ApiGlobalErrorResponses } from '../common/decorators/swagger/ApiGlobalErrorResponse';
 import { AuthGuard } from '../auth-guard/auth.guard';
 import { TokenUser } from '../common/types/request.type';
@@ -125,7 +126,7 @@ export class MeController {
     @Body('name') name: string,
   ): Promise<ResponseMeDto> {
     const { sub } = user;
-    const socialList = [];
+    const socialList: RequestUpdateSocialDto[] = [];
     const responseMeDto = await this.meService.updateMe({
       name,
       socialList,

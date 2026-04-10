@@ -3,14 +3,14 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class ResponseDto<T> {
   @ApiProperty({ enum: HttpStatus, example: 200 })
-  statusCode: HttpStatus;
+  statusCode!: HttpStatus;
 
   @ApiProperty({ example: '0000' })
-  errorCode: string;
+  errorCode!: string;
 
   @ApiProperty({ example: '정상' })
-  errorMessage: string;
+  errorMessage!: string;
 
   @ApiProperty()
-  data: T;
+  data!: T;
 }

@@ -2,7 +2,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-oauth2';
 import { Request } from 'express';
 
-type OAuthConfig = {
+export type OAuthConfig = {
   clientID: string;
   clientSecret: string;
   callbackURL: string;
@@ -12,29 +12,30 @@ type OAuthConfig = {
   disconnectCallbackURL: string;
   scope?: string | string[];
   passReqToCallback?: boolean;
-  state?: any;
+  state?: string | Record<string, unknown>;
   proxy?: boolean;
   session?: boolean;
   assignProperty?: string;
   property?: string;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function CustomOAuthStrategy(
   StrategyClass: typeof Strategy,
   strategyName: string,
-) {
-  return class extends PassportStrategy(StrategyClass, strategyName) {
+): new (config: OAuthConfig) => any {
+  class CustomStrategy extends PassportStrategy(StrategyClass, strategyName) {
     readonly config: OAuthConfig;
 
     constructor(config: OAuthConfig) {
+      const { session: _session, ...strategyOptions } = config;
       super({
-        ...config,
+        ...strategyOptions,
         callbackURL: '',
-        session: false,
         assignProperty: 'oauth',
         property: 'oauth',
         passReqToCallback: true,
-      });
+      } as never);
       this.config = {
         ...config,
         session: false,
@@ -45,24 +46,24 @@ export function CustomOAuthStrategy(
     }
 
     async validate(
-      req: any,
+      req: Request & { oauth?: Record<string, unknown>; user?: Record<string, unknown> },
       accessToken: string,
       refreshToken: string,
-      profile: any,
+      profile: Record<string, unknown>,
     ) {
       req.oauth = profile;
-      return req?.user ?? profile;
+      return (req?.user as Record<string, unknown>) ?? profile;
     }
 
-    authenticate(req: Request, options: any) {
-      const newOptions = { ...options, ...this.config };
+    authenticate(req: Request, options: Record<string, unknown>) {
+      const newOptions: Record<string, unknown> = { ...options, ...this.config };
       const requestUrl = req.originalUrl;
       const { destination } = req.query;
       const callbackURL = this.getCallbackUrl(requestUrl);
 
       if (destination) {
         newOptions.state = JSON.stringify({
-          ...newOptions?.state,
+          ...(newOptions?.state as Record<string, unknown>),
           destination,
         });
       }
@@ -79,5 +80,7 @@ export function CustomOAuthStrategy(
       }
       return this.config.callbackURL;
     }
-  };
+  }
+
+  return CustomStrategy;
 }

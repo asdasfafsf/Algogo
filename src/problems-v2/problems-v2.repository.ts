@@ -2,79 +2,36 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { InquiryProblemsSummaryDto } from './dto/inquiry-problems-summary.dto';
 import { Prisma } from '@prisma/client';
-import { ProblemSort } from './types/problem.type';
-import { PROBLEM_SORT_MAP } from './constants/problems-sort';
+import { ProblemSort, PROBLEM_SORT } from '../common/constants/problem-sort.constant';
+import { getProblemOrderBy } from '../common/utils/problem-order-by.util';
 import { ProblemSummaryDto } from './dto/problem-summary.dto';
 import { USER_PROBLEM_STATE } from '../common/constants/user.constant';
+import { DEFAULT_PAGE_NO, DEFAULT_PAGE_SIZE, FULLTEXT_SEARCH_LIMIT } from '../common/constants/pagination.constant';
 import { UserProblemState } from '../common/types/user.type';
 
 @Injectable()
 export class ProblemsV2Repository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  private getProblemOrderBy(
-    sort: ProblemSort,
-  ):
-    | Prisma.ProblemOrderByWithRelationInput
-    | Prisma.ProblemOrderByWithRelationInput[] {
-    const orderBy = [];
-
-    if (sort === PROBLEM_SORT_MAP.ANSWER_RATE_ASC) {
-      orderBy.push({
-        answerRate: 'asc',
-      });
-    } else if (sort === PROBLEM_SORT_MAP.ANSWER_RATE_DESC) {
-      orderBy.push({
-        answerRate: 'desc',
-      });
-    } else if (sort === PROBLEM_SORT_MAP.LEVEL_ASC) {
-      orderBy.push({
-        level: 'asc',
-      });
-    } else if (sort === PROBLEM_SORT_MAP.LEVEL_DESC) {
-      orderBy.push({
-        level: 'desc',
-      });
-    } else if (sort === PROBLEM_SORT_MAP.SUBMIT_COUNT_ASC) {
-      orderBy.push({
-        submitCount: 'asc',
-      });
-    } else if (sort === PROBLEM_SORT_MAP.SUBMIT_COUNT_DESC) {
-      orderBy.push({
-        submitCount: 'desc',
-      });
-    } else if (sort === PROBLEM_SORT_MAP.TITLE_ASC) {
-      orderBy.push({
-        title: 'asc',
-      });
-    } else if (sort === PROBLEM_SORT_MAP.TITLE_DESC) {
-      orderBy.push({
-        title: 'desc',
-      });
-    }
-
-    return orderBy;
-  }
-
   async getProblemSumamryByTitle(
     dto: InquiryProblemsSummaryDto & { userUuid?: string },
   ) {
     const { pageNo, pageSize, sort, levelList, typeList, title, states } = dto;
 
-    const filters: string[] = [];
+    const filters: Prisma.Sql[] = [];
 
     if (levelList?.length) {
       filters.push(
-        `p.PROBLEM_V2_LEVEL IN (${levelList.map(Number).join(',')})`,
+        Prisma.sql`p.PROBLEM_V2_LEVEL IN (${Prisma.join(levelList.map(Number))})`,
       );
     }
 
     if (typeList?.length) {
-      filters.push(`
+      filters.push(Prisma.sql`
         EXISTS (
           SELECT 1 FROM PROBLEM_V2_TYPE t
           WHERE t.PROBLEM_V2_UUID = p.PROBLEM_V2_UUID
-          AND t.name IN (${typeList.map((v) => `'${v}'`).join(',')})
+          AND t.name IN (${Prisma.join(typeList)})
         )
       `);
     }
@@ -82,69 +39,80 @@ export class ProblemsV2Repository {
     // states 필터링: states.length == 0일 때는 전체, 필터가 있을 때는 해당 상태만
     if (states && states.length > 0 && dto.userUuid) {
       // NONE과 NULL을 동일하게 처리
-      const hasNoneState = states.includes('NONE' as any);
+      const hasNoneState = states.includes('NONE' as unknown as (typeof states)[number]);
       const otherStates = states.filter((state) => state !== 'NONE');
 
       if (hasNoneState && otherStates.length > 0) {
         // NONE과 다른 상태들이 모두 포함된 경우
-        filters.push(`
+        filters.push(Prisma.sql`
           (NOT EXISTS (
             SELECT 1 FROM USER_PROBLEM_STATE ups2
             WHERE ups2.PROBLEM_UUID = p.PROBLEM_V2_UUID
-            AND ups2.USER_UUID = '${dto.userUuid}'
+            AND ups2.USER_UUID = ${dto.userUuid}
           ) OR EXISTS (
             SELECT 1 FROM USER_PROBLEM_STATE ups2
             WHERE ups2.PROBLEM_UUID = p.PROBLEM_V2_UUID
-            AND ups2.USER_UUID = '${dto.userUuid}'
-            AND ups2.STATE IN (${otherStates.map((state) => `'${state}'`).join(',')})
+            AND ups2.USER_UUID = ${dto.userUuid}
+            AND ups2.STATE IN (${Prisma.join(otherStates)})
           ))
         `);
       } else if (hasNoneState) {
         // NONE만 포함된 경우 (상태가 없는 문제들)
-        filters.push(`
+        filters.push(Prisma.sql`
           NOT EXISTS (
             SELECT 1 FROM USER_PROBLEM_STATE ups2
             WHERE ups2.PROBLEM_UUID = p.PROBLEM_V2_UUID
-            AND ups2.USER_UUID = '${dto.userUuid}'
+            AND ups2.USER_UUID = ${dto.userUuid}
           )
         `);
       } else {
         // 다른 상태들만 포함된 경우
-        filters.push(`
+        filters.push(Prisma.sql`
           EXISTS (
             SELECT 1 FROM USER_PROBLEM_STATE ups2
             WHERE ups2.PROBLEM_UUID = p.PROBLEM_V2_UUID
-            AND ups2.USER_UUID = '${dto.userUuid}'
-            AND ups2.STATE IN (${otherStates.map((state) => `'${state}'`).join(',')})
+            AND ups2.USER_UUID = ${dto.userUuid}
+            AND ups2.STATE IN (${Prisma.join(otherStates)})
           )
         `);
       }
     }
 
-    const whereClause = filters.length ? `AND ${filters.join(' AND ')}` : '';
+    const whereClause =
+      filters.length > 0
+        ? Prisma.sql`AND ${Prisma.join(filters, ' AND ')}`
+        : Prisma.empty;
 
     const orderClause = (() => {
       switch (sort) {
-        case PROBLEM_SORT_MAP.ANSWER_RATE_DESC:
-          return 'ORDER BY p.PROBLEM_V2_ANSWER_RATE DESC';
-        case PROBLEM_SORT_MAP.ANSWER_RATE_ASC:
-          return 'ORDER BY p.PROBLEM_V2_ANSWER_RATE ASC';
-        case PROBLEM_SORT_MAP.LEVEL_ASC:
-          return 'ORDER BY p.PROBLEM_V2_LEVEL ASC';
-        case PROBLEM_SORT_MAP.LEVEL_DESC:
-          return 'ORDER BY p.PROBLEM_V2_LEVEL DESC';
-        case PROBLEM_SORT_MAP.SUBMIT_COUNT_ASC:
-          return 'ORDER BY p.PROBLEM_V2_SUBMIT_COUNT ASC';
-        case PROBLEM_SORT_MAP.SUBMIT_COUNT_DESC:
-          return 'ORDER BY p.PROBLEM_V2_SUBMIT_COUNT DESC';
-        case PROBLEM_SORT_MAP.TITLE_ASC:
-          return 'ORDER BY p.PROBLEM_V2_TITLE ASC';
-        case PROBLEM_SORT_MAP.TITLE_DESC:
-          return 'ORDER BY p.PROBLEM_V2_TITLE DESC';
+        case PROBLEM_SORT.ANSWER_RATE_DESC:
+          return Prisma.sql`ORDER BY p.PROBLEM_V2_ANSWER_RATE DESC`;
+        case PROBLEM_SORT.ANSWER_RATE_ASC:
+          return Prisma.sql`ORDER BY p.PROBLEM_V2_ANSWER_RATE ASC`;
+        case PROBLEM_SORT.LEVEL_ASC:
+          return Prisma.sql`ORDER BY p.PROBLEM_V2_LEVEL ASC`;
+        case PROBLEM_SORT.LEVEL_DESC:
+          return Prisma.sql`ORDER BY p.PROBLEM_V2_LEVEL DESC`;
+        case PROBLEM_SORT.SUBMIT_COUNT_ASC:
+          return Prisma.sql`ORDER BY p.PROBLEM_V2_SUBMIT_COUNT ASC`;
+        case PROBLEM_SORT.SUBMIT_COUNT_DESC:
+          return Prisma.sql`ORDER BY p.PROBLEM_V2_SUBMIT_COUNT DESC`;
+        case PROBLEM_SORT.TITLE_ASC:
+          return Prisma.sql`ORDER BY p.PROBLEM_V2_TITLE ASC`;
+        case PROBLEM_SORT.TITLE_DESC:
+          return Prisma.sql`ORDER BY p.PROBLEM_V2_TITLE DESC`;
         default:
-          return 'ORDER BY p.PROBLEM_V2_NO ASC';
+          return Prisma.sql`ORDER BY p.PROBLEM_V2_NO ASC`;
       }
     })();
+
+    const stateSelectClause = dto.userUuid
+      ? Prisma.sql`COALESCE(ups.STATE, 'NONE') AS state`
+      : Prisma.sql`'NONE' AS state`;
+
+    const joinClause = dto.userUuid
+      ? Prisma.sql`LEFT JOIN USER_PROBLEM_STATE ups ON ups.PROBLEM_UUID = p.PROBLEM_V2_UUID AND ups.USER_UUID = ${dto.userUuid}`
+      : Prisma.empty;
 
     const rawList = await this.prismaService.$queryRaw<ProblemSummaryDto[]>(
       Prisma.sql`
@@ -160,33 +128,28 @@ export class ProblemsV2Repository {
           p.PROBLEM_V2_SOURCE AS source,
           p.PROBLEM_V2_SOURCE_ID AS sourceId,
           p.PROBLEM_V2_SOURCE_URL AS sourceUrl,
-          ${Prisma.raw(
-            dto.userUuid
-              ? `COALESCE(ups.STATE, 'NONE') AS state`
-              : `'NONE' AS state`,
-          )}
+          ${stateSelectClause}
         FROM PROBLEM_V2 p
-        ${Prisma.raw(
-          dto.userUuid
-            ? `LEFT JOIN USER_PROBLEM_STATE ups ON ups.PROBLEM_UUID = p.PROBLEM_V2_UUID AND ups.USER_UUID = '${dto.userUuid}'`
-            : '',
-        )}
+        ${joinClause}
         WHERE MATCH(p.PROBLEM_V2_TITLE) AGAINST(${title} IN BOOLEAN MODE)
-        ${Prisma.raw(whereClause)}
-        ${Prisma.raw(orderClause)}
-        LIMIT 1000;
+        ${whereClause}
+        ${orderClause}
+        LIMIT ${FULLTEXT_SEARCH_LIMIT};
       `,
     );
 
+    const searchTitle = dto.title ?? '';
     const filtered = (rawList as ProblemSummaryDto[]).filter((item) => {
       const title = item.title.toLowerCase();
-      const search = dto.title.toLowerCase();
+      const search = searchTitle.toLowerCase();
 
       return title.includes(search);
     });
     const totalCount = filtered.length;
-    const offset = (pageNo - 1) * pageSize;
-    const paged = filtered.slice(offset, offset + pageSize);
+    const currentPageNo = pageNo ?? DEFAULT_PAGE_NO;
+    const currentPageSize = pageSize ?? DEFAULT_PAGE_SIZE;
+    const offset = (currentPageNo - 1) * currentPageSize;
+    const paged = filtered.slice(offset, offset + currentPageSize);
 
     return {
       problemList: paged,
@@ -218,7 +181,7 @@ export class ProblemsV2Repository {
     // states 필터링: states.length == 0일 때는 전체, 필터가 있을 때는 해당 상태만
     if (states && states.length > 0 && dto.userUuid) {
       // NONE과 NULL을 동일하게 처리
-      const hasNoneState = states.includes('NONE' as any);
+      const hasNoneState = states.includes('NONE' as unknown as (typeof states)[number]);
       const otherStates = states.filter((state) => state !== 'NONE');
 
       if (hasNoneState && otherStates.length > 0) {
@@ -258,9 +221,9 @@ export class ProblemsV2Repository {
       }
     }
 
-    const orderBy = this.getProblemOrderBy(sort);
-    const skip = (pageNo - 1) * pageSize;
-    const take = pageSize;
+    const orderBy = getProblemOrderBy(sort);
+    const skip = ((pageNo ?? DEFAULT_PAGE_NO) - 1) * (pageSize ?? DEFAULT_PAGE_SIZE);
+    const take = pageSize ?? DEFAULT_PAGE_SIZE;
 
     const totalCount = await this.prismaService.problemV2.count({
       where,

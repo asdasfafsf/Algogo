@@ -21,7 +21,7 @@ export default class RequestUpdateCodeTemplateDto {
   })
   @IsString({ message: '템플릿 UUID는 문자열이어야 합니다.' })
   @IsNotEmpty({ message: '템플릿 UUID는 필수 항목입니다.' })
-  uuid: string;
+  uuid!: string;
 
   @ApiProperty({
     description: '템플릿 제목',
@@ -69,7 +69,7 @@ export default class RequestUpdateCodeTemplateDto {
     message: '지원하지 않는 프로그래밍 언어입니다.',
   })
   @IsNotEmpty({ message: '프로그래밍 언어는 필수 항목입니다.' })
-  language: LanguageProvider;
+  language!: LanguageProvider;
 
   @ApiProperty({
     description: '기본 템플릿 여부',
@@ -79,5 +79,5 @@ export default class RequestUpdateCodeTemplateDto {
   @IsBoolean({
     message: '기본 템플릿 여부는 불리언 값이어야 합니다.',
   })
-  isDefault: boolean;
+  isDefault!: boolean;
 }

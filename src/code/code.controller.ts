@@ -172,7 +172,7 @@ export class CodeController {
   @ApiResponse({
     status: 200,
     description: '코드 템플릿 수정 성공',
-    type: null,
+    type: undefined,
   })
   @ApiResponse({
     status: 404,

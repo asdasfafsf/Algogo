@@ -7,31 +7,31 @@ export class ResponseUserDto {
     description: 'The UUID of the user',
     example: '550e8400-e29b-41d4-a716-446655440000',
   })
-  uuid: string;
+  uuid!: string;
 
   @ApiProperty({
     description: 'The name of the user',
     example: 'John Doe',
   })
-  name: string;
+  name!: string;
 
   @ApiProperty({
     description: 'The email address of the user',
     example: 'john.doe@example.com',
   })
-  email: string;
+  email!: string;
 
   @ApiProperty({
     description: 'Profile photo URL of the user',
     example: 'https://example.com/profile-photo.jpg',
   })
-  profilePhoto: string;
+  profilePhoto!: string;
 
   @ApiProperty({
     type: [ResponseSocialDto],
     description: "List of user's social accounts",
   })
-  socialList: ResponseSocialDto[];
+  socialList!: ResponseSocialDto[];
 
   @ApiProperty({
     type: [ResponseOAuthDto],

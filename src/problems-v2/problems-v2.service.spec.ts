@@ -3,7 +3,7 @@ import { ProblemsV2Service } from './problems-v2.service';
 import { ProblemsV2Repository } from './problems-v2.repository';
 import { ProblemNotFoundException } from '../common/errors/problem/ProblemNotFoundException';
 import { USER_PROBLEM_STATE } from '../common/constants/user.constant';
-import { PROBLEM_SORT_MAP } from './constants/problems-sort';
+import { PROBLEM_SORT } from '../common/constants/problem-sort.constant';
 
 describe('ProblemsV2Service', () => {
   let service: ProblemsV2Service;
@@ -44,7 +44,7 @@ describe('ProblemsV2Service', () => {
         const dto = {
           pageNo: 1,
           pageSize: 10,
-          sort: PROBLEM_SORT_MAP.DEFAULT,
+          sort: PROBLEM_SORT.DEFAULT,
         } as any;
         repository.getProblemsSummary.mockResolvedValue({} as any);
 
@@ -62,7 +62,7 @@ describe('ProblemsV2Service', () => {
           title: 'A',
           pageNo: 1,
           pageSize: 10,
-          sort: PROBLEM_SORT_MAP.DEFAULT,
+          sort: PROBLEM_SORT.DEFAULT,
         } as any;
         repository.getProblemsSummary.mockResolvedValue({} as any);
 
@@ -80,7 +80,7 @@ describe('ProblemsV2Service', () => {
           title: '',
           pageNo: 1,
           pageSize: 10,
-          sort: PROBLEM_SORT_MAP.DEFAULT,
+          sort: PROBLEM_SORT.DEFAULT,
         } as any;
         repository.getProblemsSummary.mockResolvedValue({} as any);
 
@@ -98,7 +98,7 @@ describe('ProblemsV2Service', () => {
           title: 'A+B',
           pageNo: 1,
           pageSize: 10,
-          sort: PROBLEM_SORT_MAP.DEFAULT,
+          sort: PROBLEM_SORT.DEFAULT,
         } as any;
         repository.getProblemsSummary.mockResolvedValue({} as any);
 
@@ -116,7 +116,7 @@ describe('ProblemsV2Service', () => {
           title: '+-<>@~*',
           pageNo: 1,
           pageSize: 10,
-          sort: PROBLEM_SORT_MAP.DEFAULT,
+          sort: PROBLEM_SORT.DEFAULT,
         } as any;
         repository.getProblemsSummary.mockResolvedValue({} as any);
 
@@ -134,7 +134,7 @@ describe('ProblemsV2Service', () => {
           title: '알고리즘',
           pageNo: 1,
           pageSize: 10,
-          sort: PROBLEM_SORT_MAP.DEFAULT,
+          sort: PROBLEM_SORT.DEFAULT,
         } as any;
         repository.getProblemSumamryByTitle.mockResolvedValue({} as any);
 
@@ -152,7 +152,7 @@ describe('ProblemsV2Service', () => {
           title: 'Hello World',
           pageNo: 1,
           pageSize: 10,
-          sort: PROBLEM_SORT_MAP.DEFAULT,
+          sort: PROBLEM_SORT.DEFAULT,
         } as any;
         repository.getProblemSumamryByTitle.mockResolvedValue({} as any);
 
@@ -171,7 +171,7 @@ describe('ProblemsV2Service', () => {
         title: '알고리즘',
         pageNo: 1,
         pageSize: 10,
-        sort: PROBLEM_SORT_MAP.DEFAULT,
+        sort: PROBLEM_SORT.DEFAULT,
       } as any;
       const expectedResult = {
         problemList: [{ uuid: 'test-uuid', title: '알고리즘 문제' }],

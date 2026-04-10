@@ -12,6 +12,7 @@ import RequestCreateCodeTemplateDto from './dto/RequestCreateCodeTemplateDto';
 import { NotFoundProblemException } from './errors/NotFoundProblemException';
 import { NotFoundProblemCode } from './errors/NotFoundProblemCode';
 import { RedisService } from '../redis/redis.service';
+import { MAX_CODE_TEMPLATE_COUNT } from './constants';
 import RequestUpsertProblemCodeDto from './dto/RequestUpsertProblemCodeDto';
 import { CustomLogger } from '../logger/custom-logger';
 @Injectable()
@@ -63,7 +64,7 @@ export class CodeService {
     userUuid: string;
     uuid: string;
   }) {
-    const codeTemplate = this.codeRepository.getCodeTemplate({
+    const codeTemplate = await this.codeRepository.getCodeTemplate({
       userUuid,
       uuid,
     });
@@ -82,14 +83,14 @@ export class CodeService {
     const count =
       await this.codeRepository.selectTotalCodeTemplateCount(userUuid);
 
-    if (count >= 10) {
+    if (count >= MAX_CODE_TEMPLATE_COUNT) {
       throw new CodeTemplateLimitExceededException();
     }
 
     const codeTemplate = await this.codeRepository.createCodeTemplate({
       userUuid,
       content,
-      description,
+      description: description ?? '',
       name,
       language,
     });
@@ -156,6 +157,11 @@ export class CodeService {
     dto: RequestUpsertDefaultCodeTemplateDto & { userUuid: string },
   ) {
     const { userUuid, uuid, language } = dto;
+
+    if (!uuid) {
+      throw new NotFoundCodeTemplateException();
+    }
+
     const codeTemplateNo = await this.codeRepository.getCodeTemplateNo({
       uuid,
       userUuid,

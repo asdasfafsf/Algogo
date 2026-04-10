@@ -29,5 +29,5 @@ export default class RequestUpsertDefaultCodeTemplateDto {
   @IsEnum(LANGUAGE_PROVIDER, {
     message: '지원하지 않는 프로그래밍 언어입니다.',
   })
-  language: LanguageProvider;
+  language!: LanguageProvider;
 }

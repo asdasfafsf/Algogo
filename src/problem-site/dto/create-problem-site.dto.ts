@@ -11,7 +11,7 @@ export class CreateProblemSiteDto {
   })
   @IsNotEmpty()
   @IsString()
-  provider: ProblemSiteProvider;
+  provider!: ProblemSiteProvider;
 
   @ApiProperty({
     description: '문제 사이트 계정 핸들/아이디',
@@ -21,5 +21,5 @@ export class CreateProblemSiteDto {
   })
   @IsNotEmpty()
   @IsString()
-  handle: string;
+  handle!: string;
 }

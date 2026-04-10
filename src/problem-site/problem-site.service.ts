@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ProblemSiteRepository } from './problem-site.repository';
-import { ProblemSiteProvider } from 'src/common/types/problem-site.type';
+import { ProblemSiteProvider } from '../common/types/problem-site.type';
 
 @Injectable()
 export class ProblemSiteService {

@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { ProblemNotFoundException } from '../common/errors/problem/ProblemNotFoundException';
 import { ProblemsRepository } from './problems.repository';
 import { ProblemType } from '../common/types/problem.type';
 import { ResponseProblemDto } from './dto/ResponseProblemDto';
@@ -22,12 +23,12 @@ export class ProblemsService {
 
     try {
       const problemSummary = await this.problemsRepository.getProblemList(
-        pageNo,
-        pageSize,
+        pageNo ?? 1,
+        pageSize ?? 10,
         sort,
         levelList,
         typeList,
-        title || null,
+        title || undefined,
       );
 
       return {
@@ -39,9 +40,9 @@ export class ProblemsService {
           };
         }),
       };
-    } catch (e) {
+    } catch (e: unknown) {
       this.logger.error(`${ProblemsService.name} getProblemSummaryList`, {
-        message: e.message,
+        message: e instanceof Error ? e.message : String(e),
       });
 
       throw e;
@@ -53,7 +54,7 @@ export class ProblemsService {
       const problem = await this.problemsRepository.getProblem(uuid);
 
       if (!problem) {
-        throw new NotFoundException('문제를 찾을 수 없습니다.');
+        throw new ProblemNotFoundException();
       }
 
       return {
@@ -62,9 +63,9 @@ export class ProblemsService {
           (content) => content as ResponseProblemContentDto,
         ),
       };
-    } catch (e) {
+    } catch (e: unknown) {
       this.logger.error(`${ProblemsService.name} getProblem uuid`, {
-        message: e.message,
+        message: e instanceof Error ? e.message : String(e),
       });
 
       throw e;

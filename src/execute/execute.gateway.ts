@@ -31,13 +31,15 @@ import { TokenUser } from '../common/types/request.type';
 import { WsAuthGuard } from '../auth-guard/ws.auth.guard';
 import { ExecutionRateLimitGuard } from '../rate-limit/execution-rate-limit.guard';
 import { ExecutionRateLimitInterceptor } from '../rate-limit/execution-rate-limit.interceptor';
+import { RequestExecuteDto } from './dto/RequestExecuteDto';
+import { RequestRunDto } from './dto/RequestRunDto';
 
 class AuthSocket extends Socket {
-  messageCount: number;
-  user: TokenUser;
-  token: string;
-  lastRequestTime: number;
-  authErrorCount: number;
+  messageCount!: number;
+  user!: TokenUser;
+  token!: string;
+  lastRequestTime!: number;
+  authErrorCount!: number;
 }
 
 @WebSocketGateway()
@@ -53,7 +55,7 @@ export class ExecuteGateway {
   ) {}
 
   @WebSocketServer()
-  private server: Server;
+  private server!: Server;
 
   async handleConnection(socket: AuthSocket) {
     socket.lastRequestTime = Math.floor(new Date().getTime() / 1000);
@@ -121,11 +123,11 @@ export class ExecuteGateway {
   @UseInterceptors(ExecutionRateLimitInterceptor)
   @SubscribeMessage('execute')
   async handleExecute(
-    @MessageBody() requestExecuteDto: any,
+    @MessageBody() requestExecuteDto: RequestExecuteDto,
     @ConnectedSocket() socket: AuthSocket,
   ) {
     const { id } = socket;
-    const requestRunDto = { id, ...requestExecuteDto };
+    const requestRunDto = { id, ...requestExecuteDto } as unknown as RequestRunDto;
     socket.lastRequestTime = Math.floor(new Date().getTime() / 1000);
 
     try {
@@ -149,7 +151,6 @@ export class ExecuteGateway {
         processTime: 0,
         memory: 0,
       };
-    } finally {
     }
   }
 
@@ -180,7 +181,7 @@ export class ExecuteGateway {
   }
 
   @OnEvent('execute')
-  async subscribeExecute(payload: any) {
+  async subscribeExecute(payload: { id: string; [key: string]: unknown }) {
     const { id, ...message } = payload;
     this.server.to(id).emit('executeResult', message);
   }

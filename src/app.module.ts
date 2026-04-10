@@ -27,7 +27,6 @@ import { CryptoModule } from './crypto/crypto.module';
 import { ExecuteModule } from './execute/execute.module';
 import { MeModule } from './me/me.module';
 import { LoggerModule } from './logger/logger.module';
-import { ProblemsReportModule } from './problems-report/problems-report.module';
 import { ProblemsCollectModule } from './problems-collect/problems-collect.module';
 import { CodeModule } from './code/code.module';
 import { ProblemsV2Module } from './problems-v2/problems-v2.module';
@@ -42,6 +41,7 @@ import encryptConfig from './config/encryptConfig';
 import bullmqConfig from './config/bullmqConfig';
 import wsConfig from './config/wsConfig';
 import LoggerConfig from './config/LoggerConfig';
+import appConfig from './config/appConfig';
 import { CacheModule } from '@nestjs/cache-manager';
 import { RequestMetadataMiddleware } from './middlewares/RequestMetadataMiddleware';
 import { AuthGuardModule } from './auth-guard/auth-guard.module';
@@ -68,6 +68,7 @@ import { createKeyv } from '@keyv/redis';
     ConfigModule.forRoot({
       envFilePath: [`.${process.env.NODE_ENV ?? 'production'}.env`],
       load: [
+        appConfig,
         crawlerConfig,
         s3Config,
         googleOAuthConfig,
@@ -102,7 +103,7 @@ import { createKeyv } from '@keyv/redis';
     PrismaModule,
     UsersModule,
     RedisModule.forRootAsync({
-      host: process.env.REDIS_HOST,
+      host: process.env.REDIS_HOST ?? 'localhost',
       port: Number(process.env.REDIS_PORT),
       password: process.env.REDIS_PASSWORD,
     }),
@@ -111,7 +112,6 @@ import { createKeyv } from '@keyv/redis';
     ExecuteModule,
     MeModule,
     LoggerModule,
-    ProblemsReportModule,
     ProblemsCollectModule,
     CodeModule,
     ProblemsV2Module,
@@ -138,6 +138,6 @@ import { createKeyv } from '@keyv/redis';
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(RequestMetadataMiddleware).forRoutes('*');
+    consumer.apply(RequestMetadataMiddleware).forRoutes('*splat');
   }
 }

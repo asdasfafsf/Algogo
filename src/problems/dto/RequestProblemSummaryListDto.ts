@@ -1,9 +1,9 @@
-import { IsNumber, IsIn, Min, IsOptional, IsEnum } from 'class-validator';
+import { IsNumber, IsIn, Min, IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { ProblemType } from '../../common/types/problem.type';
-import { ProblemSort } from '../enum/ProblemSortEnum';
-import { PROBLEM_TYPE } from 'src/common/constants/problem.constant';
+import { PROBLEM_SORT, ProblemSort } from '../enum/ProblemSortEnum';
+import { PROBLEM_TYPE } from '../../common/constants/problem.constant';
 
 export class RequestProblemSummaryListDto {
   @Transform(({ value }) => (value !== undefined ? Number(value) : 1))
@@ -62,13 +62,13 @@ export class RequestProblemSummaryListDto {
   typeList?: ProblemType[];
 
   @IsOptional()
-  @IsEnum(ProblemSort)
+  @IsIn(Object.values(PROBLEM_SORT))
   @ApiProperty({
     description: '문제 정렬',
-    default: ProblemSort.DEFAULT,
-    enum: ProblemSort,
+    default: PROBLEM_SORT.DEFAULT,
+    enum: Object.values(PROBLEM_SORT),
     enumName: 'ProblemSort',
     required: false,
   })
-  sort: ProblemSort = ProblemSort.DEFAULT;
+  sort: ProblemSort = PROBLEM_SORT.DEFAULT;
 }

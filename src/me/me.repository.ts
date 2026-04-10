@@ -47,7 +47,7 @@ export class MeRepository {
       },
     });
 
-    return user.uuid;
+    return user?.uuid ?? null;
   }
 
   async updateMe(updateMeDto: UpdateMeDto) {

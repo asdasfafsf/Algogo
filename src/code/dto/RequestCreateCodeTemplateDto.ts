@@ -19,7 +19,7 @@ export default class RequestCreateCodeTemplateDto {
   })
   @IsString()
   @Length(1, 100)
-  name: string;
+  name!: string;
 
   @ApiProperty({
     description: '템플릿 내용',
@@ -28,7 +28,7 @@ export default class RequestCreateCodeTemplateDto {
   })
   @IsString()
   @MinLength(1)
-  content: string;
+  content!: string;
 
   @ApiProperty({
     description: '템플릿 설명 (선택사항)',
@@ -53,7 +53,7 @@ export default class RequestCreateCodeTemplateDto {
   @IsEnum(LANGUAGE_PROVIDER, {
     message: '지원하지 않는 프로그래밍 언어입니다.',
   })
-  language: LanguageProvider;
+  language!: LanguageProvider;
 
   @ApiProperty({
     description: '기본 템플릿 여부',
@@ -63,5 +63,5 @@ export default class RequestCreateCodeTemplateDto {
   @IsBoolean({
     message: '기본 템플릿 여부는 불리언 값이어야 합니다.',
   })
-  isDefault: boolean;
+  isDefault!: boolean;
 }

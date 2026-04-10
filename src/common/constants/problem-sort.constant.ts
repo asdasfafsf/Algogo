@@ -1,4 +1,4 @@
-export const PROBLEM_SORT_MAP = {
+export const PROBLEM_SORT = {
   DEFAULT: 0,
   TITLE_ASC: 10,
   TITLE_DESC: 11,
@@ -9,3 +9,5 @@ export const PROBLEM_SORT_MAP = {
   SUBMIT_COUNT_ASC: 40,
   SUBMIT_COUNT_DESC: 41,
 } as const;
+
+export type ProblemSort = (typeof PROBLEM_SORT)[keyof typeof PROBLEM_SORT];

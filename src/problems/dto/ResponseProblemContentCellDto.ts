@@ -5,15 +5,15 @@ export class ResponseProblemContentCellDto {
     description: '행 인덱스',
     example: 1,
   })
-  rowIndex: number;
+  rowIndex!: number;
   @ApiProperty({
     description: '열 인덱스',
     example: 1,
   })
-  colIndex: number;
+  colIndex!: number;
   @ApiProperty({
     description: '셀 내용',
     example: '1',
   })
-  content: string;
+  content!: string;
 }
