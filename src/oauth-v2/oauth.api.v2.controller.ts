@@ -4,7 +4,6 @@ import {
   Post,
   Res,
   UseGuards,
-  Inject,
 } from '@nestjs/common';
 import { DynamicOAuthGuard } from './dynamic-oauth.guard';
 import { OAuthProvider, OAuthRequestUser } from '../common/types/oauth.type';
@@ -16,15 +15,13 @@ import { OAuth } from '../common/decorators/contexts/oauth.decorator';
 import { RequestMetadata } from '../common/decorators/contexts/request-metadata.decorator';
 import { RequestMetadata as Metadata } from '../common/types/request.type';
 import { Response } from 'express';
-import JwtConfig from '../config/jwtConfig';
-import { ConfigType } from '@nestjs/config';
+import { TokenCookieService } from '../jwt/token-cookie.service';
 
 @Controller('api/v2/oauth')
 export class OauthApiV2Controller {
   constructor(
     private readonly oauthV2Service: OauthV2Service,
-    @Inject(JwtConfig.KEY)
-    private readonly jwtConfig: ConfigType<typeof JwtConfig>,
+    private readonly tokenCookieService: TokenCookieService,
   ) {}
 
   @Post('/:provider')
@@ -41,19 +38,7 @@ export class OauthApiV2Controller {
         userAgent: metadata.userAgent,
       });
 
-    res.cookie('access_token', accessToken, {
-      httpOnly: process.env.NODE_ENV !== 'development', // 개발환경에서는 접근 허용
-      secure: process.env.NODE_ENV !== 'development',
-      sameSite: process.env.NODE_ENV !== 'development' ? 'strict' : 'lax', // 개발환경에서는 lax
-      maxAge: this.jwtConfig.jwtAccessTokenExpiresIn * 1000,
-    });
-
-    res.cookie('refresh_token', refreshToken, {
-      httpOnly: process.env.NODE_ENV !== 'development', // 개발환경에서는 접근 허용
-      secure: process.env.NODE_ENV !== 'development',
-      sameSite: process.env.NODE_ENV !== 'development' ? 'strict' : 'lax', // 개발환경에서는 lax
-      maxAge: this.jwtConfig.jwtRefreshTokenExpiresIn * 1000,
-    });
+    this.tokenCookieService.setAuthCookies(res, { accessToken, refreshToken });
 
     return {
       accessToken,

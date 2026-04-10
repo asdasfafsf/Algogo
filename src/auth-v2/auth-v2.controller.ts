@@ -19,11 +19,9 @@ import { ApiGlobalErrorResponses } from '../common/decorators/swagger/ApiGlobalE
 import { RequestMetadata as Metadata } from '../common/types/request.type';
 import { RequestMetadata } from '../common/decorators/contexts/request-metadata.decorator';
 import { Request, Response } from 'express';
-import { Inject } from '@nestjs/common';
-import JwtConfig from '../config/jwtConfig';
-import { ConfigType } from '@nestjs/config';
-import { User } from 'src/common/decorators/contexts/user.decorator';
-import { AuthGuard } from 'src/auth-guard/auth.guard';
+import { TokenCookieService } from '../jwt/token-cookie.service';
+import { User } from '../common/decorators/contexts/user.decorator';
+import { AuthGuard } from '../auth-guard/auth.guard';
 
 @ApiTags('Auth V2')
 @ApiBearerAuth('Authorization')
@@ -32,8 +30,7 @@ import { AuthGuard } from 'src/auth-guard/auth.guard';
 export class AuthV2Controller {
   constructor(
     private readonly authV2Service: AuthV2Service,
-    @Inject(JwtConfig.KEY)
-    private readonly jwtConfig: ConfigType<typeof JwtConfig>,
+    private readonly tokenCookieService: TokenCookieService,
   ) {}
 
   @ApiOperation({
@@ -72,19 +69,7 @@ export class AuthV2Controller {
       userAgent: metadata.userAgent,
     });
 
-    res.cookie('access_token', accessToken, {
-      httpOnly: process.env.NODE_ENV !== 'development', // 개발환경에서는 접근 허용
-      secure: process.env.NODE_ENV !== 'development',
-      sameSite: process.env.NODE_ENV !== 'development' ? 'strict' : 'lax', // 개발환경에서는 lax
-      maxAge: this.jwtConfig.jwtAccessTokenExpiresIn * 1000,
-    });
-
-    res.cookie('refresh_token', refreshToken, {
-      httpOnly: process.env.NODE_ENV !== 'development', // 개발환경에서는 접근 허용
-      secure: process.env.NODE_ENV !== 'development',
-      sameSite: process.env.NODE_ENV !== 'development' ? 'strict' : 'lax', // 개발환경에서는 lax
-      maxAge: this.jwtConfig.jwtRefreshTokenExpiresIn * 1000,
-    });
+    this.tokenCookieService.setAuthCookies(res, { accessToken, refreshToken });
 
     return {
       accessToken,
@@ -115,8 +100,7 @@ export class AuthV2Controller {
       refreshToken,
     });
 
-    res.clearCookie('access_token');
-    res.clearCookie('refresh_token');
+    this.tokenCookieService.clearAuthCookies(res);
 
     return;
   }
