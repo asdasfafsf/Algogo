@@ -41,6 +41,7 @@ import encryptConfig from './config/encryptConfig';
 import bullmqConfig from './config/bullmqConfig';
 import wsConfig from './config/wsConfig';
 import LoggerConfig from './config/LoggerConfig';
+import appConfig from './config/appConfig';
 import { CacheModule } from '@nestjs/cache-manager';
 import { RequestMetadataMiddleware } from './middlewares/RequestMetadataMiddleware';
 import { AuthGuardModule } from './auth-guard/auth-guard.module';
@@ -67,6 +68,7 @@ import { createKeyv } from '@keyv/redis';
     ConfigModule.forRoot({
       envFilePath: [`.${process.env.NODE_ENV ?? 'production'}.env`],
       load: [
+        appConfig,
         crawlerConfig,
         s3Config,
         googleOAuthConfig,
