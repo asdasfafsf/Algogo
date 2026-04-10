@@ -1,6 +1,5 @@
 import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import { validationSchema } from './config/validationSchema';
 import { ProblemsModule } from './problems/problems.module';
@@ -127,7 +126,6 @@ import { createKeyv } from '@keyv/redis';
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,
     },
-    AppService,
   ],
 })
 export class AppModule {

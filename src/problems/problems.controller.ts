@@ -14,7 +14,7 @@ import { ResponseDto } from '../common/dto/ResponseDto';
 import { CustomLogger } from '../logger/custom-logger';
 import { RequestProblemSummaryListDto } from './dto/RequestProblemSummaryListDto';
 
-@ApiTags('문제 관련 API')
+@ApiTags('[Deprecated] 문제 관련 API v1')
 @ApiBadRequestErrorResponse()
 @ApiExtraModels(ResponseProblemSummaryListDto, ResponseDto)
 @Controller('api/v1/problems')
@@ -27,6 +27,7 @@ export class ProblemsController {
   @ApiOperation({
     summary: '문제 요약 리스트',
     description: '여러 문제의 요약 정보를 불러온다',
+    deprecated: true,
   })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -58,6 +59,7 @@ export class ProblemsController {
   @ApiOperation({
     summary: '문제 상세조회',
     description: '문제에 대한 상세 정보를 가져온다',
+    deprecated: true,
   })
   @ApiResponse({
     status: HttpStatus.OK,
