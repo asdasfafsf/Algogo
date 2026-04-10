@@ -22,12 +22,12 @@ export class ProblemsService {
 
     try {
       const problemSummary = await this.problemsRepository.getProblemList(
-        pageNo,
-        pageSize,
+        pageNo ?? 1,
+        pageSize ?? 10,
         sort,
         levelList,
         typeList,
-        title || null,
+        title || undefined,
       );
 
       return {
@@ -39,9 +39,9 @@ export class ProblemsService {
           };
         }),
       };
-    } catch (e) {
+    } catch (e: unknown) {
       this.logger.error(`${ProblemsService.name} getProblemSummaryList`, {
-        message: e.message,
+        message: e instanceof Error ? e.message : String(e),
       });
 
       throw e;
@@ -62,9 +62,9 @@ export class ProblemsService {
           (content) => content as ResponseProblemContentDto,
         ),
       };
-    } catch (e) {
+    } catch (e: unknown) {
       this.logger.error(`${ProblemsService.name} getProblem uuid`, {
-        message: e.message,
+        message: e instanceof Error ? e.message : String(e),
       });
 
       throw e;

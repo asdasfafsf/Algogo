@@ -21,7 +21,7 @@ export class ProblemsReportController {
   @ApiOperation({
     summary: '문제 잘못된게 있을 경우 수정 API',
     description: '문의내용을 전송한다',
-    responses: null,
+    responses: undefined,
   })
   @ApiResponse({
     status: HttpStatus.OK,

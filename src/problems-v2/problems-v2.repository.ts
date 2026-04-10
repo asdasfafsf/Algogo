@@ -17,7 +17,7 @@ export class ProblemsV2Repository {
   ):
     | Prisma.ProblemOrderByWithRelationInput
     | Prisma.ProblemOrderByWithRelationInput[] {
-    const orderBy = [];
+    const orderBy: Prisma.ProblemOrderByWithRelationInput[] = [];
 
     if (sort === PROBLEM_SORT_MAP.ANSWER_RATE_ASC) {
       orderBy.push({
@@ -178,15 +178,18 @@ export class ProblemsV2Repository {
       `,
     );
 
+    const searchTitle = dto.title ?? '';
     const filtered = (rawList as ProblemSummaryDto[]).filter((item) => {
       const title = item.title.toLowerCase();
-      const search = dto.title.toLowerCase();
+      const search = searchTitle.toLowerCase();
 
       return title.includes(search);
     });
     const totalCount = filtered.length;
-    const offset = (pageNo - 1) * pageSize;
-    const paged = filtered.slice(offset, offset + pageSize);
+    const currentPageNo = pageNo ?? 1;
+    const currentPageSize = pageSize ?? 10;
+    const offset = (currentPageNo - 1) * currentPageSize;
+    const paged = filtered.slice(offset, offset + currentPageSize);
 
     return {
       problemList: paged,
@@ -259,8 +262,8 @@ export class ProblemsV2Repository {
     }
 
     const orderBy = this.getProblemOrderBy(sort);
-    const skip = (pageNo - 1) * pageSize;
-    const take = pageSize;
+    const skip = ((pageNo ?? 1) - 1) * (pageSize ?? 10);
+    const take = pageSize ?? 10;
 
     const totalCount = await this.prismaService.problemV2.count({
       where,

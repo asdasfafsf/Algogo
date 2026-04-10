@@ -89,7 +89,7 @@ export class CodeService {
     const codeTemplate = await this.codeRepository.createCodeTemplate({
       userUuid,
       content,
-      description,
+      description: description ?? '',
       name,
       language,
     });
@@ -156,6 +156,11 @@ export class CodeService {
     dto: RequestUpsertDefaultCodeTemplateDto & { userUuid: string },
   ) {
     const { userUuid, uuid, language } = dto;
+
+    if (!uuid) {
+      throw new NotFoundCodeTemplateException();
+    }
+
     const codeTemplateNo = await this.codeRepository.getCodeTemplateNo({
       uuid,
       userUuid,

@@ -17,13 +17,14 @@ export class ProblemsV2Service {
   ) {
     const MYSQL_FULLTEXT_DELIMITERS = ['+', '-', '<', '>', '@', '~', '*'];
 
-    const hasTitle = !!dto.title;
+    const title = dto.title ?? '';
+    const hasTitle = !!title;
     const hasSpecial =
       hasTitle &&
       MYSQL_FULLTEXT_DELIMITERS.some((delimiter) =>
-        dto.title.includes(delimiter),
+        title.includes(delimiter),
       );
-    const canNgramSearch = hasTitle && dto.title.length > 1 && !hasSpecial;
+    const canNgramSearch = hasTitle && title.length > 1 && !hasSpecial;
 
     if (canNgramSearch) {
       return this.problemsV2Repository.getProblemSumamryByTitle(dto);
@@ -42,7 +43,7 @@ export class ProblemsV2Service {
       throw new ProblemNotFoundException();
     }
 
-    return {
+    const result: ProblemDto = {
       ...problem,
       state: (problem.userProblemStateList?.[0]?.state ??
         USER_PROBLEM_STATE.NONE) as UserProblemState,
@@ -52,7 +53,9 @@ export class ProblemsV2Service {
       languageLimitList: problem.languageLimitList.map(
         (languageLimit) => languageLimit.language,
       ),
-    };
+    } as ProblemDto;
+
+    return result;
   }
 
   async getTodayProblems({

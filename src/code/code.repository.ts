@@ -168,7 +168,7 @@ export class CodeRepository {
     return codeTemplateList;
   }
 
-  async upsertCodeDefaultTemplate({ userUuid, language, codeTemplateNo }) {
+  async upsertCodeDefaultTemplate({ userUuid, language, codeTemplateNo }: { userUuid: string; language: LanguageProvider; codeTemplateNo: number }) {
     await this.prisma.codeDefaultTemplate.upsert({
       update: {
         codeTemplateNo,
