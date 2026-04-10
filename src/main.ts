@@ -4,13 +4,16 @@ import { ValidationPipe } from '@nestjs/common';
 import * as requestIp from 'request-ip';
 import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
+import compression from 'compression';
 import { RedisIoAdapter } from './redis/redis.io.adapter';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  if (process.env.NODE_ENV === 'development') {
+  const isDevelopment = process.env.NODE_ENV === 'development';
+
+  if (isDevelopment) {
     const config = new DocumentBuilder()
       .setTitle('Algogo API')
       .setDescription('Algogo API')
@@ -27,17 +30,17 @@ async function bootstrap() {
       .build();
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api', app, document);
-
-    app.enableCors({
-      origin:
-        process.env.NODE_ENV === 'development'
-          ? 'http://localhost:5173'
-          : undefined,
-      credentials: process.env.NODE_ENV === 'development',
-    });
   }
 
+  app.enableCors({
+    origin: isDevelopment
+      ? process.env.FRONTEND_URL || 'http://localhost:5173'
+      : process.env.FRONTEND_URL || false,
+    credentials: true,
+  });
+
   app.use(helmet());
+  app.use(compression());
 
   app.use(requestIp.mw());
   app.use(cookieParser());
@@ -48,9 +51,13 @@ async function bootstrap() {
       transformOptions: { enableImplicitConversion: true },
     }),
   );
+
   const redisIoAdapter = new RedisIoAdapter(app);
   await redisIoAdapter.connectToRedis();
   app.useWebSocketAdapter(redisIoAdapter);
+
+  app.enableShutdownHooks();
+
   await app.listen(Number(process.env.SERVER_PORT));
 }
 bootstrap();
