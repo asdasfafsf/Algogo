@@ -82,7 +82,7 @@ export class ProblemsV2Repository {
     // states 필터링: states.length == 0일 때는 전체, 필터가 있을 때는 해당 상태만
     if (states && states.length > 0 && dto.userUuid) {
       // NONE과 NULL을 동일하게 처리
-      const hasNoneState = states.includes('NONE' as any);
+      const hasNoneState = states.includes('NONE' as unknown as (typeof states)[number]);
       const otherStates = states.filter((state) => state !== 'NONE');
 
       if (hasNoneState && otherStates.length > 0) {
@@ -221,7 +221,7 @@ export class ProblemsV2Repository {
     // states 필터링: states.length == 0일 때는 전체, 필터가 있을 때는 해당 상태만
     if (states && states.length > 0 && dto.userUuid) {
       // NONE과 NULL을 동일하게 처리
-      const hasNoneState = states.includes('NONE' as any);
+      const hasNoneState = states.includes('NONE' as unknown as (typeof states)[number]);
       const otherStates = states.filter((state) => state !== 'NONE');
 
       if (hasNoneState && otherStates.length > 0) {

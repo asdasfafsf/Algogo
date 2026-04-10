@@ -8,7 +8,7 @@ export function MaxBytes(
   maxBytes: number,
   validationOptions?: ValidationOptions,
 ) {
-  return function (object: any, propertyName: string) {
+  return function (object: object, propertyName: string) {
     registerDecorator({
       name: 'maxBytes',
       target: object.constructor,
@@ -16,7 +16,7 @@ export function MaxBytes(
       constraints: [maxBytes],
       options: validationOptions,
       validator: {
-        validate(value: any, args: ValidationArguments) {
+        validate(value: unknown, args: ValidationArguments) {
           if (typeof value !== 'string') return false;
           const bytes = Buffer.byteLength(value, 'utf8');
           return bytes <= args.constraints[0];

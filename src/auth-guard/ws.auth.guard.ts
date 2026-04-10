@@ -1,5 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { WsException } from '@nestjs/websockets';
+import { Socket } from 'socket.io';
 import { CustomLogger } from '../logger/custom-logger';
 import { JwtService } from '../jwt/jwt.service';
 
@@ -27,7 +28,7 @@ export class WsAuthGuard implements CanActivate {
     }
   }
 
-  private extractTokenFromClient(client: any): string | undefined {
+  private extractTokenFromClient(client: Socket & { token?: string }): string | undefined {
     return client.token ?? undefined;
   }
 }

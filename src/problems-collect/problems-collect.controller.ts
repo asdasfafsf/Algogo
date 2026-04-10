@@ -10,9 +10,10 @@ import {
   Controller,
   HttpStatus,
   Post,
-  Req,
   UseGuards,
 } from '@nestjs/common';
+import { User } from '../common/decorators/contexts/user.decorator';
+import { TokenUser } from '../common/types/request.type';
 import { RequestProblemCollectDto } from './dto/RequestProblemCollectDto';
 import { ApiGlobalErrorResponses } from '../common/decorators/swagger/ApiGlobalErrorResponse';
 import { ProblemsCollectService } from './problems-collect.service';
@@ -85,10 +86,10 @@ export class ProblemsCollectController {
   @Post('/')
   async collectProblem(
     @Body() requestProblemCollectDto: RequestProblemCollectDto,
-    @Req() req: any,
+    @User() user: TokenUser,
   ) {
     const { url } = requestProblemCollectDto;
-    const { userNo } = req;
+    const userNo = user.sub;
 
     const uuid = await this.problemsCollectService.collect({
       url,

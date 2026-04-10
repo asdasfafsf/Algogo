@@ -1,4 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
+import { Request } from 'express';
 import { ConfigType } from '@nestjs/config';
 import kakaoOAuthConfig from '../config/kakaoOAuthConfig';
 import { HttpService } from '@nestjs/axios';
@@ -32,10 +33,10 @@ export class KakaoOAuthStrategy extends CustomOAuthStrategy(
   }
 
   async validate(
-    req: any,
+    req: Request & { oauth?: Record<string, unknown>; user?: Record<string, unknown> },
     accessToken: string,
     refreshToken: string,
-  ): Promise<any> {
+  ): Promise<Record<string, unknown>> {
     const userInfo = await this.getUserInfo(accessToken);
     const { sub, nickname, email } = userInfo;
 

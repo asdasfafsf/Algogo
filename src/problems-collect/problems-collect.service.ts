@@ -18,7 +18,7 @@ export class ProblemsCollectService {
     private readonly logger: CustomLogger,
   ) {}
 
-  async collect({ url, userNo }: { url: string; userNo: number }) {
+  async collect({ url, userNo }: { url: string; userNo: string }) {
     console.log(url, userNo);
     throw new Error('Not implemented');
   }

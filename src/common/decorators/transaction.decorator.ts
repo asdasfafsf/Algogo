@@ -2,16 +2,13 @@ import { PrismaService } from '../../prisma/prisma.service';
 
 export function Transaction() {
   return function (
-    target: object,
-    propertyKey: string,
+    _target: unknown,
+    _propertyKey: string,
     descriptor: PropertyDescriptor,
   ) {
     const originalMethod = descriptor.value;
 
-    descriptor.value = async function (
-      this: Record<string, unknown>,
-      ...args: unknown[]
-    ) {
+    descriptor.value = async function (this: Record<string, unknown>, ...args: unknown[]) {
       const prisma = this.prisma as PrismaService;
 
       return await prisma.$transaction(async (tx) => {

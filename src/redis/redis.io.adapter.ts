@@ -19,7 +19,7 @@ export class RedisIoAdapter extends IoAdapter {
     this.adapterConstructor = createAdapter(pubClient, subClient);
   }
 
-  createIOServer(port: number, options?: ServerOptions): any {
+  createIOServer(port: number, options?: ServerOptions): ReturnType<IoAdapter['createIOServer']> {
     const server = super.createIOServer(port, options);
     server.adapter(this.adapterConstructor);
     return server;
