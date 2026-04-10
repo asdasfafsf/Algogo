@@ -104,7 +104,7 @@ import { createKeyv } from '@keyv/redis';
               format: winston.format.json(),
               replaceTimestamp: true,
               onConnectionError: (err: Error) =>
-                console.error('Loki connection error:', err),
+                process.stderr.write(`Loki connection error: ${err.message}\n`),
             }),
           );
         }
