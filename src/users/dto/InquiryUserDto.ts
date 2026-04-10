@@ -1,4 +1,4 @@
 export class InquiryUserDto {
-  userNo: number;
-  uuid: string;
+  userNo!: number;
+  uuid!: string;
 }

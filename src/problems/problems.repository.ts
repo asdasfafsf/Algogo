@@ -13,7 +13,7 @@ export class ProblemsRepository {
   ):
     | Prisma.ProblemOrderByWithRelationInput
     | Prisma.ProblemOrderByWithRelationInput[] {
-    const orderBy = [];
+    const orderBy: Prisma.ProblemOrderByWithRelationInput[] = [];
 
     if (sort === ProblemSort.ANSWER_RATE_ASC) {
       orderBy.push({

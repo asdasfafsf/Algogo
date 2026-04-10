@@ -7,5 +7,5 @@ export class ResponseOAuthDto {
     description: 'OAuth기관',
     enum: OAUTH_PROVIDER,
   })
-  provider: OAuthProvider;
+  provider!: OAuthProvider;
 }

@@ -9,86 +9,86 @@ export class ProblemDto {
     description: '문제 UUID',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
-  uuid: string;
+  uuid!: string;
 
   @ApiProperty({
     description: '문제 제목',
     example: '두 수의 합',
   })
-  title: string;
+  title!: string;
 
   @ApiProperty({
     description: '문제 난이도',
     example: 3,
   })
-  level: number;
+  level!: number;
 
   @ApiProperty({
     description: '난이도 텍스트',
     example: '중급',
   })
-  levelText: string;
+  levelText!: string;
 
   @ApiProperty({
     description: '정답률',
     example: 15.54,
   })
-  answerRate: number;
+  answerRate!: number;
 
   @ApiProperty({
     description: '총 제출 횟수',
     example: 20,
   })
-  submitCount: number;
+  submitCount!: number;
 
   @ApiProperty({
     description: '시간 제한(초)',
     example: 2,
   })
-  timeout: number;
+  timeout!: number;
 
   @ApiProperty({
     description: '메모리 제한(MB)',
     example: 128,
   })
-  memoryLimit: number;
+  memoryLimit!: number;
 
   @ApiProperty({
     description: '정답 제출 횟수',
     example: 10,
   })
-  answerCount: number;
+  answerCount!: number;
 
   @ApiProperty({
     description: '정답 제출한 사람 수',
     example: 5,
   })
-  answerPeopleCount: number;
+  answerPeopleCount!: number;
 
   @ApiProperty({
     description: '출처',
     example: '백준',
   })
-  source: string;
+  source!: string;
 
   @ApiProperty({
     description: '출처 ID',
     example: '1000',
   })
-  sourceId: string;
+  sourceId!: string;
 
   @ApiProperty({
     description: '출처 URL',
     example: 'https://www.acmicpc.net/problem/1000',
   })
-  sourceUrl: string;
+  sourceUrl!: string;
 
   @ApiProperty({
     description: '문제 내용',
     example:
       '두 수 A와 B를 입력받은 다음, A+B를 출력하는 프로그램을 작성하시오.',
   })
-  content: string;
+  content!: string;
 
   @ApiProperty({
     description: '제한 사항',
@@ -140,136 +140,136 @@ export class ProblemDto {
     description: '추가 시간 허용 여부',
     default: false,
   })
-  additionalTimeAllowed: boolean;
+  additionalTimeAllowed!: boolean;
 
   @ApiProperty({
     description: '스페셜 저지 여부',
     default: false,
   })
-  isSpecialJudge: boolean;
+  isSpecialJudge!: boolean;
 
   @ApiProperty({
     description: '서브태스크 여부',
     default: false,
   })
-  isSubTask: boolean;
+  isSubTask!: boolean;
 
   @ApiProperty({
     description: '함수형 문제 여부',
     default: false,
   })
-  isFunction: boolean;
+  isFunction!: boolean;
 
   @ApiProperty({
     description: '인터랙티브 문제 여부',
     default: false,
   })
-  isInteractive: boolean;
+  isInteractive!: boolean;
 
   @ApiProperty({
     description: '투 스텝 문제 여부',
     default: false,
   })
-  isTwoStep: boolean;
+  isTwoStep!: boolean;
 
   @ApiProperty({
     description: '클래스 문제 여부',
     default: false,
   })
-  isClass: boolean;
+  isClass!: boolean;
 
   @ApiProperty({
     description: '생성 시간',
   })
-  createdAt: Date;
+  createdAt!: Date;
 
   @ApiProperty({
     description: '마지막 업데이트 시간',
   })
-  updatedAt: Date;
+  updatedAt!: Date;
 
   @ApiProperty({
     description: '입출력 예시 리스트',
     type: [ProblemInputOutputDto],
   })
-  inputOutputList: ProblemInputOutputDto[];
+  inputOutputList!: ProblemInputOutputDto[];
 
   @ApiProperty({
     description: '문제 유형 리스트',
     type: [String],
     example: ['그래프 탐색'],
   })
-  typeList: ProblemType[];
+  typeList!: ProblemType[];
 
   @ApiProperty({
     description: '문제 스타일',
     example: 'MathJax의 스타일시트가 리턴됨',
   })
-  style: string;
+  style!: string;
 
   @ApiProperty({
     description: '서브태스크 리스트',
     type: [ProblemSubtaskDto],
   })
-  subTaskList: ProblemSubtaskDto[];
+  subTaskList!: ProblemSubtaskDto[];
 
   @ApiProperty({
     description: '커스텀 예시',
     required: false,
   })
-  customExample: string;
+  customExample!: string;
 
   @ApiProperty({
     description: '커스텀 구현',
     required: false,
   })
-  customImplementation: string;
+  customImplementation!: string;
 
   @ApiProperty({
     description: '커스텀 그라더',
     required: false,
   })
-  customGrader: string;
+  customGrader!: string;
 
   @ApiProperty({
     description: '커스텀 노트',
     required: false,
   })
-  customNotes: string;
+  customNotes!: string;
 
   @ApiProperty({
     description: '커스텀 첨부 파일',
     required: false,
   })
-  customAttachment: string;
+  customAttachment!: string;
 
   @ApiProperty({
     description: '출처',
     required: false,
   })
-  problemSource: string;
+  problemSource!: string;
 
   @ApiProperty({
     description: '언어 제한 여부',
     default: false,
   })
-  isLanguageRestrict: boolean;
+  isLanguageRestrict!: boolean;
 
   @ApiProperty({
     description: '커스텀 예시',
     required: false,
   })
-  customSample: string;
+  customSample!: string;
 
   @ApiProperty({
     description: '언어 제한 리스트',
     type: [String],
   })
-  languageLimitList: string[];
+  languageLimitList!: string[];
 
   @ApiProperty({
     description: '문제 상태',
     example: 'NONE',
   })
-  state: UserProblemState;
+  state!: UserProblemState;
 }

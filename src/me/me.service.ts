@@ -23,6 +23,11 @@ export class MeService {
 
   async getMe(uuid: string): Promise<ResponseMeDto> {
     const me = await this.meRepository.getMe(uuid);
+
+    if (!me) {
+      throw new Error('사용자를 찾을 수 없습니다.');
+    }
+
     const socialList = me.socialList.map((elem) => ({
       provider: elem.provider as SocialProvider,
       content: elem.content,
@@ -30,8 +35,11 @@ export class MeService {
     const oauthList = me.oauthList.map(({ provider }) => ({
       provider: provider as OAuthProvider,
     }));
-    const responseMeDto = {
-      ...me,
+    const responseMeDto: ResponseMeDto = {
+      uuid: me.uuid,
+      name: me.name,
+      email: me.email,
+      profilePhoto: me.profilePhoto,
       socialList,
       oauthList,
     };

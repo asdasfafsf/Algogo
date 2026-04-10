@@ -6,23 +6,23 @@ export class ResponseProblemSummaryListDto {
     type: [ResponseProblemSummaryDto],
     description: 'List of problem summaries',
   })
-  problemList: ResponseProblemSummaryDto[];
+  problemList!: ResponseProblemSummaryDto[];
 
   @ApiProperty({
     example: 100,
     description: 'Total number of problems',
   })
-  totalCount: number;
+  totalCount!: number;
 
   @ApiProperty({
     example: 10,
     description: 'Number of problems per page',
   })
-  pageSize: number;
+  pageSize!: number;
 
   @ApiProperty({
     example: 1,
     description: 'Current page number',
   })
-  pageNo: number;
+  pageNo!: number;
 }

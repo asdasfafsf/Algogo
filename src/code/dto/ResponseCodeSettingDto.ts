@@ -6,35 +6,35 @@ export class ResponseCodeSettingDto {
     description: '폰트 크기',
     example: 14,
   })
-  fontSize: number;
+  fontSize!: number;
 
   @ApiProperty({
     description: '문제 내용 영역 비율',
     example: 100,
   })
-  problemContentRate: number;
+  problemContentRate!: number;
 
   @ApiProperty({
     description: '에디터 테마',
     example: 'vs-dark',
   })
-  theme: string;
+  theme!: string;
 
   @ApiProperty({
     description: '탭 크기',
     example: 4,
   })
-  tabSize: number;
+  tabSize!: number;
 
   @ApiProperty({
     description: '라인 넘버 표시 여부',
     example: 'on',
   })
-  lineNumber: string;
+  lineNumber!: string;
 
   @ApiProperty({
     description: '기본 프로그래밍 언어',
     example: 'cpp',
   })
-  defaultLanguage: LanguageProvider;
+  defaultLanguage!: LanguageProvider;
 }

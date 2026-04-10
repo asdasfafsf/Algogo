@@ -27,7 +27,7 @@ export class JwtService {
   async sign(
     payload: any,
     expiresIn?: string | number,
-    secret: string = this.config.jwtSecret,
+    secret: string = this.config.jwtSecret ?? '',
   ) {
     return await this.nestJwtService.signAsync(payload, {
       secret,
@@ -43,7 +43,7 @@ export class JwtService {
    * @throws JwtTokenExpiredException - 토큰이 만료된 경우
    * @throws JwtInvalidTokenException - 토큰이 유효하지 않은 경우
    */
-  async verify(token: string, secret: string = this.config.jwtSecret) {
+  async verify(token: string, secret: string = this.config.jwtSecret ?? '') {
     try {
       return await this.nestJwtService.verifyAsync(token, {
         secret,

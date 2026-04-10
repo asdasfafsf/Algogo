@@ -5,6 +5,7 @@ import { ConfigType } from '@nestjs/config';
 import { catchError, firstValueFrom, of } from 'rxjs';
 import { ResponseDto } from '../common/dto/ResponseDto';
 import { ResponseProblemDto } from '../problems/dto/ResponseProblemDto';
+import { ResponseProblemContentDto } from '../problems/dto/ResponseProblemContentDto';
 import { Logger } from 'winston';
 
 @Injectable()
@@ -68,10 +69,10 @@ export class CrawlerService {
 
     const data = response.data;
 
-    data.data.contentList = data.data.contentList.map((elem) => {
+    data.data.contentList = data.data.contentList.map((elem: ResponseProblemContentDto) => {
       return {
-        cellList: elem.cellList ?? [],
         ...elem,
+        cellList: elem.cellList ?? [],
       };
     });
 

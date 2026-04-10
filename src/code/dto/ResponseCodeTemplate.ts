@@ -6,7 +6,7 @@ export default class ResponseCodeTemplate extends ResponseCodeTemplateSummary {
     description: '템플릿 내용',
     example: 'function solution() { ... }',
   })
-  content: string;
+  content!: string;
 
   @ApiProperty({
     description: '템플릿 설명 (선택사항)',

@@ -20,7 +20,13 @@ export class GoogleOauthStrategy extends CustomOAuthStrategy(
     private readonly httpService: HttpService,
   ) {
     super({
-      ...oauthConfig,
+      clientID: oauthConfig.clientID ?? '',
+      clientSecret: oauthConfig.clientSecret ?? '',
+      callbackURL: oauthConfig.callbackURL ?? '',
+      authorizationURL: oauthConfig.authorizationURL ?? '',
+      tokenURL: oauthConfig.tokenURL ?? '',
+      connectCallbackURL: oauthConfig.connectCallbackURL ?? '',
+      disconnectCallbackURL: oauthConfig.disconnectCallbackURL ?? '',
       scope: ['profile', 'email'], // Google 전용 scope
     });
   }

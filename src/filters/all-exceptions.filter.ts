@@ -41,21 +41,21 @@ export class AllExceptionsFilter implements ExceptionFilter {
       errorCode = customError.code;
       errorMessage = customError.message;
     } else if (exception instanceof HttpException) {
-      const response = exception.getResponse();
-      if (typeof response === 'object' && response['message']) {
-        if (Array.isArray(response['message'])) {
+      const exceptionResponse = exception.getResponse() as Record<string, unknown>;
+      if (typeof exceptionResponse === 'object' && exceptionResponse['message']) {
+        if (Array.isArray(exceptionResponse['message'])) {
           errorMessage = isDevelopment
-            ? response['message'].join(', ')
-            : response['message'][0];
+            ? exceptionResponse['message'].join(', ')
+            : exceptionResponse['message'][0];
         } else {
-          errorMessage = response['message'];
+          errorMessage = exceptionResponse['message'] as string;
         }
       } else {
         errorMessage = exception.message;
       }
     }
 
-    const stackTrace = (exception as any)?.stack || 'No stack trace available';
+    const stackTrace = exception instanceof Error ? exception.stack ?? 'No stack trace available' : 'No stack trace available';
 
     if (
       statusCode === HttpStatus.INTERNAL_SERVER_ERROR ||
@@ -64,7 +64,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       this.logger.error(`INTERNAL_SERVER_ERROR`, {
         ip: request.ip,
         url: request.url,
-        exception: exception.toString(),
+        exception: exception instanceof Error ? exception.toString() : String(exception),
         stackTrace: process.env.NODE_ENV === 'development' ? stackTrace : '',
         errorMessage,
         headers: request.headers,

@@ -16,11 +16,13 @@ export class ExecuteService implements OnModuleInit {
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  private queueEvents: QueueEvents;
-  private queue: Queue;
+  private queueEvents!: QueueEvents;
+  private queue!: Queue;
 
   async onModuleInit() {
-    this.queue = new Queue(this.config.queueName, {
+    const queueName = this.config.queueName ?? 'default';
+
+    this.queue = new Queue(queueName, {
       connection: {
         ...this.config,
       },
@@ -33,7 +35,7 @@ export class ExecuteService implements OnModuleInit {
 
     await this.queue.waitUntilReady();
 
-    this.queueEvents = new QueueEvents(this.config.queueName, {
+    this.queueEvents = new QueueEvents(queueName, {
       connection: {
         ...this.config,
       },
@@ -69,9 +71,10 @@ export class ExecuteService implements OnModuleInit {
       const result = await job.waitUntilFinished(this.queueEvents, timeout);
 
       return result;
-    } catch (error) {
-      this.logger.error(error.message);
-      if (error?.message?.includes('timed out before finishing')) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(message);
+      if (message?.includes('timed out before finishing')) {
         return {
           processTime: 0,
           memory: 0,

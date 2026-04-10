@@ -14,12 +14,12 @@ export class S3Service {
     @Inject(s3Config.KEY) private readonly config: ConfigType<typeof s3Config>,
   ) {
     this.s3Client = new S3Client({
-      region: this.config.region,
+      region: this.config.region ?? '',
       forcePathStyle: true,
-      endpoint: this.config.endpoint,
+      endpoint: this.config.endpoint ?? '',
       credentials: {
-        accessKeyId: this.config.accessKey,
-        secretAccessKey: this.config.secretKey,
+        accessKeyId: this.config.accessKey ?? '',
+        secretAccessKey: this.config.secretKey ?? '',
       },
     });
   }
@@ -42,7 +42,7 @@ export class S3Service {
   async removeObject(Key: string) {
     const command = new DeleteObjectCommand({
       Bucket: this.config.bucketName,
-      Key: Key.replace(this.config.endpoint, ''),
+      Key: Key.replace(this.config.endpoint ?? '', ''),
     });
 
     await this.s3Client.send(command);
