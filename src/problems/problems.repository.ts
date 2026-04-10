@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProblemType } from '../common/types/problem.type';
-import { ProblemSort } from './enum/ProblemSortEnum';
+import { PROBLEM_SORT, ProblemSort } from './enum/ProblemSortEnum';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
@@ -15,35 +15,35 @@ export class ProblemsRepository {
     | Prisma.ProblemOrderByWithRelationInput[] {
     const orderBy: Prisma.ProblemOrderByWithRelationInput[] = [];
 
-    if (sort === ProblemSort.ANSWER_RATE_ASC) {
+    if (sort === PROBLEM_SORT.ANSWER_RATE_ASC) {
       orderBy.push({
         answerRate: 'asc',
       });
-    } else if (sort === ProblemSort.ANSWER_RATE_DESC) {
+    } else if (sort === PROBLEM_SORT.ANSWER_RATE_DESC) {
       orderBy.push({
         answerRate: 'desc',
       });
-    } else if (sort === ProblemSort.LEVEL_ASC) {
+    } else if (sort === PROBLEM_SORT.LEVEL_ASC) {
       orderBy.push({
         level: 'asc',
       });
-    } else if (sort === ProblemSort.LEVEL_DESC) {
+    } else if (sort === PROBLEM_SORT.LEVEL_DESC) {
       orderBy.push({
         level: 'desc',
       });
-    } else if (sort === ProblemSort.SUBMIT_COUNT_ASC) {
+    } else if (sort === PROBLEM_SORT.SUBMIT_COUNT_ASC) {
       orderBy.push({
         submitCount: 'asc',
       });
-    } else if (sort === ProblemSort.SUBMIT_COUNT_DESC) {
+    } else if (sort === PROBLEM_SORT.SUBMIT_COUNT_DESC) {
       orderBy.push({
         submitCount: 'desc',
       });
-    } else if (sort === ProblemSort.TITLE_ASC) {
+    } else if (sort === PROBLEM_SORT.TITLE_ASC) {
       orderBy.push({
         title: 'asc',
       });
-    } else if (sort === ProblemSort.TITLE_DESC) {
+    } else if (sort === PROBLEM_SORT.TITLE_DESC) {
       orderBy.push({
         title: 'desc',
       });
