@@ -6,6 +6,7 @@ import { ProblemSort } from './types/problem.type';
 import { PROBLEM_SORT_MAP } from './constants/problems-sort';
 import { ProblemSummaryDto } from './dto/problem-summary.dto';
 import { USER_PROBLEM_STATE } from '../common/constants/user.constant';
+import { DEFAULT_PAGE_NO, DEFAULT_PAGE_SIZE, FULLTEXT_SEARCH_LIMIT } from '../common/constants/pagination.constant';
 import { UserProblemState } from '../common/types/user.type';
 
 @Injectable()
@@ -177,7 +178,7 @@ export class ProblemsV2Repository {
         WHERE MATCH(p.PROBLEM_V2_TITLE) AGAINST(${title} IN BOOLEAN MODE)
         ${whereClause}
         ${orderClause}
-        LIMIT 1000;
+        LIMIT ${FULLTEXT_SEARCH_LIMIT};
       `,
     );
 
@@ -189,8 +190,8 @@ export class ProblemsV2Repository {
       return title.includes(search);
     });
     const totalCount = filtered.length;
-    const currentPageNo = pageNo ?? 1;
-    const currentPageSize = pageSize ?? 10;
+    const currentPageNo = pageNo ?? DEFAULT_PAGE_NO;
+    const currentPageSize = pageSize ?? DEFAULT_PAGE_SIZE;
     const offset = (currentPageNo - 1) * currentPageSize;
     const paged = filtered.slice(offset, offset + currentPageSize);
 
@@ -265,8 +266,8 @@ export class ProblemsV2Repository {
     }
 
     const orderBy = this.getProblemOrderBy(sort);
-    const skip = ((pageNo ?? 1) - 1) * (pageSize ?? 10);
-    const take = pageSize ?? 10;
+    const skip = ((pageNo ?? DEFAULT_PAGE_NO) - 1) * (pageSize ?? DEFAULT_PAGE_SIZE);
+    const take = pageSize ?? DEFAULT_PAGE_SIZE;
 
     const totalCount = await this.prismaService.problemV2.count({
       where,

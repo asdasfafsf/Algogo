@@ -1,0 +1,1 @@
+export const MAX_CODE_TEMPLATE_COUNT = 10;
