@@ -52,7 +52,7 @@ export function CustomOAuthStrategy(
       profile: Record<string, unknown>,
     ) {
       req.oauth = profile;
-      return (req?.user as Record<string, unknown>) ?? profile;
+      return req?.user ?? profile;
     }
 
     authenticate(req: Request, options: Record<string, unknown>) {
@@ -62,8 +62,12 @@ export function CustomOAuthStrategy(
       const callbackURL = this.getCallbackUrl(requestUrl);
 
       if (destination) {
+        const currentState =
+          typeof newOptions?.state === 'object' && newOptions.state !== null
+            ? newOptions.state
+            : {};
         newOptions.state = JSON.stringify({
-          ...(newOptions?.state as Record<string, unknown>),
+          ...currentState,
           destination,
         });
       }
