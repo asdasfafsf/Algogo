@@ -138,6 +138,6 @@ import { createKeyv } from '@keyv/redis';
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(RequestMetadataMiddleware).forRoutes('*');
+    consumer.apply(RequestMetadataMiddleware).forRoutes('*splat');
   }
 }
