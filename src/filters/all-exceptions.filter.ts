@@ -8,18 +8,26 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
+import { ConfigType } from '@nestjs/config';
 import { CustomHttpException } from '../common/errors/CustomHttpException';
 import { Logger } from 'winston';
 import { CustomError } from '../common/types/error.type';
+import appConfig from '../config/appConfig';
 
 @Injectable()
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
+  private readonly isDevelopment: boolean;
+
   constructor(
     @Inject('winston')
     private readonly logger: Logger,
     private readonly httpAdapterHost: HttpAdapterHost,
-  ) {}
+    @Inject(appConfig.KEY)
+    private readonly appCfg: ConfigType<typeof appConfig>,
+  ) {
+    this.isDevelopment = appCfg.isDevelopment;
+  }
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const { httpAdapter } = this.httpAdapterHost;
@@ -27,7 +35,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const request = ctx.getRequest();
     const response = ctx.getResponse();
 
-    const isDevelopment = process.env.NODE_ENV === 'development';
+    const isDevelopment = this.isDevelopment;
 
     const statusCode =
       exception instanceof HttpException
@@ -59,7 +67,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     if (
       statusCode === HttpStatus.INTERNAL_SERVER_ERROR ||
-      process.env.NODE_ENV === 'development'
+      isDevelopment
     ) {
       const sanitizedHeaders = {
         ...request.headers,
@@ -70,7 +78,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         ip: request.ip,
         url: request.url,
         exception: exception instanceof Error ? exception.toString() : String(exception),
-        stackTrace: process.env.NODE_ENV === 'development' ? stackTrace : '',
+        stackTrace: isDevelopment ? stackTrace : '',
         errorMessage,
         headers: sanitizedHeaders,
       });
