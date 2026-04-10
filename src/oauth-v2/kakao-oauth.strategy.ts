@@ -4,7 +4,7 @@ import { ConfigType } from '@nestjs/config';
 import kakaoOAuthConfig from '../config/kakaoOAuthConfig';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
-import { CustomLogger } from '../logger/custom-logger';
+import { AppLogger } from '../logger/app-logger';
 import { CustomOAuthStrategy } from './custom-oauth.strategy';
 import { Strategy } from 'passport-oauth2';
 import { OAUTH_PROVIDER } from '../common/constants/oauth.contant';
@@ -17,7 +17,7 @@ export class KakaoOAuthStrategy extends CustomOAuthStrategy(
   constructor(
     @Inject(kakaoOAuthConfig.KEY)
     private readonly oauthConfig: ConfigType<typeof kakaoOAuthConfig>,
-    private readonly logger: CustomLogger,
+    private readonly logger: AppLogger,
     private readonly httpService: HttpService,
   ) {
     super({

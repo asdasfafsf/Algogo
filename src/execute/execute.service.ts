@@ -3,7 +3,7 @@ import { Queue, QueueEvents } from 'bullmq';
 import { uuidv7 } from 'uuidv7';
 import bullmqConfig from '../config/bullmqConfig';
 import { ConfigType } from '@nestjs/config';
-import { CustomLogger } from '../logger/custom-logger';
+import { AppLogger } from '../logger/app-logger';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { RequestRunDto } from './dto/RequestRunDto';
 
@@ -12,7 +12,7 @@ export class ExecuteService implements OnModuleInit {
   constructor(
     @Inject(bullmqConfig.KEY)
     private readonly config: ConfigType<typeof bullmqConfig>,
-    private readonly logger: CustomLogger,
+    private readonly logger: AppLogger,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 

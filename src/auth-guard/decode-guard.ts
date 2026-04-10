@@ -4,7 +4,7 @@ import { Request } from 'express';
 
 @Injectable()
 export class DecodeGuard implements CanActivate {
-  constructor(private jwtService: JwtService) {}
+  constructor(private readonly jwtService: JwtService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();

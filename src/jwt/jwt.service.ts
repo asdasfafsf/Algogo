@@ -78,7 +78,7 @@ export class JwtService {
   async decode(token: string) {
     try {
       return this.nestJwtService.decode(token);
-    } catch (e) {
+    } catch (error: unknown) {
       throw new JwtInvalidTokenException();
     }
   }

@@ -7,7 +7,7 @@ import { Cache } from 'cache-manager';
 import { JwtInvalidTokenException } from '../common/errors/token/JwtInvalidTokenException';
 import JwtConfig from '../config/jwtConfig';
 import { ConfigType } from '@nestjs/config';
-import { CustomLogger } from '../logger/custom-logger';
+import { AppLogger } from '../logger/app-logger';
 import { TokenUser } from '../common/types/request.type';
 @Injectable()
 export class AuthV2Service {
@@ -18,7 +18,7 @@ export class AuthV2Service {
     private readonly cacheManager: Cache,
     @Inject(JwtConfig.KEY)
     private readonly jwtConfig: ConfigType<typeof JwtConfig>,
-    private readonly logger: CustomLogger,
+    private readonly logger: AppLogger,
   ) {}
 
   /**

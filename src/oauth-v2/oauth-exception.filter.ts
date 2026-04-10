@@ -8,14 +8,14 @@ import {
 } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { Response } from 'express';
-import { CustomLogger } from '../logger/custom-logger';
+import { AppLogger } from '../logger/app-logger';
 import appConfig from '../config/appConfig';
 
 @Injectable()
 @Catch()
 export class OAuthExceptionFilter implements ExceptionFilter {
   constructor(
-    private readonly logger: CustomLogger,
+    private readonly logger: AppLogger,
     @Inject(appConfig.KEY)
     private readonly appCfg: ConfigType<typeof appConfig>,
   ) {}

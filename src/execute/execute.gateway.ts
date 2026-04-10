@@ -21,7 +21,7 @@ import { RedisService } from '../redis/redis.service';
 import WsConfig from '../config/wsConfig';
 import { ConfigType } from '@nestjs/config';
 import { Cron } from '@nestjs/schedule';
-import { CustomLogger } from '../logger/custom-logger';
+import { AppLogger } from '../logger/app-logger';
 import { RequestWsAuthDto } from './dto/RequestWsAuthDto';
 import { OnEvent } from '@nestjs/event-emitter';
 import { CustomHttpException } from '../common/errors/CustomHttpException';
@@ -48,7 +48,7 @@ export class ExecuteGateway {
   constructor(
     private readonly executeService: ExecuteService,
     private readonly wsAuthGurad: WsAuthGuard,
-    private readonly logger: CustomLogger,
+    private readonly logger: AppLogger,
     @Inject(WsConfig.KEY)
     private readonly wsConfig: ConfigType<typeof WsConfig>,
     private readonly redisService: RedisService,
@@ -97,9 +97,9 @@ export class ExecuteGateway {
         code: '0000',
         result: '',
       });
-    } catch (e) {
-      if (e instanceof CustomHttpException) {
-        const response = e.getResponse() as CustomError;
+    } catch (error: unknown) {
+      if (error instanceof CustomHttpException) {
+        const response = error.getResponse() as CustomError;
         const { code, message } = response;
         socket.emit('auth', {
           code,
@@ -133,9 +133,9 @@ export class ExecuteGateway {
     try {
       const response = await this.executeService.run(requestRunDto);
       return response;
-    } catch (e) {
-      if (e instanceof CustomHttpException) {
-        const response = e.getResponse() as CustomError;
+    } catch (error: unknown) {
+      if (error instanceof CustomHttpException) {
+        const response = error.getResponse() as CustomError;
         const { code, message } = response;
         return {
           code,
