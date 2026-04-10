@@ -10,6 +10,7 @@ import { UpdateMeDto } from './dto/UpdateMeDto';
 import { SocialProvider } from '../common/types/social.type';
 import { OAuthProvider } from '../common/types/oauth.type';
 import { CustomLogger } from '../logger/custom-logger';
+import { UserNotFoundException } from '../common/errors/user/UserNotFoundException';
 
 @Injectable()
 export class MeService {
@@ -25,7 +26,7 @@ export class MeService {
     const me = await this.meRepository.getMe(uuid);
 
     if (!me) {
-      throw new Error('사용자를 찾을 수 없습니다.');
+      throw new UserNotFoundException();
     }
 
     const socialList = me.socialList.map((elem) => ({

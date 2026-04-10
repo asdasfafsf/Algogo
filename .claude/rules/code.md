@@ -507,6 +507,26 @@ export class InquiryProblemsSummaryDto {
 }
 ```
 
+### DTO 프로퍼티 `!` (definite assignment assertion) (MUST)
+
+DTO 프로퍼티에 `!`를 사용한다. class-validator/class-transformer가 런타임에 요청 body에서 값을 주입하므로 생성자에서 초기화하지 않는다. strict 모드에서 TypeScript가 초기화를 요구하기 때문에 `!`로 "런타임에 할당됨"을 명시한다.
+
+```typescript
+export class CreateUserDto {
+  @IsString()
+  @ApiProperty({ description: '이름' })
+  name!: string;  // class-transformer가 런타임에 할당
+
+  @IsOptional()
+  @ApiProperty({ required: false })
+  nickname?: string;  // optional은 ?를 사용
+}
+```
+
+- 필수 필드: `!` 사용 (`name!: string`)
+- 선택 필드: `?` 사용 (`nickname?: string`)
+- 기본값이 있는 필드: 초기화로 해결 (`pageNo?: number = 1`)
+
 ### Response DTO (SHOULD)
 
 - `@ApiProperty()`로 Swagger 문서화한다.
