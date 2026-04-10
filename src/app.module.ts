@@ -1,5 +1,4 @@
 import { MiddlewareConsumer, Module } from '@nestjs/common';
-import { AppController } from './app.controller';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import { validationSchema } from './config/validationSchema';
 import { ProblemsModule } from './problems/problems.module';
@@ -17,6 +16,12 @@ import * as winston from 'winston';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { AllExceptionsFilter } from './filters/all-exceptions.filter';
 import { ResponseInterceptor } from './interceptors/response-interceptor';
+import {
+  PrometheusModule,
+  makeCounterProvider,
+  makeHistogramProvider,
+} from '@willsoto/nestjs-prometheus';
+import { MetricsInterceptor } from './interceptors/metrics.interceptor';
 import { RequestLogInterceptor } from './interceptors/request-log.interceptor';
 import { UsersModule } from './users/users.module';
 import { RedisModule } from './redis/redis.module';
@@ -152,9 +157,12 @@ import { createKeyv } from '@keyv/redis';
     AuthorizationModule,
     ProblemSiteModule,
     RateLimitModule,
+    PrometheusModule.register({
+      path: '/metrics',
+      defaultMetrics: { enabled: true },
+    }),
   ],
 
-  controllers: [AppController],
   providers: [
     {
       provide: APP_FILTER,
@@ -167,6 +175,21 @@ import { createKeyv } from '@keyv/redis';
     {
       provide: APP_INTERCEPTOR,
       useClass: RequestLogInterceptor,
+    },
+    makeCounterProvider({
+      name: 'http_requests_total',
+      help: 'Total number of HTTP requests',
+      labelNames: ['method', 'path', 'status'],
+    }),
+    makeHistogramProvider({
+      name: 'http_request_duration_seconds',
+      help: 'HTTP request duration in seconds',
+      labelNames: ['method', 'path', 'status'],
+      buckets: [0.01, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10],
+    }),
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: MetricsInterceptor,
     },
   ],
 })
