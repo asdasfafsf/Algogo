@@ -61,8 +61,8 @@ export class KakaoOAuthStrategy extends CustomOAuthStrategy(
       );
 
       return response.data;
-    } catch (error) {
-      this.logger.error('Error fetching Kakao user info', { error });
+    } catch (error: unknown) {
+      this.logger.error('Error fetching Kakao user info', { error: String(error) });
       throw error;
     }
   }

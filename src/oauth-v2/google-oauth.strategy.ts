@@ -56,7 +56,7 @@ export class GoogleOauthStrategy extends CustomOAuthStrategy(
         this.httpService.get(url, { headers }),
       );
       return response.data;
-    } catch (error) {
+    } catch (error: unknown) {
       throw error;
     }
   }
