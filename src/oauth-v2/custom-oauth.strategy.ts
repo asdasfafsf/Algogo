@@ -28,14 +28,14 @@ export function CustomOAuthStrategy(
     readonly config: OAuthConfig;
 
     constructor(config: OAuthConfig) {
+      const { session: _session, ...strategyOptions } = config;
       super({
-        ...config,
+        ...strategyOptions,
         callbackURL: '',
-        session: false,
         assignProperty: 'oauth',
         property: 'oauth',
         passReqToCallback: true,
-      });
+      } as never);
       this.config = {
         ...config,
         session: false,

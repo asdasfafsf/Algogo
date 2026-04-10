@@ -26,7 +26,7 @@ export class JwtService {
    */
   async sign(
     payload: Record<string, unknown>,
-    expiresIn?: string | number,
+    expiresIn?: number,
     secret: string = this.config.jwtSecret ?? '',
   ) {
     return await this.nestJwtService.signAsync(payload, {
