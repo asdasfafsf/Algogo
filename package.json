@@ -80,7 +80,8 @@
     "socket.io": "^4.8.1",
     "uuidv7": "^1.0.2",
     "winston": "^3.17.0",
-    "winston-daily-rotate-file": "^5.0.0"
+    "winston-daily-rotate-file": "^5.0.0",
+    "winston-loki": "^6.1.4"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

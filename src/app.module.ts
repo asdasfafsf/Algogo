@@ -39,6 +39,7 @@ import bullmqConfig from './config/bullmqConfig';
 import wsConfig from './config/wsConfig';
 import LoggerConfig from './config/LoggerConfig';
 import appConfig from './config/appConfig';
+import lokiConfig from './config/lokiConfig';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ClsModule } from 'nestjs-cls';
 import { uuidv7 } from 'uuidv7';
@@ -59,18 +60,43 @@ import { createKeyv } from '@keyv/redis';
         },
       },
     }),
-    WinstonModule.forRoot({
-      transports: [
-        new winston.transports.Console({
-          level: process.env.NODE_ENV === 'production' ? 'info' : 'silly',
-          format: winston.format.combine(
-            winston.format.timestamp(),
-            nestWinstonModuleUtilities.format.nestLike('MyApp', {
-              prettyPrint: true,
+    WinstonModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (loki: ConfigType<typeof lokiConfig>) => {
+        const transports: winston.transport[] = [
+          new winston.transports.Console({
+            level: process.env.NODE_ENV === 'production' ? 'info' : 'silly',
+            format: winston.format.combine(
+              winston.format.timestamp(),
+              nestWinstonModuleUtilities.format.nestLike('Algogo', {
+                prettyPrint: true,
+              }),
+            ),
+          }),
+        ];
+
+        if (loki.enabled && loki.host) {
+          const LokiTransport = require('winston-loki');
+          transports.push(
+            new LokiTransport({
+              host: loki.host,
+              basicAuth:
+                loki.username && loki.password
+                  ? `${loki.username}:${loki.password}`
+                  : undefined,
+              labels: { app: 'algogo' },
+              json: true,
+              format: winston.format.json(),
+              replaceTimestamp: true,
+              onConnectionError: (err: Error) =>
+                console.error('Loki connection error:', err),
             }),
-          ),
-        }),
-      ],
+          );
+        }
+
+        return { transports };
+      },
+      inject: [lokiConfig.KEY],
     }),
     ConfigModule.forRoot({
       envFilePath: [`.${process.env.NODE_ENV ?? 'production'}.env`],
@@ -86,6 +112,7 @@ import { createKeyv } from '@keyv/redis';
         bullmqConfig,
         wsConfig,
         LoggerConfig,
+        lokiConfig,
       ],
       isGlobal: true,
       validationSchema,
