@@ -61,4 +61,5 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 .env
 .env2
 /**/*.env
+.test.env
 /**/env/
