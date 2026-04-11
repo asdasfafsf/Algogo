@@ -4,7 +4,7 @@ import googleOAuthConfig from '../config/googleOAuthConfig';
 import { ConfigType } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
-import { CustomLogger } from '../logger/custom-logger';
+import { AppLogger } from '../logger/app-logger';
 import { CustomOAuthStrategy } from './custom-oauth.strategy';
 import { Strategy } from 'passport-oauth2';
 import { OAUTH_PROVIDER } from '../common/constants/oauth.contant';
@@ -17,7 +17,7 @@ export class GoogleOauthStrategy extends CustomOAuthStrategy(
   constructor(
     @Inject(googleOAuthConfig.KEY)
     private readonly oauthConfig: ConfigType<typeof googleOAuthConfig>,
-    private readonly logger: CustomLogger,
+    private readonly logger: AppLogger,
     private readonly httpService: HttpService,
   ) {
     super({
@@ -45,7 +45,7 @@ export class GoogleOauthStrategy extends CustomOAuthStrategy(
     });
   }
 
-  private async getUserInfo(accessToken: string): Promise<any> {
+  private async getUserInfo(accessToken: string): Promise<Record<string, unknown>> {
     const url = 'https://www.googleapis.com/oauth2/v3/userinfo';
     const headers = {
       Authorization: `Bearer ${accessToken}`,
@@ -56,7 +56,7 @@ export class GoogleOauthStrategy extends CustomOAuthStrategy(
         this.httpService.get(url, { headers }),
       );
       return response.data;
-    } catch (error) {
+    } catch (error: unknown) {
       throw error;
     }
   }

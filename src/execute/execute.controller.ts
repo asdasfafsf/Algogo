@@ -9,13 +9,13 @@ import {
 import { ExecuteService } from './execute.service';
 import { RequestExecuteDto } from './dto/RequestExecuteDto';
 import { ApiExcludeEndpoint } from '@nestjs/swagger';
-import { CustomLogger } from '../logger/custom-logger';
+import { AppLogger } from '../logger/app-logger';
 import { AuthGuard } from '../auth-guard/auth.guard';
 
 @Controller('api/v1/execute')
 export class ExecuteController {
   constructor(
-    private readonly logger: CustomLogger,
+    private readonly logger: AppLogger,
     private readonly executeService: ExecuteService,
   ) {}
 

@@ -10,17 +10,17 @@ import { CodeTemplateLimitExceededException } from './errors/CodeTemplateLimitEx
 import RequestUpsertCodeTemplateDto from './dto/RequestUpdateCodeTemplateDto';
 import RequestCreateCodeTemplateDto from './dto/RequestCreateCodeTemplateDto';
 import { NotFoundProblemException } from './errors/NotFoundProblemException';
-import { NotFoundProblemCode } from './errors/NotFoundProblemCode';
+import { NotFoundProblemCodeException } from './errors/NotFoundProblemCodeException';
 import { RedisService } from '../redis/redis.service';
 import { MAX_CODE_TEMPLATE_COUNT } from './constants';
 import RequestUpsertProblemCodeDto from './dto/RequestUpsertProblemCodeDto';
-import { CustomLogger } from '../logger/custom-logger';
+import { AppLogger } from '../logger/app-logger';
 @Injectable()
 export class CodeService {
   constructor(
     private readonly redisService: RedisService,
     private readonly codeRepository: CodeRepository,
-    private readonly logger: CustomLogger,
+    private readonly logger: AppLogger,
   ) {}
 
   async getCodeSetting(userUuid: string) {
@@ -117,7 +117,7 @@ export class CodeService {
       throw new NotFoundCodeTemplateException();
     }
 
-    const codeTemplate = await this.codeRepository.updateCodeTempltae({
+    const codeTemplate = await this.codeRepository.updateCodeTemplate({
       userUuid,
       content,
       description,
@@ -209,7 +209,7 @@ export class CodeService {
     });
 
     if (!problemCodes) {
-      throw new NotFoundProblemCode();
+      throw new NotFoundProblemCodeException();
     }
 
     return problemCodes;

@@ -27,7 +27,7 @@ export class ProblemsV2Service {
     const canNgramSearch = hasTitle && title.length > 1 && !hasSpecial;
 
     if (canNgramSearch) {
-      return this.problemsV2Repository.getProblemSumamryByTitle(dto);
+      return this.problemsV2Repository.getProblemSummaryByTitle(dto);
     }
 
     return this.problemsV2Repository.getProblemsSummary(dto);

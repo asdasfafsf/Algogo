@@ -1,10 +1,6 @@
 import { MiddlewareConsumer, Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import { validationSchema } from './config/validationSchema';
-import { CrawlerModule } from './crawler/crawler.module';
-import crawlerConfig from './config/crawlerConfig';
 import { ProblemsModule } from './problems/problems.module';
 import { S3Module } from './s3/s3.module';
 import { ImageModule } from './image/image.module';
@@ -20,6 +16,13 @@ import * as winston from 'winston';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { AllExceptionsFilter } from './filters/all-exceptions.filter';
 import { ResponseInterceptor } from './interceptors/response-interceptor';
+import {
+  PrometheusModule,
+  makeCounterProvider,
+  makeHistogramProvider,
+} from '@willsoto/nestjs-prometheus';
+import { MetricsInterceptor } from './interceptors/metrics.interceptor';
+import { RequestLogInterceptor } from './interceptors/request-log.interceptor';
 import { UsersModule } from './users/users.module';
 import { RedisModule } from './redis/redis.module';
 import { JwtModule } from './jwt/jwt.module';
@@ -27,7 +30,6 @@ import { CryptoModule } from './crypto/crypto.module';
 import { ExecuteModule } from './execute/execute.module';
 import { MeModule } from './me/me.module';
 import { LoggerModule } from './logger/logger.module';
-import { ProblemsCollectModule } from './problems-collect/problems-collect.module';
 import { CodeModule } from './code/code.module';
 import { ProblemsV2Module } from './problems-v2/problems-v2.module';
 import { AuthV2Module } from './auth-v2/auth-v2.module';
@@ -42,7 +44,11 @@ import bullmqConfig from './config/bullmqConfig';
 import wsConfig from './config/wsConfig';
 import LoggerConfig from './config/LoggerConfig';
 import appConfig from './config/appConfig';
+import lokiConfig from './config/lokiConfig';
+import tempoConfig from './config/tempoConfig';
 import { CacheModule } from '@nestjs/cache-manager';
+import { ClsModule } from 'nestjs-cls';
+import { uuidv7 } from 'uuidv7';
 import { RequestMetadataMiddleware } from './middlewares/RequestMetadataMiddleware';
 import { AuthGuardModule } from './auth-guard/auth-guard.module';
 import { AuthorizationModule } from './authorization/authorization.module';
@@ -52,24 +58,10 @@ import { createKeyv } from '@keyv/redis';
 
 @Module({
   imports: [
-    WinstonModule.forRoot({
-      transports: [
-        new winston.transports.Console({
-          level: process.env.NODE_ENV === 'production' ? 'info' : 'silly',
-          format: winston.format.combine(
-            winston.format.timestamp(),
-            nestWinstonModuleUtilities.format.nestLike('MyApp', {
-              prettyPrint: true,
-            }),
-          ),
-        }),
-      ],
-    }),
     ConfigModule.forRoot({
       envFilePath: [`.${process.env.NODE_ENV ?? 'production'}.env`],
       load: [
         appConfig,
-        crawlerConfig,
         s3Config,
         googleOAuthConfig,
         kakaoOAuthConfig,
@@ -80,9 +72,66 @@ import { createKeyv } from '@keyv/redis';
         bullmqConfig,
         wsConfig,
         LoggerConfig,
+        lokiConfig,
+        tempoConfig,
       ],
       isGlobal: true,
       validationSchema,
+    }),
+    ClsModule.forRoot({
+      global: true,
+      middleware: {
+        mount: true,
+        setup: (cls, req) => {
+          cls.set('requestId', (req.headers['x-request-id'] as string) || uuidv7());
+          try {
+            const { trace } = require('@opentelemetry/api');
+            const span = trace.getActiveSpan();
+            if (span) {
+              cls.set('traceId', span.spanContext().traceId);
+            }
+          } catch {
+            // OpenTelemetry not available, skip
+          }
+        },
+      },
+    }),
+    WinstonModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (loki: ConfigType<typeof lokiConfig>) => {
+        const transports: winston.transport[] = [
+          new winston.transports.Console({
+            level: process.env.NODE_ENV === 'production' ? 'info' : 'silly',
+            format: winston.format.combine(
+              winston.format.timestamp(),
+              nestWinstonModuleUtilities.format.nestLike('Algogo', {
+                prettyPrint: true,
+              }),
+            ),
+          }),
+        ];
+
+        if (loki.enabled && loki.host) {
+          const LokiTransport = require('winston-loki');
+          transports.push(
+            new LokiTransport({
+              host: loki.host,
+              basicAuth:
+                loki.username && loki.password
+                  ? `${loki.username}:${loki.password}`
+                  : undefined,
+              labels: { app: 'algogo' },
+              batching: true,
+              interval: 5,
+              onConnectionError: (err: Error) =>
+                process.stderr.write(`Loki connection error: ${err.message}\n`),
+            }),
+          );
+        }
+
+        return { transports };
+      },
+      inject: [lokiConfig.KEY],
     }),
     CacheModule.registerAsync({
       imports: [ConfigModule],
@@ -96,7 +145,6 @@ import { createKeyv } from '@keyv/redis';
       isGlobal: true,
     }),
 
-    CrawlerModule,
     ProblemsModule,
     S3Module,
     ImageModule,
@@ -112,7 +160,6 @@ import { createKeyv } from '@keyv/redis';
     ExecuteModule,
     MeModule,
     LoggerModule,
-    ProblemsCollectModule,
     CodeModule,
     ProblemsV2Module,
     AuthV2Module,
@@ -121,9 +168,12 @@ import { createKeyv } from '@keyv/redis';
     AuthorizationModule,
     ProblemSiteModule,
     RateLimitModule,
+    PrometheusModule.register({
+      path: '/metrics',
+      defaultMetrics: { enabled: true },
+    }),
   ],
 
-  controllers: [AppController],
   providers: [
     {
       provide: APP_FILTER,
@@ -133,7 +183,25 @@ import { createKeyv } from '@keyv/redis';
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,
     },
-    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: RequestLogInterceptor,
+    },
+    makeCounterProvider({
+      name: 'http_requests_total',
+      help: 'Total number of HTTP requests',
+      labelNames: ['method', 'path', 'status'],
+    }),
+    makeHistogramProvider({
+      name: 'http_request_duration_seconds',
+      help: 'HTTP request duration in seconds',
+      labelNames: ['method', 'path', 'status'],
+      buckets: [0.01, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10],
+    }),
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: MetricsInterceptor,
+    },
   ],
 })
 export class AppModule {

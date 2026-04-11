@@ -95,6 +95,38 @@ describe('OauthV2Service', () => {
       // Then
       expect(result.state).toBe(OAUTH_STATE.CONNECTED_TO_OTHER_ACCOUNT);
     });
+
+    it('비활성 연동이고 같은 유저면 CONNECTED_AND_INACTIVE를 반환한다', async () => {
+      // Given
+      const oauth = { userUuid: 'user-1', isActive: false };
+      repository.findOne.mockResolvedValue(oauth as never);
+
+      // When
+      const result = await service.getOAuthState({
+        id: '123',
+        provider: 'kakao',
+        userUuid: 'user-1',
+      });
+
+      // Then
+      expect(result.state).toBe(OAUTH_STATE.CONNECTED_AND_INACTIVE);
+    });
+
+    it('비활성 연동이고 다른 유저면 DISCONNECTED_FROM_OTHER_ACCOUNT를 반환한다', async () => {
+      // Given
+      const oauth = { userUuid: 'other-user', isActive: false };
+      repository.findOne.mockResolvedValue(oauth as never);
+
+      // When
+      const result = await service.getOAuthState({
+        id: '123',
+        provider: 'kakao',
+        userUuid: 'user-1',
+      });
+
+      // Then
+      expect(result.state).toBe(OAUTH_STATE.DISCONNECTED_FROM_OTHER_ACCOUNT);
+    });
   });
 
   describe('registerOrLogin', () => {
@@ -138,6 +170,27 @@ describe('OauthV2Service', () => {
       );
       expect(result).toEqual(mockTokens);
     });
+
+    it('비활성 OAuth가 존재하면 활성화 후 로그인한다', async () => {
+      // Given
+      const oauth = { userUuid: 'inactive-uuid', isActive: false };
+      repository.findOne.mockResolvedValue(oauth as never);
+
+      // When
+      const result = await service.registerOrLogin(params);
+
+      // Then
+      expect(repository.updateUserOAuth).toHaveBeenCalledWith({
+        id: '123',
+        provider: 'kakao',
+        userUuid: 'inactive-uuid',
+        isActive: true,
+      });
+      expect(authV2Service.login).toHaveBeenCalledWith(
+        expect.objectContaining({ userUuid: 'inactive-uuid' }),
+      );
+      expect(result).toEqual(mockTokens);
+    });
   });
 
   describe('connectOAuthProvider', () => {
@@ -154,9 +207,20 @@ describe('OauthV2Service', () => {
       expect(repository.createUserOAuth).toHaveBeenCalledWith(params);
     });
 
-    it('다른 계정에 활성 연동이면 OAuthConflictException을 던진다', async () => {
+    it('활성 OAuth가 존재하면 OAuthConflictException을 던진다', async () => {
       // Given
       const oauth = { userUuid: 'other-user', isActive: true };
+      repository.findOne.mockResolvedValue(oauth as never);
+
+      // When & Then
+      await expect(service.connectOAuthProvider(params)).rejects.toThrow(
+        OAuthConflictException,
+      );
+    });
+
+    it('비활성 OAuth가 존재하면 OAuthConflictException을 던진다', async () => {
+      // Given
+      const oauth = { userUuid: 'other-user', isActive: false };
       repository.findOne.mockResolvedValue(oauth as never);
 
       // When & Then

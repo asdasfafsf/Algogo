@@ -1,12 +1,12 @@
 import { Catch, ArgumentsHost, WsExceptionFilter } from '@nestjs/common';
 import { CustomHttpException } from '../../common/errors/CustomHttpException';
 import { CustomError } from '../../common/types/error.type';
-import { CustomLogger } from '../../logger/custom-logger';
+import { AppLogger } from '../../logger/app-logger';
 
 @Catch()
 export class ExecuteWsExceptionFilter implements WsExceptionFilter {
-  constructor(private readonly logger: CustomLogger) {}
-  catch(exception: CustomHttpException, host: ArgumentsHost) {
+  constructor(private readonly logger: AppLogger) {}
+  catch(exception: unknown, host: ArgumentsHost) {
     const client = host.switchToWs().getClient();
 
     if (exception instanceof CustomHttpException) {

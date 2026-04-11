@@ -3,7 +3,7 @@ import { CustomNotFoundException } from '../../common/errors/CustomNotFoundExcep
 export class NotFoundCodeTemplateException extends CustomNotFoundException {
   constructor() {
     super({
-      code: 'NOT_FOUND',
+      code: 'CODE_TEMPLATE_NOT_FOUND',
       message: '코드 템플릿을 찾을 수없습니다.',
     });
   }

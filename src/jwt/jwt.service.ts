@@ -48,7 +48,7 @@ export class JwtService {
       return await this.nestJwtService.verifyAsync(token, {
         secret,
       });
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof TokenExpiredError) {
         throw new JwtTokenExpiredException();
       }
@@ -58,7 +58,7 @@ export class JwtService {
       return await this.nestJwtService.verifyAsync(token, {
         secret: this.config.prevJwtSecret,
       });
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof TokenExpiredError) {
         throw new JwtTokenExpiredException();
       } else if (error instanceof JsonWebTokenError) {
@@ -78,7 +78,7 @@ export class JwtService {
   async decode(token: string) {
     try {
       return this.nestJwtService.decode(token);
-    } catch (e) {
+    } catch (error: unknown) {
       throw new JwtInvalidTokenException();
     }
   }
