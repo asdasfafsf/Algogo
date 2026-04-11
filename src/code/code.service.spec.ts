@@ -7,7 +7,7 @@ import { NotFoundCodeSettingException } from './errors/NotFoundCodeSettingExcept
 import { NotFoundCodeTemplateException } from './errors/NotFoundCodeTemplateException';
 import { CodeTemplateLimitExceededException } from './errors/CodeTemplateLimitExceededException';
 import { NotFoundProblemException } from './errors/NotFoundProblemException';
-import { NotFoundProblemCode } from './errors/NotFoundProblemCode';
+import { NotFoundProblemCodeException } from './errors/NotFoundProblemCodeException';
 import { MAX_CODE_TEMPLATE_COUNT } from './constants';
 
 describe('CodeService 단위 테스트', () => {
@@ -23,7 +23,7 @@ describe('CodeService 단위 테스트', () => {
     createCodeTemplate: jest.fn(),
     selectTotalCodeTemplateCount: jest.fn(),
     getCodeTemplateNo: jest.fn(),
-    updateCodeTempltae: jest.fn(),
+    updateCodeTemplate: jest.fn(),
     deleteCodeTemplate: jest.fn(),
     upsertCodeDefaultTemplate: jest.fn(),
     problemUuidToProblemNo: jest.fn(),
@@ -266,14 +266,14 @@ describe('CodeService 단위 테스트', () => {
       };
       repository.getCodeTemplateNo.mockResolvedValue(1);
       const mockUpdated = { ...dto };
-      repository.updateCodeTempltae.mockResolvedValue(mockUpdated as never);
+      repository.updateCodeTemplate.mockResolvedValue(mockUpdated as never);
 
       // When
       const result = await service.updateCodeTemplate(dto as never);
 
       // Then
       expect(result).toEqual(mockUpdated);
-      expect(repository.updateCodeTempltae).toHaveBeenCalledWith({
+      expect(repository.updateCodeTemplate).toHaveBeenCalledWith({
         userUuid,
         content: 'updated code',
         description: '수정 설명',
@@ -314,7 +314,7 @@ describe('CodeService 단위 테스트', () => {
       };
       repository.getCodeTemplateNo.mockResolvedValueOnce(1);
       const mockUpdated = { ...dto };
-      repository.updateCodeTempltae.mockResolvedValue(mockUpdated as never);
+      repository.updateCodeTemplate.mockResolvedValue(mockUpdated as never);
       repository.getCodeTemplateNo.mockResolvedValueOnce(1);
       repository.upsertCodeDefaultTemplate.mockResolvedValue(undefined as never);
 
@@ -465,14 +465,14 @@ describe('CodeService 단위 테스트', () => {
       });
     });
 
-    it('문제 코드가 없으면 NotFoundProblemCode를 던진다', async () => {
+    it('문제 코드가 없으면 NotFoundProblemCodeException를 던진다', async () => {
       // Given
       repository.getProblemCodes.mockResolvedValue(null as never);
 
       // When & Then
       await expect(
         service.getProblemCodes({ userUuid, problemUuid }),
-      ).rejects.toThrow(NotFoundProblemCode);
+      ).rejects.toThrow(NotFoundProblemCodeException);
     });
   });
 

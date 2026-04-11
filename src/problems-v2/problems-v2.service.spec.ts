@@ -11,7 +11,7 @@ describe('ProblemsV2Service', () => {
 
   beforeEach(async () => {
     const mockRepository = {
-      getProblemSumamryByTitle: jest.fn(),
+      getProblemSummaryByTitle: jest.fn(),
       getProblemsSummary: jest.fn(),
       getProblem: jest.fn(),
       getTodayProblems: jest.fn(),
@@ -53,7 +53,7 @@ describe('ProblemsV2Service', () => {
 
         // Then
         expect(repository.getProblemsSummary).toHaveBeenCalledWith(dto);
-        expect(repository.getProblemSumamryByTitle).not.toHaveBeenCalled();
+        expect(repository.getProblemSummaryByTitle).not.toHaveBeenCalled();
       });
 
       it('제목이 1글자일 때 일반 검색을 사용해야 함', async () => {
@@ -71,7 +71,7 @@ describe('ProblemsV2Service', () => {
 
         // Then
         expect(repository.getProblemsSummary).toHaveBeenCalledWith(dto);
-        expect(repository.getProblemSumamryByTitle).not.toHaveBeenCalled();
+        expect(repository.getProblemSummaryByTitle).not.toHaveBeenCalled();
       });
 
       it('빈 문자열 제목일 때 일반 검색을 사용해야 함', async () => {
@@ -89,7 +89,7 @@ describe('ProblemsV2Service', () => {
 
         // Then
         expect(repository.getProblemsSummary).toHaveBeenCalledWith(dto);
-        expect(repository.getProblemSumamryByTitle).not.toHaveBeenCalled();
+        expect(repository.getProblemSummaryByTitle).not.toHaveBeenCalled();
       });
 
       it('특수문자가 포함된 제목일 때 일반 검색을 사용해야 함 (+)', async () => {
@@ -107,7 +107,7 @@ describe('ProblemsV2Service', () => {
 
         // Then
         expect(repository.getProblemsSummary).toHaveBeenCalledWith(dto);
-        expect(repository.getProblemSumamryByTitle).not.toHaveBeenCalled();
+        expect(repository.getProblemSummaryByTitle).not.toHaveBeenCalled();
       });
 
       it('모든 특수문자가 포함된 제목일 때 일반 검색을 사용해야 함', async () => {
@@ -125,7 +125,7 @@ describe('ProblemsV2Service', () => {
 
         // Then
         expect(repository.getProblemsSummary).toHaveBeenCalledWith(dto);
-        expect(repository.getProblemSumamryByTitle).not.toHaveBeenCalled();
+        expect(repository.getProblemSummaryByTitle).not.toHaveBeenCalled();
       });
 
       it('정상적인 제목일 때 N-gram 검색을 사용해야 함', async () => {
@@ -136,13 +136,13 @@ describe('ProblemsV2Service', () => {
           pageSize: 10,
           sort: PROBLEM_SORT.DEFAULT,
         } as any;
-        repository.getProblemSumamryByTitle.mockResolvedValue({} as any);
+        repository.getProblemSummaryByTitle.mockResolvedValue({} as any);
 
         // When
         await service.getProblemsSummary(dto);
 
         // Then
-        expect(repository.getProblemSumamryByTitle).toHaveBeenCalledWith(dto);
+        expect(repository.getProblemSummaryByTitle).toHaveBeenCalledWith(dto);
         expect(repository.getProblemsSummary).not.toHaveBeenCalled();
       });
 
@@ -154,13 +154,13 @@ describe('ProblemsV2Service', () => {
           pageSize: 10,
           sort: PROBLEM_SORT.DEFAULT,
         } as any;
-        repository.getProblemSumamryByTitle.mockResolvedValue({} as any);
+        repository.getProblemSummaryByTitle.mockResolvedValue({} as any);
 
         // When
         await service.getProblemsSummary(dto);
 
         // Then
-        expect(repository.getProblemSumamryByTitle).toHaveBeenCalledWith(dto);
+        expect(repository.getProblemSummaryByTitle).toHaveBeenCalledWith(dto);
         expect(repository.getProblemsSummary).not.toHaveBeenCalled();
       });
     });
@@ -179,7 +179,7 @@ describe('ProblemsV2Service', () => {
         pageNo: 1,
         pageSize: 10,
       };
-      repository.getProblemSumamryByTitle.mockResolvedValue(
+      repository.getProblemSummaryByTitle.mockResolvedValue(
         expectedResult as any,
       );
 
