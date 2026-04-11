@@ -58,7 +58,28 @@ import { createKeyv } from '@keyv/redis';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      envFilePath: [`.${process.env.NODE_ENV ?? 'production'}.env`],
+      load: [
+        appConfig,
+        s3Config,
+        googleOAuthConfig,
+        kakaoOAuthConfig,
+        githubOAuthConfig,
+        redisConfig,
+        jwtConfig,
+        encryptConfig,
+        bullmqConfig,
+        wsConfig,
+        LoggerConfig,
+        lokiConfig,
+        tempoConfig,
+      ],
+      isGlobal: true,
+      validationSchema,
+    }),
     ClsModule.forRoot({
+      global: true,
       middleware: {
         mount: true,
         setup: (cls, req) => {
@@ -100,9 +121,8 @@ import { createKeyv } from '@keyv/redis';
                   ? `${loki.username}:${loki.password}`
                   : undefined,
               labels: { app: 'algogo' },
-              json: true,
-              format: winston.format.json(),
-              replaceTimestamp: true,
+              batching: true,
+              interval: 5,
               onConnectionError: (err: Error) =>
                 process.stderr.write(`Loki connection error: ${err.message}\n`),
             }),
@@ -112,26 +132,6 @@ import { createKeyv } from '@keyv/redis';
         return { transports };
       },
       inject: [lokiConfig.KEY],
-    }),
-    ConfigModule.forRoot({
-      envFilePath: [`.${process.env.NODE_ENV ?? 'production'}.env`],
-      load: [
-        appConfig,
-        s3Config,
-        googleOAuthConfig,
-        kakaoOAuthConfig,
-        githubOAuthConfig,
-        redisConfig,
-        jwtConfig,
-        encryptConfig,
-        bullmqConfig,
-        wsConfig,
-        LoggerConfig,
-        lokiConfig,
-        tempoConfig,
-      ],
-      isGlobal: true,
-      validationSchema,
     }),
     CacheModule.registerAsync({
       imports: [ConfigModule],
