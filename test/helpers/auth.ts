@@ -26,9 +26,9 @@ export function createAuthCookies(
   accessToken: string,
   refreshToken?: string,
 ): string {
-  const cookies = [`accessToken=${accessToken}`];
+  const cookies = [`access_token=${accessToken}`];
   if (refreshToken) {
-    cookies.push(`refreshToken=${refreshToken}`);
+    cookies.push(`refresh_token=${refreshToken}`);
   }
   return cookies.join('; ');
 }
