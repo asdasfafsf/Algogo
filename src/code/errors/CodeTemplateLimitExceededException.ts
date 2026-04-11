@@ -3,7 +3,7 @@ import { CustomConflictException } from '../../common/errors/CustomConflictExcep
 export class CodeTemplateLimitExceededException extends CustomConflictException {
   constructor() {
     super({
-      code: 'C9000',
+      code: 'CODE_TEMPLATE_LIMIT_EXCEEDED',
       message: '설정가능한 코드 템플릿 갯수를 초과하였습니다.',
     });
   }

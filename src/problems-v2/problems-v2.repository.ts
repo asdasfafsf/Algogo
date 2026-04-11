@@ -13,7 +13,7 @@ import { UserProblemState } from '../common/types/user.type';
 export class ProblemsV2Repository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async getProblemSumamryByTitle(
+  async getProblemSummaryByTitle(
     dto: InquiryProblemsSummaryDto & { userUuid?: string },
   ) {
     const { pageNo, pageSize, sort, levelList, typeList, title, states } = dto;

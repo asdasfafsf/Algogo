@@ -222,7 +222,7 @@ export class CodeRepository {
     return codeTemplate;
   }
 
-  async updateCodeTempltae({
+  async updateCodeTemplate({
     userUuid,
     content,
     language,
