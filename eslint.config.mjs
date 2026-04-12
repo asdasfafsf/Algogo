@@ -31,7 +31,7 @@ export default tseslint.config(
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-      '@typescript-eslint/ban-types': 'error',
+      '@typescript-eslint/no-unsafe-function-type': 'error',
     },
   },
 );
