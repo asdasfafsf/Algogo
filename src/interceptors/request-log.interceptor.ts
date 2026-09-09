@@ -1,8 +1,14 @@
-import { Injectable, NestInterceptor, ExecutionContext, CallHandler, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  NestInterceptor,
+  ExecutionContext,
+  CallHandler,
+  Inject,
+} from '@nestjs/common';
 import { Observable, tap } from 'rxjs';
 import { Logger } from 'winston';
 import { ClsService } from 'nestjs-cls';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 
 @Injectable()
 export class RequestLogInterceptor implements NestInterceptor {
@@ -35,7 +41,10 @@ export class RequestLogInterceptor implements NestInterceptor {
       path: req.originalUrl,
       status: res.statusCode,
       duration: Date.now() - start,
-      ip: (req.headers['cf-connecting-ip'] as string) || (req.headers['x-forwarded-for'] as string) || req.ip,
+      ip:
+        (req.headers['cf-connecting-ip'] as string) ||
+        (req.headers['x-forwarded-for'] as string) ||
+        req.ip,
       userAgent: req.headers['user-agent'],
     });
   }

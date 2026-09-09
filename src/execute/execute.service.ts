@@ -1,4 +1,9 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import { Queue, QueueEvents } from 'bullmq';
 import { uuidv7 } from 'uuidv7';
 import bullmqConfig from '../config/bullmqConfig';
@@ -8,7 +13,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { RequestRunDto } from './dto/RequestRunDto';
 
 @Injectable()
-export class ExecuteService implements OnModuleInit {
+export class ExecuteService implements OnModuleInit, OnModuleDestroy {
   constructor(
     @Inject(bullmqConfig.KEY)
     private readonly config: ConfigType<typeof bullmqConfig>,
@@ -46,7 +51,10 @@ export class ExecuteService implements OnModuleInit {
     this.queueEvents.on('progress', (progress) => {
       this.logger.silly('progress', { progress });
 
-      const progressData = progress as { data: Record<string, unknown>; jobId: string };
+      const progressData = progress as {
+        data: Record<string, unknown>;
+        jobId: string;
+      };
       if (progressData.data.stage === 'execute') {
         this.eventEmitter.emit('execute', {
           ...progressData.data,
@@ -60,7 +68,16 @@ export class ExecuteService implements OnModuleInit {
     return `${provider}_${Math.floor(new Date().getTime() / 1000)}_${uuidv7()}`;
   }
 
-  async run(requestExecuteDto: RequestRunDto): Promise<Record<string, unknown> | { processTime: number; memory: number; code: string; result: string }> {
+  async onModuleDestroy() {
+    await Promise.all([this.queueEvents?.close(), this.queue?.close()]);
+  }
+
+  async run(
+    requestExecuteDto: RequestRunDto,
+  ): Promise<
+    | Record<string, unknown>
+    | { processTime: number; memory: number; code: string; result: string }
+  > {
     try {
       const job = await this.queue.add('run', requestExecuteDto, {
         attempts: 2,

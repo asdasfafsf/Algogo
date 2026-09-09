@@ -14,10 +14,7 @@ export interface RedisModuleOptions {
 }
 
 @Global()
-@Module({
-  providers: [RedisService],
-  exports: [RedisService],
-})
+@Module({})
 export class RedisModule {
   static forRootAsync(options: RedisModuleOptions): DynamicModule {
     const redisClientProvider = {
@@ -76,8 +73,18 @@ export class RedisModule {
 
     return {
       module: RedisModule,
-      providers: [redisClientProvider, pubClientProvider, subClientProvider],
-      exports: [redisClientProvider, pubClientProvider, subClientProvider],
+      providers: [
+        RedisService,
+        redisClientProvider,
+        pubClientProvider,
+        subClientProvider,
+      ],
+      exports: [
+        RedisService,
+        redisClientProvider,
+        pubClientProvider,
+        subClientProvider,
+      ],
     };
   }
 }

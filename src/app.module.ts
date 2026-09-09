@@ -4,15 +4,10 @@ import { validationSchema } from './config/validationSchema';
 import { ProblemsModule } from './problems/problems.module';
 import { S3Module } from './s3/s3.module';
 import { ImageModule } from './image/image.module';
-import {
-  WinstonModule,
-  utilities as nestWinstonModuleUtilities,
-} from 'nest-winston';
 
 import s3Config from './config/s3Config';
 
 import { PrismaModule } from './prisma/prisma.module';
-import * as winston from 'winston';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { AllExceptionsFilter } from './filters/all-exceptions.filter';
 import { ResponseInterceptor } from './interceptors/response-interceptor';
@@ -83,7 +78,10 @@ import { createKeyv } from '@keyv/redis';
       middleware: {
         mount: true,
         setup: (cls, req) => {
-          cls.set('requestId', (req.headers['x-request-id'] as string) || uuidv7());
+          cls.set(
+            'requestId',
+            (req.headers['x-request-id'] as string) || uuidv7(),
+          );
           try {
             const { trace } = require('@opentelemetry/api');
             const span = trace.getActiveSpan();
@@ -95,43 +93,6 @@ import { createKeyv } from '@keyv/redis';
           }
         },
       },
-    }),
-    WinstonModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (loki: ConfigType<typeof lokiConfig>) => {
-        const transports: winston.transport[] = [
-          new winston.transports.Console({
-            level: process.env.NODE_ENV === 'production' ? 'info' : 'silly',
-            format: winston.format.combine(
-              winston.format.timestamp(),
-              nestWinstonModuleUtilities.format.nestLike('Algogo', {
-                prettyPrint: true,
-              }),
-            ),
-          }),
-        ];
-
-        if (loki.enabled && loki.host) {
-          const LokiTransport = require('winston-loki');
-          transports.push(
-            new LokiTransport({
-              host: loki.host,
-              basicAuth:
-                loki.username && loki.password
-                  ? `${loki.username}:${loki.password}`
-                  : undefined,
-              labels: { app: 'algogo' },
-              batching: true,
-              interval: 5,
-              onConnectionError: (err: Error) =>
-                process.stderr.write(`Loki connection error: ${err.message}\n`),
-            }),
-          );
-        }
-
-        return { transports };
-      },
-      inject: [lokiConfig.KEY],
     }),
     CacheModule.registerAsync({
       imports: [ConfigModule],
