@@ -45,11 +45,11 @@ NestJS 모놀리스이며 MySQL/Prisma, Redis, BullMQ, S3, Socket.IO, JWT/OAuth�
 - 기능 작업은 별도 워크트리에서 수행한다. 이미 지정된 작업 워크트리가 있으면 이어서 사용하고, 기본 작업 디렉토리의 브랜치를 임의로 전환하지 않는다.
 - `main`에 직접 커밋·push·로컬 머지를 하지 않는다. `dev`에도 직접 push하지 않는다.
 - 대안을 검토하고 선택한 결정 중 코드만으로 이유가 드러나지 않는 것은 [ADR 지침](docs/adr/README.md)에 따라 기록한다.
-- Claude의 훅은 다른 에이전트에서 자동 실행되지 않는다. 위 브랜치 보호, 파일별 lint/format, ADR 확인을 직접 수행한다. 이 문서는 자동 차단 장치를 설치하지 않는다.
+- 공통 훅은 `.agents/hooks/`에서 CLI로 실행한다. [훅 사용법](docs/agents/hooks.md)을 따른다. Claude에는 연결 설정이 있으며 다른 도구의 자동 실행 등록은 별도다.
 
 ## Claude 문서와의 관계
 
-공통 지침의 기준은 이 파일과 `docs/agents/`다. 기존 `.claude/`는 Claude 전용 설정·훅과 이전 지침을 보존한 것이다. 공통 규칙을 변경할 때는 새 경로를 수정하고, Claude 전용 설정에 영향을 주면 해당 설정도 일관되게 갱신한다.
+공통 원본은 `AGENTS.md`, `docs/agents/`, `.agents/`에서 관리한다. `CLAUDE.md`와 `.claude/` 내부 항목은 원본을 가리키는 심볼릭 링크다. Claude 전용 연결 설정 원본은 `.agents/integrations/claude/settings.json`에 있으며 업무 규칙이나 구현을 중복 정의하지 않는다.
 
 ## 프로젝트 로컬 스킬
 
