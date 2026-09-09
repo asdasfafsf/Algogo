@@ -16,6 +16,7 @@ Linear 이슈: ALGOGO-72. NestJS 11 기준 커밋 `672b9b1`의 서버를 NestJS 
 ## 런타임 호환성 수정
 
 - RedisService를 설정된 동적 모듈에서 한 번만 등록하고 종료 시 클라이언트 종료를 기다린다.
+- Redis 옵션은 환경 파일의 비동기 검증이 완료된 뒤 주입된 redisConfig에서 읽는다. 모듈 선언 중 process.env를 캡처하면 Nest Config 12에서 환경 파일 전용 기동이 실패하므로 해당 경로를 별도로 검증한다.
 - ExecuteService의 Queue·QueueEvents와 RedisIoAdapter가 소유한 pub/sub 클라이언트를 종료한다.
 - 소켓 인증 DTO에 token 검증을 추가해 whitelist가 토큰을 제거하지 않도록 한다.
 - sort DTO에 숫자 변환을 명시해 독립 파일 변환에서도 문자열 쿼리를 숫자로 처리한다.
@@ -41,3 +42,7 @@ rtk proxy npm exec --yes --package=pnpm@10.32.1 -- pnpm build
 Docker 이미지 빌드·기동, `/metrics` 200, 비인증 `/api/v1/me` 401, healthy 상태와 SIGTERM 후 10초 안 정상 종료를 확인했다. 실제 Google/Kakao 로그인과 외부 Loki/Tempo 전송은 검증하지 않았다.
 
 별도 버그 수정 작업과 package.json·lockfile·Redis·실행 코드가 겹칠 수 있다. 두 작업을 통합할 때 양쪽 변경을 보존하고 관련 검증을 다시 수행한다.
+
+## 독립 리뷰 후속 검증
+
+환경 파일 전용 기동의 Redis 옵션 조기 캡처 회귀를 독립 리뷰에서 발견했다. `test:local:env-file`은 .test.env에 정의된 값을 부모 프로세스에서 제거한 새 프로세스를 실행해 Nest가 직접 파일을 읽도록 한다. 수정 전 Invalid URL 실패, 수정 후 서버 초기화·Redis 클라이언트 3개의 PING·정상 종료 통과를 확인했다. 이 테스트에는 `--env-file`을 붙이지 않는다.

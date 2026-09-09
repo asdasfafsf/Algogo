@@ -111,11 +111,7 @@ import { createKeyv } from '@keyv/redis';
     ImageModule,
     PrismaModule,
     UsersModule,
-    RedisModule.forRootAsync({
-      host: process.env.REDIS_HOST ?? 'localhost',
-      port: Number(process.env.REDIS_PORT),
-      password: process.env.REDIS_PASSWORD,
-    }),
+    RedisModule.forRootAsync(),
     JwtModule,
     CryptoModule,
     ExecuteModule,

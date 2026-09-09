@@ -6,21 +6,21 @@ import {
   REDIS_SUB_CLIENT,
 } from './redis.constants';
 import { RedisService } from './redis.service';
-
-export interface RedisModuleOptions {
-  host: string;
-  port: number;
-  password?: string;
-}
+import { ConfigModule } from '@nestjs/config';
+import type { ConfigType } from '@nestjs/config';
+import redisConfig from '../config/redisConfig';
 
 @Global()
 @Module({})
 export class RedisModule {
-  static forRootAsync(options: RedisModuleOptions): DynamicModule {
+  static forRootAsync(): DynamicModule {
     const redisClientProvider = {
       provide: REDIS_CLIENT,
-      useFactory: async (): Promise<RedisClientType> => {
-        const { host, port, password } = options;
+      inject: [redisConfig.KEY],
+      useFactory: async (
+        config: ConfigType<typeof redisConfig>,
+      ): Promise<RedisClientType> => {
+        const { host = 'localhost', port, password } = config;
         const client = createClient({
           url: `redis://${host}:${port}`,
           password,
@@ -37,8 +37,11 @@ export class RedisModule {
 
     const pubClientProvider = {
       provide: REDIS_PUB_CLIENT,
-      useFactory: async (): Promise<RedisClientType> => {
-        const { host, port, password } = options;
+      inject: [redisConfig.KEY],
+      useFactory: async (
+        config: ConfigType<typeof redisConfig>,
+      ): Promise<RedisClientType> => {
+        const { host = 'localhost', port, password } = config;
         const pubClient = createClient({
           url: `redis://${host}:${port}`,
           password,
@@ -55,8 +58,11 @@ export class RedisModule {
 
     const subClientProvider = {
       provide: REDIS_SUB_CLIENT,
-      useFactory: async (): Promise<RedisClientType> => {
-        const { host, port, password } = options;
+      inject: [redisConfig.KEY],
+      useFactory: async (
+        config: ConfigType<typeof redisConfig>,
+      ): Promise<RedisClientType> => {
+        const { host = 'localhost', port, password } = config;
         const subClient = createClient({
           url: `redis://${host}:${port}`,
           password,
@@ -73,6 +79,7 @@ export class RedisModule {
 
     return {
       module: RedisModule,
+      imports: [ConfigModule.forFeature(redisConfig)],
       providers: [
         RedisService,
         redisClientProvider,

@@ -34,6 +34,7 @@ DB 쓰기 테스트는 순서대로 실행한다. 기존 E2E가 테이블 데이
 rtk proxy npm exec --yes --package=pnpm@10.32.1 -- pnpm build
 rtk proxy npm exec --yes --package=pnpm@10.32.1 -- pnpm run typecheck
 rtk proxy npm exec --yes --package=pnpm@10.32.1 -- pnpm test --runInBand
+rtk proxy npm exec --yes --package=pnpm@10.32.1 -- pnpm run test:local:env-file
 rtk proxy npm exec --yes --package=pnpm@10.32.1 -- pnpm run test:local:e2e
 rtk proxy npm exec --yes --package=pnpm@10.32.1 -- pnpm run test:local:services
 ```
@@ -42,12 +43,13 @@ rtk proxy npm exec --yes --package=pnpm@10.32.1 -- pnpm run test:local:services
 
 ## 검증 결과 — 2026-09-09
 
-| 검증                | 결과                          |
-| ------------------- | ----------------------------- |
-| 전체 타입 검사·빌드 | 통과                          |
-| 단위 테스트         | 22개 묶음, 175개 통과         |
-| 기존 전체 E2E       | 110개 중 97개 통과, 13개 실패 |
-| 실제 서비스 통합    | 14개 중 12개 통과, 2개 실패   |
+| 검증                            | 결과                                                   |
+| ------------------------------- | ------------------------------------------------------ |
+| 전체 타입 검사·빌드             | 통과                                                   |
+| 환경 파일 전용 기동 회귀 테스트 | 1개 통과: 사전 주입 없이 설정 로딩·Redis 3개 연결·종료 |
+| 단위 테스트                     | 22개 묶음, 175개 통과                                  |
+| 기존 전체 E2E                   | 110개 중 97개 통과, 13개 실패                          |
+| 실제 서비스 통합                | 14개 중 12개 통과, 2개 실패                            |
 
 Python·Node.js·C++·Clang·Java·Java17 모두 실제 큐와 소켓 진행 이벤트 경로에서 예상 출력 `42`를 확인했다. MinIO 업로드와 공개 HTTP 읽기도 통과했다.
 
