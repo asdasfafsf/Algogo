@@ -113,9 +113,7 @@ describe('CodeService 단위 테스트', () => {
           { uuid: 'uuid-1', name: '템플릿1', language: 'JAVA' },
           { uuid: 'uuid-2', name: '템플릿2', language: 'PYTHON' },
         ],
-        defaultList: [
-          { language: 'JAVA', codeTemplateUuid: 'uuid-1' },
-        ],
+        defaultList: [{ language: 'JAVA', codeTemplateUuid: 'uuid-1' }],
       };
       repository.getCodeTemplateResult.mockResolvedValue(mockData as never);
 
@@ -216,7 +214,9 @@ describe('CodeService 단위 테스트', () => {
       repository.selectTotalCodeTemplateCount.mockResolvedValue(0);
       repository.createCodeTemplate.mockResolvedValue(mockCreated as never);
       repository.getCodeTemplateNo.mockResolvedValue(1);
-      repository.upsertCodeDefaultTemplate.mockResolvedValue(undefined as never);
+      repository.upsertCodeDefaultTemplate.mockResolvedValue(
+        undefined as never,
+      );
 
       // When
       await service.createCodeTemplate(dto as never);
@@ -316,7 +316,9 @@ describe('CodeService 단위 테스트', () => {
       const mockUpdated = { ...dto };
       repository.updateCodeTemplate.mockResolvedValue(mockUpdated as never);
       repository.getCodeTemplateNo.mockResolvedValueOnce(1);
-      repository.upsertCodeDefaultTemplate.mockResolvedValue(undefined as never);
+      repository.upsertCodeDefaultTemplate.mockResolvedValue(
+        undefined as never,
+      );
 
       // When
       await service.updateCodeTemplate(dto as never);
@@ -339,7 +341,10 @@ describe('CodeService 단위 테스트', () => {
       await service.deleteCodeTemplate({ uuid, userUuid });
 
       // Then
-      expect(repository.getCodeTemplateNo).toHaveBeenCalledWith({ uuid, userUuid });
+      expect(repository.getCodeTemplateNo).toHaveBeenCalledWith({
+        uuid,
+        userUuid,
+      });
       expect(repository.deleteCodeTemplate).toHaveBeenCalledWith({ no: 1 });
     });
 
@@ -359,9 +364,15 @@ describe('CodeService 단위 테스트', () => {
 
     it('기본 템플릿을 설정한다', async () => {
       // Given
-      const dto = { userUuid, uuid: 'template-uuid-1', language: 'JAVA' as const };
+      const dto = {
+        userUuid,
+        uuid: 'template-uuid-1',
+        language: 'JAVA' as const,
+      };
       repository.getCodeTemplateNo.mockResolvedValue(1);
-      repository.upsertCodeDefaultTemplate.mockResolvedValue(undefined as never);
+      repository.upsertCodeDefaultTemplate.mockResolvedValue(
+        undefined as never,
+      );
 
       // When
       await service.setDefaultCodeTemplate(dto as never);
@@ -412,7 +423,9 @@ describe('CodeService 단위 테스트', () => {
 
       // Then
       expect(result).toBe(42);
-      expect(redisService.get).toHaveBeenCalledWith(`problemUuid_${problemUuid}`);
+      expect(redisService.get).toHaveBeenCalledWith(
+        `problemUuid_${problemUuid}`,
+      );
       expect(repository.problemUuidToProblemNo).not.toHaveBeenCalled();
     });
 
@@ -426,7 +439,9 @@ describe('CodeService 단위 테스트', () => {
 
       // Then
       expect(result).toBe(99);
-      expect(repository.problemUuidToProblemNo).toHaveBeenCalledWith(problemUuid);
+      expect(repository.problemUuidToProblemNo).toHaveBeenCalledWith(
+        problemUuid,
+      );
       expect(redisService.set).toHaveBeenCalledWith(
         `problemUuid_${problemUuid}`,
         '99',
@@ -439,9 +454,9 @@ describe('CodeService 단위 테스트', () => {
       repository.problemUuidToProblemNo.mockResolvedValue(null as never);
 
       // When & Then
-      await expect(
-        service.problemUuidToProblemNo(problemUuid),
-      ).rejects.toThrow(NotFoundProblemException);
+      await expect(service.problemUuidToProblemNo(problemUuid)).rejects.toThrow(
+        NotFoundProblemException,
+      );
     });
   });
 

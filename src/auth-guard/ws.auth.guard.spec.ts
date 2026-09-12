@@ -5,6 +5,12 @@ import { WsException } from '@nestjs/websockets';
 import { WsAuthGuard } from './ws.auth.guard';
 import { JwtService } from '../jwt/jwt.service';
 import { AppLogger } from '../logger/app-logger';
+import type { Socket } from 'socket.io';
+
+type MockClient = Partial<Socket> & {
+  token?: string;
+  user?: unknown;
+};
 
 describe('WsAuthGuard', () => {
   let guard: WsAuthGuard;
@@ -19,7 +25,7 @@ describe('WsAuthGuard', () => {
   } as unknown as AppLogger;
 
   /* ────────── Helper: Context Mock ────────── */
-  const createWsContext = (client: any): ExecutionContext =>
+  const createWsContext = (client: MockClient): ExecutionContext =>
     ({
       switchToWs: () => ({
         getClient: () => client,
@@ -47,7 +53,7 @@ describe('WsAuthGuard', () => {
     const tokenPayload = { sub: 'uuid-123' };
     mockJwtService.verify.mockResolvedValue(tokenPayload);
 
-    const client: any = { token: 'valid-token' };
+    const client: MockClient = { token: 'valid-token' };
     const context = createWsContext(client);
 
     // Act
@@ -63,7 +69,7 @@ describe('WsAuthGuard', () => {
         2) 토큰 없음 → WsException
   ─────────────────────────────── */
   it('토큰이 없으면 WsException을 던진다', async () => {
-    const client: any = {}; // token 필드 없음
+    const client: MockClient = {}; // token 필드 없음
     const context = createWsContext(client);
 
     await expect(guard.canActivate(context)).rejects.toBeInstanceOf(
@@ -76,7 +82,7 @@ describe('WsAuthGuard', () => {
         3) verify() 실패 → 예외 전파
   ─────────────────────────────── */
   it('JwtService.verify()가 예외를 던지면 그대로 전파한다', async () => {
-    const client: any = { token: 'bad-token' };
+    const client: MockClient = { token: 'bad-token' };
     const context = createWsContext(client);
 
     mockJwtService.verify.mockRejectedValue(new Error('invalid'));

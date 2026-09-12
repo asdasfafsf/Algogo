@@ -66,7 +66,7 @@ describe('ExecuteService', () => {
       id: 'test-job',
       provider: 'Java',
       code: 'System.out.println("hello")',
-      inputList: [{ input: '1', seq: '1' }],
+      inputList: [{ input: '1', seq: 1 }],
     } as RequestRunDto;
 
     it('queue가 초기화되지 않으면 에러를 반환한다', async () => {

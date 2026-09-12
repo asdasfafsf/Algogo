@@ -127,7 +127,10 @@ export class ExecuteGateway {
     @ConnectedSocket() socket: AuthSocket,
   ) {
     const { id } = socket;
-    const requestRunDto = { id, ...requestExecuteDto } as unknown as RequestRunDto;
+    const requestRunDto = {
+      id,
+      ...requestExecuteDto,
+    } as unknown as RequestRunDto;
     socket.lastRequestTime = Math.floor(new Date().getTime() / 1000);
 
     try {

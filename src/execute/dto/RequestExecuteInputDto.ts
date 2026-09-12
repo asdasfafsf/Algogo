@@ -1,4 +1,9 @@
+import { IsNumber, IsString } from 'class-validator';
+
 export class RequestExecuteInputDto {
+  @IsString()
   input!: string;
-  seq!: string;
+
+  @IsNumber()
+  seq!: number;
 }

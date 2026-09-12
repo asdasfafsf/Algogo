@@ -50,6 +50,7 @@ import { AuthorizationModule } from './authorization/authorization.module';
 import { ProblemSiteModule } from './problem-site/problem-site.module';
 import { RateLimitModule } from './rate-limit/rate-limit.module';
 import { createKeyv } from '@keyv/redis';
+import { trace } from '@opentelemetry/api';
 
 @Module({
   imports: [
@@ -82,14 +83,9 @@ import { createKeyv } from '@keyv/redis';
             'requestId',
             (req.headers['x-request-id'] as string) || uuidv7(),
           );
-          try {
-            const { trace } = require('@opentelemetry/api');
-            const span = trace.getActiveSpan();
-            if (span) {
-              cls.set('traceId', span.spanContext().traceId);
-            }
-          } catch {
-            // OpenTelemetry not available, skip
+          const span = trace.getActiveSpan();
+          if (span) {
+            cls.set('traceId', span.spanContext().traceId);
           }
         },
       },

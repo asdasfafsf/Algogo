@@ -19,15 +19,28 @@ export type OAuthConfig = {
   property?: string;
 };
 
+type CustomOAuthStrategyInstance = Strategy & {
+  validate(
+    req: Request & {
+      oauth?: Record<string, unknown>;
+      user?: Record<string, unknown>;
+    },
+    accessToken: string,
+    refreshToken: string,
+    profile: Record<string, unknown>,
+  ): Promise<Record<string, unknown>>;
+};
+
 export function CustomOAuthStrategy(
   StrategyClass: typeof Strategy,
   strategyName: string,
-): new (config: OAuthConfig) => any {
+): new (config: OAuthConfig) => CustomOAuthStrategyInstance {
   class CustomStrategy extends PassportStrategy(StrategyClass, strategyName) {
     readonly config: OAuthConfig;
 
     constructor(config: OAuthConfig) {
-      const { session: _session, ...strategyOptions } = config;
+      const strategyOptions = { ...config };
+      Reflect.deleteProperty(strategyOptions, 'session');
       super({
         ...strategyOptions,
         callbackURL: '',

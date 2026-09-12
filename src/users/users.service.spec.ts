@@ -43,7 +43,9 @@ describe('UsersService', () => {
 
       // Then
       expect(result).toEqual(user);
-      expect(repository.findUser).toHaveBeenCalledWith({ userUuid: 'test-uuid' });
+      expect(repository.findUser).toHaveBeenCalledWith({
+        userUuid: 'test-uuid',
+      });
     });
 
     it('유저가 없으면 UserNotFoundException을 던진다', async () => {
@@ -60,7 +62,12 @@ describe('UsersService', () => {
   describe('createUser', () => {
     it('유저를 생성하고 반환한다', async () => {
       // Given
-      const params = { provider: 'kakao' as const, id: '123', name: '테스트', email: 'test@test.com' };
+      const params = {
+        provider: 'kakao' as const,
+        id: '123',
+        name: '테스트',
+        email: 'test@test.com',
+      };
       const created = { uuid: 'new-uuid', ...params };
       repository.createUser.mockResolvedValue(created as never);
 

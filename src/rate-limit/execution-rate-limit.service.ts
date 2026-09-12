@@ -44,7 +44,7 @@ export class ExecutionRateLimitService {
       return {1, reqTokens - 1, useTokens}
     `;
     const now = Math.floor(Date.now() / 1000);
-    const [allowed, _] = await this.redisService.eval<[number, number, number]>(
+    const [allowed] = await this.redisService.eval<[number, number, number]>(
       lua,
       2,
       `compiler_request:${userUuid}`,
