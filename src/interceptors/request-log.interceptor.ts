@@ -3,18 +3,16 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-  Inject,
 } from '@nestjs/common';
-import { Observable, tap } from 'rxjs';
-import { Logger } from 'winston';
+import { Observable } from 'rxjs';
 import { ClsService } from 'nestjs-cls';
 import type { Request, Response } from 'express';
+import { AppLogger } from '../logger/app-logger';
 
 @Injectable()
 export class RequestLogInterceptor implements NestInterceptor {
   constructor(
-    @Inject('winston')
-    private readonly winston: Logger,
+    private readonly logger: AppLogger,
     private readonly cls: ClsService,
   ) {}
 
@@ -22,24 +20,36 @@ export class RequestLogInterceptor implements NestInterceptor {
     if (context.getType() !== 'http') return next.handle();
 
     const req = context.switchToHttp().getRequest<Request>();
+    const res = context.switchToHttp().getResponse<Response>();
     const start = Date.now();
+    let logged = false;
+    const logRequest = (aborted: boolean) => {
+      if (logged) return;
+      logged = true;
+      this.logRequest(req, res, start, aborted);
+    };
+    res.once('finish', () => logRequest(false));
+    res.once('close', () => {
+      if (!res.writableFinished) logRequest(true);
+    });
 
-    return next.handle().pipe(
-      tap({
-        next: () => this.logRequest(req, context, start),
-        error: () => this.logRequest(req, context, start),
-      }),
-    );
+    return next.handle();
   }
 
-  private logRequest(req: Request, context: ExecutionContext, start: number) {
-    const res = context.switchToHttp().getResponse<Response>();
-    this.winston.info('access', {
+  private logRequest(
+    req: Request,
+    res: Response,
+    start: number,
+    aborted: boolean,
+  ): void {
+    this.logger.log('access', {
       type: 'access',
       requestId: this.cls.get('requestId'),
+      traceId: this.cls.get('traceId'),
       method: req.method,
-      path: req.originalUrl,
-      status: res.statusCode,
+      path: req.path,
+      status: aborted ? 499 : res.statusCode,
+      aborted,
       duration: Date.now() - start,
       ip:
         (req.headers['cf-connecting-ip'] as string) ||

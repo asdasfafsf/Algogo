@@ -58,7 +58,7 @@ before(
       logger: false,
       abortOnError: false,
     });
-    app.get('winston').silent = true;
+    app.get('pino').level = 'silent';
     app.use(cookieParser());
     app.useGlobalPipes(
       new ValidationPipe({

@@ -28,7 +28,7 @@ test('환경 변수를 미리 주입하지 않아도 환경 파일에서 Redis �
     (async () => {
       const app = await NestFactory.create(AppModule, { logger: false, abortOnError: false });
       try {
-        app.get('winston').silent = true;
+        app.get('pino').level = 'silent';
         await app.init();
         for (const key of ['REDIS_CLIENT', 'REDIS_PUB_CLIENT', 'REDIS_SUB_CLIENT']) {
           assert.equal(await app.get(constants[key]).ping(), 'PONG');

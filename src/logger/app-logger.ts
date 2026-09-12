@@ -1,14 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClsService } from 'nestjs-cls';
-import { Logger } from 'winston';
+import type { Logger } from 'pino';
+import { PINO_LOGGER } from './logger.constants';
 
 @Injectable()
 export class AppLogger {
   private context = '';
 
   constructor(
-    @Inject('winston')
-    private readonly winston: Logger,
+    @Inject(PINO_LOGGER)
+    private readonly pino: Logger,
     private readonly cls: ClsService,
   ) {}
 
@@ -26,22 +27,22 @@ export class AppLogger {
   }
 
   log(message: string, meta?: Record<string, unknown>) {
-    this.winston.info(message, this.buildMeta(meta));
+    this.pino.info(this.buildMeta(meta), message);
   }
 
   error(message: string, meta?: Record<string, unknown>) {
-    this.winston.error(message, this.buildMeta(meta));
+    this.pino.error(this.buildMeta(meta), message);
   }
 
   warn(message: string, meta?: Record<string, unknown>) {
-    this.winston.warn(message, this.buildMeta(meta));
+    this.pino.warn(this.buildMeta(meta), message);
   }
 
   debug(message: string, meta?: Record<string, unknown>) {
-    this.winston.debug(message, this.buildMeta(meta));
+    this.pino.debug(this.buildMeta(meta), message);
   }
 
   silly(message: string, meta?: Record<string, unknown>) {
-    this.winston.silly(message, this.buildMeta(meta));
+    this.pino.trace(this.buildMeta(meta), message);
   }
 }
