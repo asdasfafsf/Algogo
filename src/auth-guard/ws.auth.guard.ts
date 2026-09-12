@@ -12,23 +12,21 @@ export class WsAuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext) {
-    try {
-      const client = context.switchToWs().getClient();
-      const encryptedToken = this.extractTokenFromClient(client);
+    const client = context.switchToWs().getClient();
+    const encryptedToken = this.extractTokenFromClient(client);
 
-      if (!encryptedToken) {
-        throw new WsException('토큰이 없습니다.');
-      }
-
-      const decodedToken = await this.jwtService.verify(encryptedToken);
-      client.user = decodedToken;
-      return true;
-    } catch (error: unknown) {
-      throw error;
+    if (!encryptedToken) {
+      throw new WsException('토큰이 없습니다.');
     }
+
+    const decodedToken = await this.jwtService.verify(encryptedToken);
+    client.user = decodedToken;
+    return true;
   }
 
-  private extractTokenFromClient(client: Socket & { token?: string }): string | undefined {
+  private extractTokenFromClient(
+    client: Socket & { token?: string },
+  ): string | undefined {
     return client.token ?? undefined;
   }
 }

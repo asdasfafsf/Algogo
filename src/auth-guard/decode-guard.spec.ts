@@ -28,8 +28,8 @@ describe('DecodeGuard 단위 테스트', () => {
   });
 
   const createMockContext = (
-    headers: any = {},
-    cookies: any = {},
+    headers: Record<string, string> = {},
+    cookies: Record<string, string> = {},
   ): ExecutionContext => {
     const mockRequest = {
       headers,

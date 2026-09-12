@@ -12,13 +12,18 @@ describe('ProblemSiteService', () => {
         ProblemSiteService,
         {
           provide: ProblemSiteRepository,
-          useValue: { createProblemSite: jest.fn(), deleteProblemSite: jest.fn() },
+          useValue: {
+            createProblemSite: jest.fn(),
+            deleteProblemSite: jest.fn(),
+          },
         },
       ],
     }).compile();
 
     service = module.get(ProblemSiteService);
-    repository = module.get(ProblemSiteRepository) as jest.Mocked<ProblemSiteRepository>;
+    repository = module.get(
+      ProblemSiteRepository,
+    ) as jest.Mocked<ProblemSiteRepository>;
   });
 
   afterEach(() => {
@@ -28,7 +33,11 @@ describe('ProblemSiteService', () => {
   describe('createProblemSite', () => {
     it('repository에 위임한다', async () => {
       // Given
-      const params = { userUuid: 'user-1', provider: 'BOJ' as const, handle: 'testuser' };
+      const params = {
+        userUuid: 'user-1',
+        provider: 'BOJ' as const,
+        handle: 'testuser',
+      };
       repository.createProblemSite.mockResolvedValue(params as never);
 
       // When

@@ -8,7 +8,10 @@ export function Transaction() {
   ) {
     const originalMethod = descriptor.value;
 
-    descriptor.value = async function (this: Record<string, unknown>, ...args: unknown[]) {
+    descriptor.value = async function (
+      this: Record<string, unknown>,
+      ...args: unknown[]
+    ) {
       const prisma = this.prisma as PrismaService;
 
       return await prisma.$transaction(async (tx) => {

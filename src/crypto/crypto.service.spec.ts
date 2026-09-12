@@ -8,7 +8,9 @@ describe('CryptoService', () => {
   });
 
   describe('encryptAES / decryptAES', () => {
-    const key = Buffer.from('0123456789abcdef0123456789abcdef').toString('base64');
+    const key = Buffer.from('0123456789abcdef0123456789abcdef').toString(
+      'base64',
+    );
     const iv = Buffer.from('0123456789abcdef').toString('base64');
 
     it('암호화 후 복호화하면 원문이 복원된다', () => {
