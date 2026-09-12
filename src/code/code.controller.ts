@@ -261,12 +261,7 @@ export class CodeController {
   @Get('/problem/:problemUuid')
   async getProblemCodes(
     @User() user: TokenUser,
-    @Param(
-      'problemUuid',
-      new ParseUUIDPipe({
-        version: '4',
-      }),
-    )
+    @Param('problemUuid', new ParseUUIDPipe())
     problemUuid: string,
   ) {
     const { sub } = user;
