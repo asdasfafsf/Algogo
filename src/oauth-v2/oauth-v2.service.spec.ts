@@ -42,7 +42,9 @@ describe('OauthV2Service', () => {
     }).compile();
 
     service = module.get(OauthV2Service);
-    repository = module.get(OauthV2Repository) as jest.Mocked<OauthV2Repository>;
+    repository = module.get(
+      OauthV2Repository,
+    ) as jest.Mocked<OauthV2Repository>;
     usersService = module.get(UsersService) as jest.Mocked<UsersService>;
     authV2Service = module.get(AuthV2Service) as jest.Mocked<AuthV2Service>;
   });
@@ -57,7 +59,10 @@ describe('OauthV2Service', () => {
       repository.findOne.mockResolvedValue(null);
 
       // When
-      const result = await service.getOAuthState({ id: '123', provider: 'kakao' });
+      const result = await service.getOAuthState({
+        id: '123',
+        provider: 'kakao',
+      });
 
       // Then
       expect(result.state).toBe(OAUTH_STATE.NEW);
@@ -194,7 +199,11 @@ describe('OauthV2Service', () => {
   });
 
   describe('connectOAuthProvider', () => {
-    const params = { id: '123', provider: 'kakao' as const, userUuid: 'user-1' };
+    const params = {
+      id: '123',
+      provider: 'kakao' as const,
+      userUuid: 'user-1',
+    };
 
     it('NEW 상태면 OAuth를 생성한다', async () => {
       // Given
@@ -207,33 +216,49 @@ describe('OauthV2Service', () => {
       expect(repository.createUserOAuth).toHaveBeenCalledWith(params);
     });
 
-    it('활성 OAuth가 존재하면 OAuthConflictException을 던진다', async () => {
-      // Given
-      const oauth = { userUuid: 'other-user', isActive: true };
+    it('내 계정에 활성 OAuth가 존재하면 멱등하게 처리한다', async () => {
+      const oauth = { userUuid: 'user-1', isActive: true };
       repository.findOne.mockResolvedValue(oauth as never);
 
-      // When & Then
-      await expect(service.connectOAuthProvider(params)).rejects.toThrow(
-        OAuthConflictException,
-      );
+      await service.connectOAuthProvider(params);
+
+      expect(repository.createUserOAuth).not.toHaveBeenCalled();
+      expect(repository.updateUserOAuth).not.toHaveBeenCalled();
     });
 
-    it('비활성 OAuth가 존재하면 OAuthConflictException을 던진다', async () => {
-      // Given
-      const oauth = { userUuid: 'other-user', isActive: false };
+    it('내 계정에 비활성 OAuth가 존재하면 재활성화한다', async () => {
+      const oauth = { userUuid: 'user-1', isActive: false };
       repository.findOne.mockResolvedValue(oauth as never);
 
-      // When & Then
-      await expect(service.connectOAuthProvider(params)).rejects.toThrow(
-        OAuthConflictException,
-      );
+      await service.connectOAuthProvider(params);
+
+      expect(repository.updateUserOAuth).toHaveBeenCalledWith({
+        ...params,
+        isActive: true,
+      });
     });
+
+    it.each([true, false])(
+      '다른 계정에 연결된 OAuth(isActive: %s)는 충돌로 거부한다',
+      async (isActive) => {
+        const oauth = { userUuid: 'other-user', isActive };
+        repository.findOne.mockResolvedValue(oauth as never);
+
+        await expect(service.connectOAuthProvider(params)).rejects.toThrow(
+          OAuthConflictException,
+        );
+      },
+    );
   });
 
   describe('disconnectOAuthProvider', () => {
     it('OAuth 연동을 해제한다', async () => {
       // Given
-      const params = { id: '123', provider: 'kakao' as const, userUuid: 'user-1' };
+      const params = {
+        id: '123',
+        provider: 'kakao' as const,
+        userUuid: 'user-1',
+      };
 
       // When
       await service.disconnectOAuthProvider(params);
