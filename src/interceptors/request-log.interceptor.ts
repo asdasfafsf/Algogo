@@ -23,25 +23,33 @@ export class RequestLogInterceptor implements NestInterceptor {
     const res = context.switchToHttp().getResponse<Response>();
     const start = Date.now();
     let logged = false;
-    const logRequest = () => {
+    const logRequest = (aborted: boolean) => {
       if (logged) return;
       logged = true;
-      this.logRequest(req, res, start);
+      this.logRequest(req, res, start, aborted);
     };
-    res.once('finish', logRequest);
-    res.once('close', logRequest);
+    res.once('finish', () => logRequest(false));
+    res.once('close', () => {
+      if (!res.writableFinished) logRequest(true);
+    });
 
     return next.handle();
   }
 
-  private logRequest(req: Request, res: Response, start: number): void {
+  private logRequest(
+    req: Request,
+    res: Response,
+    start: number,
+    aborted: boolean,
+  ): void {
     this.logger.log('access', {
       type: 'access',
       requestId: this.cls.get('requestId'),
       traceId: this.cls.get('traceId'),
       method: req.method,
       path: req.path,
-      status: res.statusCode,
+      status: aborted ? 499 : res.statusCode,
+      aborted,
       duration: Date.now() - start,
       ip:
         (req.headers['cf-connecting-ip'] as string) ||

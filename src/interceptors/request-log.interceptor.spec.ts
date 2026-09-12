@@ -28,7 +28,10 @@ describe('RequestLogInterceptor', () => {
     const cls = {
       get: jest.fn((key: string) => `${key}-value`),
     } as unknown as ClsService;
-    const response = Object.assign(new EventEmitter(), { statusCode: 200 });
+    const response = Object.assign(new EventEmitter(), {
+      statusCode: 200,
+      writableFinished: false,
+    });
     const request = {
       method: 'GET',
       path: '/oauth/callback',
@@ -47,6 +50,7 @@ describe('RequestLogInterceptor', () => {
 
     new RequestLogInterceptor(logger, cls).intercept(context, next).subscribe();
     response.statusCode = 500;
+    response.writableFinished = true;
     response.emit('finish');
     response.emit('close');
 
@@ -61,6 +65,38 @@ describe('RequestLogInterceptor', () => {
       }),
     );
     expect(JSON.stringify(log.mock.calls)).not.toContain('secret');
+  });
+
+  it('finish 전에 연결이 닫히면 중단 상태로 기록한다', () => {
+    const log = jest.fn();
+    const response = Object.assign(new EventEmitter(), {
+      statusCode: 200,
+      writableFinished: false,
+    });
+    const context = {
+      getType: () => 'http',
+      switchToHttp: () => ({
+        getRequest: () => ({
+          method: 'GET',
+          path: '/stream',
+          headers: {},
+          ip: '127.0.0.1',
+        }),
+        getResponse: () => response,
+      }),
+    } as unknown as ExecutionContext;
+    const cls = { get: jest.fn() } as unknown as ClsService;
+
+    new RequestLogInterceptor({ log } as unknown as AppLogger, cls)
+      .intercept(context, { handle: () => of(undefined) })
+      .subscribe();
+    response.emit('close');
+
+    expect(log).toHaveBeenCalledWith(
+      'access',
+      expect.objectContaining({ status: 499, aborted: true }),
+    );
+    expect(response.statusCode).toBe(200);
   });
 
   it('실제 HTTP 응답이 끝날 때 CLS 문맥과 오류 상태를 유지한다', async () => {
