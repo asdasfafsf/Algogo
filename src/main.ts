@@ -5,9 +5,9 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import * as requestIp from 'request-ip';
-import * as cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
-import * as compression from 'compression';
+import compression from 'compression';
 import { RedisIoAdapter } from './redis/redis.io.adapter';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 

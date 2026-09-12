@@ -1,4 +1,4 @@
-import { Request } from 'express';
+import type { Request } from 'express';
 import { Role } from './roles.type';
 
 export type TokenUser = {

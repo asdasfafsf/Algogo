@@ -7,7 +7,7 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
-import { Response } from 'express';
+import type { Response } from 'express';
 import { AppLogger } from '../logger/app-logger';
 import appConfig from '../config/appConfig';
 
@@ -30,12 +30,8 @@ export class OAuthExceptionFilter implements ExceptionFilter {
         ? exception.message || '정의되지 않은 오류가 발생하였습니다'
         : '정의되지 않은 오류가 발생하였습니다';
 
-    const baseUrl = this.appCfg.isDevelopment
-      ? this.appCfg.frontendUrl
-      : '';
+    const baseUrl = this.appCfg.isDevelopment ? this.appCfg.frontendUrl : '';
 
-    response
-      .status(302)
-      .redirect(`${baseUrl}/error?message=${errorMessage}`);
+    response.status(302).redirect(`${baseUrl}/error?message=${errorMessage}`);
   }
 }

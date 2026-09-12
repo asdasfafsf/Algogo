@@ -1,8 +1,9 @@
 # --- 1) build stage ---
-FROM node:22-slim AS builder
+FROM node:24.15.0-slim AS builder
 WORKDIR /usr/src/app
 
-RUN npm i -g pnpm
+RUN apt-get update && apt-get install -y --no-install-recommends openssl && \
+    rm -rf /var/lib/apt/lists/* && npm i -g pnpm@10.32.1
 
 # ① 의존성
 COPY package.json pnpm-lock.yaml ./
@@ -17,10 +18,11 @@ COPY . .
 RUN pnpm build
 
 # --- 2) runtime ---
-FROM node:22-slim AS runner
+FROM node:24.15.0-slim AS runner
 WORKDIR /usr/src/app
 
-RUN npm i -g pnpm && \
+RUN apt-get update && apt-get install -y --no-install-recommends openssl && \
+    rm -rf /var/lib/apt/lists/* && npm i -g pnpm@10.32.1 && \
     groupadd -r appgroup && useradd -r -g appgroup appuser
 
 COPY --from=builder /usr/src/app/dist ./dist
@@ -36,6 +38,6 @@ ENV NODE_ENV=production
 USER appuser
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:' + (process.env.SERVER_PORT || 3000), (r) => r.statusCode === 200 ? process.exit(0) : process.exit(1)).on('error', () => process.exit(1))"
+  CMD node -e "require('http').get('http://localhost:' + (process.env.SERVER_PORT || 3000) + '/metrics', (r) => r.statusCode === 200 ? process.exit(0) : process.exit(1)).on('error', () => process.exit(1))"
 
 CMD ["node", "dist/main.js"]

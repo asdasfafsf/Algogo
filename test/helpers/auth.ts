@@ -7,7 +7,7 @@ export async function getAccessToken(
   { sub, roles }: { sub: string; roles: Role[] },
 ): Promise<string> {
   const jwtService = app.get(JwtService);
-  return jwtService.sign({ sub, roles });
+  return jwtService.sign({ sub, roles }, 300);
 }
 
 export async function getRefreshToken(
@@ -15,7 +15,7 @@ export async function getRefreshToken(
   { sub }: { sub: string },
 ): Promise<string> {
   const jwtService = app.get(JwtService);
-  return jwtService.sign({ sub });
+  return jwtService.sign({ sub }, 3600);
 }
 
 export function createAuthHeaders(token: string): { Authorization: string } {

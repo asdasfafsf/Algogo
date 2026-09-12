@@ -1,5 +1,5 @@
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { createTestApp, closeTestApp } from './helpers/setup';
@@ -35,11 +35,7 @@ describe('Auth E2E', () => {
     });
     const refreshToken = await getRefreshToken(app, { sub: user.uuid });
 
-    await cache.set(
-      `${user.uuid}:${refreshToken}`,
-      true,
-      REFRESH_TOKEN_TTL_MS,
-    );
+    await cache.set(`${user.uuid}:${refreshToken}`, true, REFRESH_TOKEN_TTL_MS);
 
     return { user, accessToken, refreshToken };
   }

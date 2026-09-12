@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
-import { Response } from 'express';
+import type { Response } from 'express';
 import JwtConfig from '../config/jwtConfig';
 import appConfig from '../config/appConfig';
 
