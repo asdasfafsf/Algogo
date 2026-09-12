@@ -26,6 +26,8 @@ export async function createTestApp(options?: {
 
   const app = module.createNestApplication();
 
+  app.getHttpAdapter().getInstance().set('query parser', 'extended');
+
   app.use(cookieParser());
   app.useGlobalPipes(
     new ValidationPipe({
