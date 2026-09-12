@@ -141,7 +141,7 @@ export class OauthV2Service {
     provider: OAuthProvider;
     userUuid: string;
   }) {
-    const oauthState = await this.getOAuthState({ id, provider });
+    const oauthState = await this.getOAuthState({ id, provider, userUuid });
     if (oauthState.state === OAUTH_STATE.NEW) {
       await this.oauthV2Repository.createUserOAuth({
         id,

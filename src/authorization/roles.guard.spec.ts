@@ -11,7 +11,7 @@ describe('RolesGuard 단위 테스트', () => {
   let guard: RolesGuard;
 
   const mockReflector = {
-    get: jest.fn(),
+    getAllAndOverride: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -26,7 +26,7 @@ describe('RolesGuard 단위 테스트', () => {
     jest.clearAllMocks();
   });
 
-  const createMockContext = (user: any = {}): ExecutionContext => {
+  const createMockContext = (user: unknown = {}): ExecutionContext => {
     const mockRequest = {
       user,
     };
@@ -44,23 +44,23 @@ describe('RolesGuard 단위 테스트', () => {
     it('필요한 역할이 없으면 true를 반환한다 (역할 검사 생략)', () => {
       // Arrange
       const mockContext = createMockContext();
-      mockReflector.get.mockReturnValue(undefined);
+      mockReflector.getAllAndOverride.mockReturnValue(undefined);
 
       // Act
       const result = guard.canActivate(mockContext);
 
       // Assert
       expect(result).toBe(true);
-      expect(mockReflector.get).toHaveBeenCalledWith(
-        Roles,
+      expect(mockReflector.getAllAndOverride).toHaveBeenCalledWith(Roles, [
         mockContext.getHandler(),
-      );
+        mockContext.getClass(),
+      ]);
     });
 
     it('필요한 역할이 빈 배열이면 true를 반환한다', () => {
       // Arrange
       const mockContext = createMockContext();
-      mockReflector.get.mockReturnValue([]);
+      mockReflector.getAllAndOverride.mockReturnValue([]);
 
       // Act
       const result = guard.canActivate(mockContext);
@@ -72,7 +72,7 @@ describe('RolesGuard 단위 테스트', () => {
     it('사용자가 없으면 CustomForbiddenException을 던진다', () => {
       // Arrange
       const mockContext = createMockContext(null);
-      mockReflector.get.mockReturnValue([ROLES.ADMIN]);
+      mockReflector.getAllAndOverride.mockReturnValue([ROLES.ADMIN]);
 
       // Act & Assert
       expect(() => guard.canActivate(mockContext)).toThrow(
@@ -87,7 +87,7 @@ describe('RolesGuard 단위 테스트', () => {
         roles: [ROLES.ADMIN, ROLES.USER] as Role[],
       };
       const mockContext = createMockContext(userWithRoles);
-      mockReflector.get.mockReturnValue([ROLES.ADMIN]);
+      mockReflector.getAllAndOverride.mockReturnValue([ROLES.ADMIN]);
 
       // Act
       const result = guard.canActivate(mockContext);
@@ -103,7 +103,7 @@ describe('RolesGuard 단위 테스트', () => {
         roles: [ROLES.USER] as Role[],
       };
       const mockContext = createMockContext(userWithRoles);
-      mockReflector.get.mockReturnValue([ROLES.ADMIN]);
+      mockReflector.getAllAndOverride.mockReturnValue([ROLES.ADMIN]);
 
       // Act & Assert
       expect(() => guard.canActivate(mockContext)).toThrow(
@@ -118,7 +118,7 @@ describe('RolesGuard 단위 테스트', () => {
         // roles 속성 없음
       };
       const mockContext = createMockContext(userWithoutRoles);
-      mockReflector.get.mockReturnValue([ROLES.ADMIN]);
+      mockReflector.getAllAndOverride.mockReturnValue([ROLES.ADMIN]);
 
       // Act & Assert
       expect(() => guard.canActivate(mockContext)).toThrow(
@@ -133,7 +133,7 @@ describe('RolesGuard 단위 테스트', () => {
         roles: null,
       };
       const mockContext = createMockContext(userWithNullRoles);
-      mockReflector.get.mockReturnValue([ROLES.ADMIN]);
+      mockReflector.getAllAndOverride.mockReturnValue([ROLES.ADMIN]);
 
       // Act & Assert
       expect(() => guard.canActivate(mockContext)).toThrow(
@@ -148,7 +148,7 @@ describe('RolesGuard 단위 테스트', () => {
         roles: [] as Role[],
       };
       const mockContext = createMockContext(userWithEmptyRoles);
-      mockReflector.get.mockReturnValue([ROLES.ADMIN]);
+      mockReflector.getAllAndOverride.mockReturnValue([ROLES.ADMIN]);
 
       // Act & Assert
       expect(() => guard.canActivate(mockContext)).toThrow(
@@ -160,10 +160,10 @@ describe('RolesGuard 단위 테스트', () => {
       // Arrange
       const userWithRoles = {
         sub: 'user-uuid',
-        roles: ['admin'] as any[], // 소문자 (올바른 Role 타입이 아님)
+        roles: ['admin'], // 소문자 (올바른 Role 타입이 아님)
       };
       const mockContext = createMockContext(userWithRoles);
-      mockReflector.get.mockReturnValue([ROLES.ADMIN]); // 'ADMIN' (대문자)
+      mockReflector.getAllAndOverride.mockReturnValue([ROLES.ADMIN]); // 'ADMIN' (대문자)
 
       // Act & Assert
       expect(() => guard.canActivate(mockContext)).toThrow(
@@ -178,7 +178,11 @@ describe('RolesGuard 단위 테스트', () => {
         roles: [ROLES.VIP] as Role[],
       };
       const mockContext = createMockContext(userWithRoles);
-      mockReflector.get.mockReturnValue([ROLES.ADMIN, ROLES.VIP, ROLES.USER]);
+      mockReflector.getAllAndOverride.mockReturnValue([
+        ROLES.ADMIN,
+        ROLES.VIP,
+        ROLES.USER,
+      ]);
 
       // Act
       const result = guard.canActivate(mockContext);
@@ -194,7 +198,7 @@ describe('RolesGuard 단위 테스트', () => {
         roles: [ROLES.ADMIN, ROLES.VIP, ROLES.USER] as Role[],
       };
       const mockContext = createMockContext(userWithRoles);
-      mockReflector.get.mockReturnValue([ROLES.ADMIN, ROLES.VIP]);
+      mockReflector.getAllAndOverride.mockReturnValue([ROLES.ADMIN, ROLES.VIP]);
 
       // Act
       const result = guard.canActivate(mockContext);
@@ -207,13 +211,16 @@ describe('RolesGuard 단위 테스트', () => {
       // Arrange
       const mockContext = createMockContext();
       const mockHandler = mockContext.getHandler();
-      mockReflector.get.mockReturnValue(undefined);
+      mockReflector.getAllAndOverride.mockReturnValue(undefined);
 
       // Act
       guard.canActivate(mockContext);
 
       // Assert
-      expect(mockReflector.get).toHaveBeenCalledWith(Roles, mockHandler);
+      expect(mockReflector.getAllAndOverride).toHaveBeenCalledWith(Roles, [
+        mockHandler,
+        mockContext.getClass(),
+      ]);
     });
   });
 });

@@ -14,6 +14,8 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.getHttpAdapter().getInstance().set('query parser', 'extended');
+
   const isDevelopment = process.env.NODE_ENV === 'development';
 
   if (isDevelopment) {
