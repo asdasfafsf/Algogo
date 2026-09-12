@@ -24,7 +24,10 @@ export class ExecuteController {
   @UseGuards(AuthGuard)
   @ApiExcludeEndpoint()
   async execute(@Body() requestExecuteDto: RequestExecuteDto) {
-    this.logger.silly('execute', { dto: requestExecuteDto } as Record<string, unknown>);
+    this.logger.silly('execute', { dto: requestExecuteDto } as Record<
+      string,
+      unknown
+    >);
     return {};
   }
 }

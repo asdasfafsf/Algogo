@@ -21,9 +21,7 @@ export class ProblemsV2Service {
     const hasTitle = !!title;
     const hasSpecial =
       hasTitle &&
-      MYSQL_FULLTEXT_DELIMITERS.some((delimiter) =>
-        title.includes(delimiter),
-      );
+      MYSQL_FULLTEXT_DELIMITERS.some((delimiter) => title.includes(delimiter));
     const canNgramSearch = hasTitle && title.length > 1 && !hasSpecial;
 
     if (canNgramSearch) {

@@ -59,9 +59,9 @@ describe('ExecutionRateLimitService', () => {
         'compiler_request:user-abc',
         'compiler_usage:user-abc',
         expect.any(Number), // now
-        20,                 // requestBucketCapacity
+        20, // requestBucketCapacity
         expect.closeTo(20 / 60, 5), // requestRefillRate
-        20,                 // usageBucketCapacity
+        20, // usageBucketCapacity
         expect.closeTo(20 / 60, 5), // usageRefillRate
       );
     });
@@ -81,8 +81,8 @@ describe('ExecutionRateLimitService', () => {
         1,
         'compiler_usage:user-1',
         expect.any(Number), // now
-        5,                  // durationSec
-        20,                 // usageBucketCapacity
+        5, // durationSec
+        20, // usageBucketCapacity
         expect.closeTo(20 / 60, 5), // usageRefillRate
       );
     });
@@ -96,9 +96,13 @@ describe('ExecutionRateLimitService', () => {
 
       // Then
       expect(redisService.eval).toHaveBeenCalledWith(
-        expect.any(String), 1,
+        expect.any(String),
+        1,
         'compiler_usage:user-1',
-        expect.any(Number), 0, 20, expect.any(Number),
+        expect.any(Number),
+        0,
+        20,
+        expect.any(Number),
       );
     });
   });

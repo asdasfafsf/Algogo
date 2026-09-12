@@ -58,14 +58,16 @@ describe('S3Service', () => {
   });
 
   describe('removeObject', () => {
-    it('endpoint prefix를 제거하고 DeleteObjectCommand를 호출한다', async () => {
+    it('객체 URL에서 endpoint와 bucket prefix를 제거한다', async () => {
       // When
-      await service.removeObject('https://s3.example.com/test-bucket/user/photo.webp');
+      await service.removeObject(
+        'https://s3.example.com/test-bucket/user/photo.webp',
+      );
 
       // Then
       expect(DeleteObjectCommand).toHaveBeenCalledWith({
         Bucket: 'test-bucket',
-        Key: '/test-bucket/user/photo.webp',
+        Key: 'user/photo.webp',
       });
       expect(mockSend).toHaveBeenCalled();
     });
@@ -75,6 +77,25 @@ describe('S3Service', () => {
       await service.removeObject('user/photo.webp');
 
       // Then
+      expect(DeleteObjectCommand).toHaveBeenCalledWith({
+        Bucket: 'test-bucket',
+        Key: 'user/photo.webp',
+      });
+    });
+
+    it('끝 슬래시가 있는 endpoint에서도 업로드 URL로 같은 객체를 삭제한다', async () => {
+      service = new S3Service({
+        ...mockConfig,
+        endpoint: 'https://s3.example.com/',
+      } as never);
+
+      const url = await service.upload(
+        'user/photo.webp',
+        Buffer.from('file-data'),
+      );
+      await service.removeObject(url);
+
+      expect(url).toBe('https://s3.example.com/test-bucket/user/photo.webp');
       expect(DeleteObjectCommand).toHaveBeenCalledWith({
         Bucket: 'test-bucket',
         Key: 'user/photo.webp',

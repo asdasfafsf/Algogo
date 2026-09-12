@@ -60,13 +60,9 @@ export class GoogleOauthStrategy extends CustomOAuthStrategy(
       Authorization: `Bearer ${accessToken}`,
     };
 
-    try {
-      const response = await lastValueFrom(
-        this.httpService.get(url, { headers }),
-      );
-      return response.data;
-    } catch (error: unknown) {
-      throw error;
-    }
+    const response = await lastValueFrom(
+      this.httpService.get(url, { headers }),
+    );
+    return response.data;
   }
 }

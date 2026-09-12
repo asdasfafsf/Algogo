@@ -23,7 +23,9 @@ describe('ProblemsService', () => {
     }).compile();
 
     service = module.get(ProblemsService);
-    repository = module.get(ProblemsRepository) as jest.Mocked<ProblemsRepository>;
+    repository = module.get(
+      ProblemsRepository,
+    ) as jest.Mocked<ProblemsRepository>;
     logger = module.get(AppLogger) as jest.Mocked<AppLogger>;
   });
 
@@ -34,7 +36,11 @@ describe('ProblemsService', () => {
   describe('getProblemSummaryList', () => {
     const mockResult = {
       problemList: [
-        { uuid: '1', title: '문제1', typeList: [{ name: '수학' }, { name: '구현' }] },
+        {
+          uuid: '1',
+          title: '문제1',
+          typeList: [{ name: '수학' }, { name: '구현' }],
+        },
         { uuid: '2', title: '문제2', typeList: [] },
       ],
       totalCount: 2,
@@ -48,7 +54,9 @@ describe('ProblemsService', () => {
 
       // When
       const result = await service.getProblemSummaryList({
-        pageNo: 1, pageSize: 10, sort: PROBLEM_SORT.DEFAULT,
+        pageNo: 1,
+        pageSize: 10,
+        sort: PROBLEM_SORT.DEFAULT,
       } as never);
 
       // Then
@@ -62,11 +70,18 @@ describe('ProblemsService', () => {
       repository.getProblemList.mockResolvedValue(mockResult as never);
 
       // When
-      await service.getProblemSummaryList({ sort: PROBLEM_SORT.DEFAULT } as never);
+      await service.getProblemSummaryList({
+        sort: PROBLEM_SORT.DEFAULT,
+      } as never);
 
       // Then
       expect(repository.getProblemList).toHaveBeenCalledWith(
-        1, 10, PROBLEM_SORT.DEFAULT, undefined, undefined, undefined,
+        1,
+        10,
+        PROBLEM_SORT.DEFAULT,
+        undefined,
+        undefined,
+        undefined,
       );
     });
 
@@ -109,7 +124,9 @@ describe('ProblemsService', () => {
       repository.getProblem.mockResolvedValue(null as never);
 
       // When & Then
-      await expect(service.getProblem('none')).rejects.toThrow(ProblemNotFoundException);
+      await expect(service.getProblem('none')).rejects.toThrow(
+        ProblemNotFoundException,
+      );
     });
 
     it('에러 시 로깅 후 에러를 재전파한다', async () => {

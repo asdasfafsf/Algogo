@@ -37,7 +37,9 @@ describe('MeService', () => {
         {
           provide: S3Service,
           useValue: {
-            upload: jest.fn().mockResolvedValue('https://s3.example.com/new-photo.webp'),
+            upload: jest
+              .fn()
+              .mockResolvedValue('https://s3.example.com/new-photo.webp'),
             removeObject: jest.fn(),
           },
         },
@@ -47,7 +49,9 @@ describe('MeService', () => {
         },
         {
           provide: ImageService,
-          useValue: { toWebp: jest.fn().mockResolvedValue(Buffer.from('webp-data')) },
+          useValue: {
+            toWebp: jest.fn().mockResolvedValue(Buffer.from('webp-data')),
+          },
         },
         { provide: AppLogger, useValue: { error: jest.fn() } },
       ],
@@ -75,7 +79,10 @@ describe('MeService', () => {
       // Then
       expect(result.uuid).toBe('user-uuid');
       expect(result.socialList).toHaveLength(2);
-      expect(result.socialList[0]).toEqual({ provider: 'github', content: 'https://github.com/test' });
+      expect(result.socialList[0]).toEqual({
+        provider: 'github',
+        content: 'https://github.com/test',
+      });
       expect(result.oauthList).toHaveLength(2);
       expect(result.oauthList[0]).toEqual({ provider: 'kakao' });
       expect(meRepository.getMe).toHaveBeenCalledWith('user-uuid');
@@ -86,7 +93,9 @@ describe('MeService', () => {
       meRepository.getMe.mockResolvedValue(null as never);
 
       // When & Then
-      await expect(service.getMe('none')).rejects.toThrow(UserNotFoundException);
+      await expect(service.getMe('none')).rejects.toThrow(
+        UserNotFoundException,
+      );
     });
 
     it('socialList이 빈 배열이면 빈 배열을 반환한다', async () => {
@@ -148,7 +157,9 @@ describe('MeService', () => {
         Buffer.from('webp-data'),
       );
       // 4. 이전 사진을 삭제했는지
-      expect(s3Service.removeObject).toHaveBeenCalledWith('https://s3.example.com/old-photo.webp');
+      expect(s3Service.removeObject).toHaveBeenCalledWith(
+        'https://s3.example.com/old-photo.webp',
+      );
       // 6. 결과에 socialList/oauthList가 매핑되었는지
       expect(result.socialList).toBeDefined();
       expect(result.oauthList).toBeDefined();

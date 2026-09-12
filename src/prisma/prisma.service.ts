@@ -1,4 +1,9 @@
-import { Inject, Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
 import appConfig from '../config/appConfig';
@@ -13,9 +18,7 @@ export class PrismaService
     appCfg: ConfigType<typeof appConfig>,
   ) {
     super(
-      appCfg.isDevelopment
-        ? { log: ['query', 'info', 'warn', 'error'] }
-        : {},
+      appCfg.isDevelopment ? { log: ['query', 'info', 'warn', 'error'] } : {},
     );
   }
   async onModuleInit() {

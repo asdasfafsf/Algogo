@@ -35,14 +35,26 @@ export class S3Service {
 
     await this.s3Client.send(command);
 
-    const fileUrl = `${this.config.endpoint}/${this.config.bucketName}/${Key}`;
+    const endpoint = this.config.endpoint?.replace(/\/+$/, '');
+    const fileUrl = `${endpoint}/${this.config.bucketName}/${Key}`;
     return fileUrl;
   }
 
   async removeObject(Key: string) {
+    const endpoint = this.config.endpoint;
+    const bucketName = this.config.bucketName;
+    let objectKey = Key;
+
+    if (endpoint && bucketName) {
+      const objectUrlPrefix = `${endpoint.replace(/\/+$/, '')}/${bucketName}/`;
+      if (Key.startsWith(objectUrlPrefix)) {
+        objectKey = Key.slice(objectUrlPrefix.length);
+      }
+    }
+
     const command = new DeleteObjectCommand({
-      Bucket: this.config.bucketName,
-      Key: Key.replace(this.config.endpoint ?? '', ''),
+      Bucket: bucketName,
+      Key: objectKey,
     });
 
     await this.s3Client.send(command);

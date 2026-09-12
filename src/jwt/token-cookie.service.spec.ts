@@ -10,7 +10,10 @@ describe('TokenCookieService', () => {
         TokenCookieService,
         {
           provide: JwtConfig.KEY,
-          useValue: { jwtAccessTokenExpiresIn: 3600, jwtRefreshTokenExpiresIn: 86400 },
+          useValue: {
+            jwtAccessTokenExpiresIn: 3600,
+            jwtRefreshTokenExpiresIn: 86400,
+          },
         },
         { provide: appConfig.KEY, useValue: { isDevelopment } },
       ],
@@ -31,10 +34,16 @@ describe('TokenCookieService', () => {
       // Then
       expect(cookie).toHaveBeenCalledTimes(2);
       expect(cookie).toHaveBeenCalledWith('access_token', 'at', {
-        httpOnly: true, secure: true, sameSite: 'strict', maxAge: 3600000,
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        maxAge: 3600000,
       });
       expect(cookie).toHaveBeenCalledWith('refresh_token', 'rt', {
-        httpOnly: true, secure: true, sameSite: 'strict', maxAge: 86400000,
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        maxAge: 86400000,
       });
     });
 
@@ -49,7 +58,10 @@ describe('TokenCookieService', () => {
 
       // Then
       expect(cookie).toHaveBeenCalledWith('access_token', 'at', {
-        httpOnly: false, secure: false, sameSite: 'lax', maxAge: 3600000,
+        httpOnly: false,
+        secure: false,
+        sameSite: 'lax',
+        maxAge: 3600000,
       });
     });
 
