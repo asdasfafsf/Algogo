@@ -227,11 +227,12 @@ describe('AuthV2Service 단위 테스트', () => {
       mockJwtConfig.jwtAccessTokenExpiresIn,
     );
 
-    // 리프레시 토큰: roles 제외 (sub만 포함)
+    // 리프레시 토큰: roles 제외, 발급마다 고유 식별자 포함
     expect(mockJwtService.sign).toHaveBeenNthCalledWith(
       2,
       {
         sub: payload.sub,
+        jti: expect.any(String),
       },
       mockJwtConfig.jwtRefreshTokenExpiresIn,
     );
