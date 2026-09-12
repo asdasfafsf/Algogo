@@ -16,9 +16,11 @@
 
 Pino를 직접 구성하고 기존 `AppLogger`와 접근 로그 인터셉터를 유지한다.
 
+구조화 로그의 애플리케이션 필드와 `requestId`, `traceId`, `context`는 유지하지만 Pino의 기본 JSON 스키마를 따른다. 이에 따라 Winston의 문자열 `level`, `message`, `timestamp`는 각각 숫자 `level`, `msg`, ISO 문자열 `time`으로 바뀐다. stdout 또는 Loki 로그를 파싱하는 소비자는 이 필드명을 기준으로 쿼리와 파서를 갱신해야 한다.
+
 ## 이유
 
-현재 로깅 경계가 이미 한곳에 모여 있어 Nest 통합 모듈의 자동 HTTP 로깅을 더하면 같은 요청이 중복 기록된다. 직접 구성하면 호출부를 바꾸지 않고 stdout JSON과 Loki worker transport를 함께 사용할 수 있다. 대신 애플리케이션 종료 시 flush와 transport 종료를 명시하고, 접근 로그는 응답 `finish` 시점의 최종 상태 코드를 기록한다.
+현재 로깅 경계가 이미 한곳에 모여 있어 Nest 통합 모듈의 자동 HTTP 로깅을 더하면 같은 요청이 중복 기록된다. 직접 구성하면 호출부를 바꾸지 않고 stdout JSON과 Loki worker transport를 함께 사용할 수 있다. Loki 전송은 종료 시 worker가 확실히 닫히도록 배치하지 않고, 애플리케이션 종료 시 flush와 transport 종료를 명시한다. 접근 로그는 응답 `finish` 시점의 최종 상태 코드를 기록한다.
 
 ## 참고
 

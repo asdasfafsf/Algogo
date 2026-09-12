@@ -1,9 +1,10 @@
 import { createServer } from 'node:http';
-import pino from 'pino';
-import type { LokiOptions } from 'pino-loki';
+import type { ClsService } from 'nestjs-cls';
+import { AppLogger } from './app-logger';
+import { createPinoResources, PinoLifecycle } from './logger.module';
 
-describe('Pino Loki transport', () => {
-  it('종료 전에 로그를 Loki HTTP endpoint로 전송한다', async () => {
+describe('Pino logger resources', () => {
+  it('trace 로그를 가린 뒤 종료 전에 Loki로 전송하고 transport를 닫는다', async () => {
     let body = '';
     let authorization = '';
     let resolveReceived: () => void;
@@ -15,7 +16,7 @@ describe('Pino Loki transport', () => {
       request.setEncoding('utf8');
       request.on('data', (chunk: string) => (body += chunk));
       request.on('end', () => {
-        response.writeHead(204).end();
+        response.writeHead(204, { Connection: 'close' }).end();
         resolveReceived();
       });
     });
@@ -26,26 +27,27 @@ describe('Pino Loki transport', () => {
     if (!address || typeof address === 'string')
       throw new Error('포트 할당 실패');
 
-    const transport = pino.transport<LokiOptions>({
-      target: 'pino-loki',
-      options: {
-        host: `http://127.0.0.1:${address.port}`,
-        basicAuth: { username: 'test-user', password: 'test-password' },
-        batching: false,
-      },
+    const resources = createPinoResources({
+      enabled: true,
+      host: `http://127.0.0.1:${address.port}`,
+      username: 'test-user',
+      password: 'test-password',
     });
-    const logger = pino(transport);
+    const cls = {
+      get: jest.fn((key: string) =>
+        key === 'requestId' ? 'request-1' : 'trace-1',
+      ),
+    } as unknown as ClsService;
+    const logger = new AppLogger(resources.logger, cls);
 
-    logger.info({ requestId: 'request-1' }, 'Loki 전송 확인');
-    await new Promise<void>((resolve, reject) =>
-      logger.flush((error) => (error ? reject(error) : resolve())),
-    );
-    await received;
-    const closed = new Promise<void>((resolve) =>
-      transport.once('close', resolve),
-    );
-    transport.end();
-    await closed;
+    logger.silly('Loki 전송 확인', {
+      password: 'secret-password',
+      headers: { authorization: 'Bearer secret-token' },
+    });
+    await Promise.all([
+      new PinoLifecycle(resources).onApplicationShutdown(),
+      received,
+    ]);
     await new Promise<void>((resolve, reject) =>
       server.close((error) => (error ? reject(error) : resolve())),
     );
@@ -55,5 +57,9 @@ describe('Pino Loki transport', () => {
     );
     expect(body).toContain('Loki 전송 확인');
     expect(body).toContain('request-1');
+    expect(body).toContain('trace-1');
+    expect(body).toContain('[REDACTED]');
+    expect(body).not.toContain('secret-password');
+    expect(body).not.toContain('secret-token');
   }, 10_000);
 });

@@ -14,7 +14,7 @@ import { PINO_LOGGER } from './logger.constants';
 
 const PINO_RESOURCES = Symbol('PINO_RESOURCES');
 
-type PinoResources = {
+export type PinoResources = {
   logger: Logger;
   transport: ReturnType<typeof pino.transport>;
 };
@@ -23,14 +23,14 @@ export function createPinoResources(
   loki: ConfigType<typeof lokiConfig>,
 ): PinoResources {
   const targets: pino.TransportTargetOptions[] = [
-    { target: 'pino/file', options: { destination: 1 } },
+    { target: 'pino/file', level: 'trace', options: { destination: 1 } },
   ];
 
   if (loki.enabled && loki.host) {
     const options: LokiOptions = {
       host: loki.host,
       labels: { app: 'algogo' },
-      batching: { interval: 5, maxBufferSize: 10_000 },
+      batching: false,
       silenceErrors: false,
     };
     if (loki.username && loki.password) {
@@ -39,10 +39,13 @@ export function createPinoResources(
         password: loki.password,
       };
     }
-    targets.push({ target: 'pino-loki', options });
+    targets.push({ target: 'pino-loki', level: 'trace', options });
   }
 
   const transport = pino.transport({ targets });
+  transport.on('error', (error: Error) => {
+    process.stderr.write(`Pino transport error: ${error.message}\n`);
+  });
   const logger = pino(
     {
       level: process.env.NODE_ENV === 'production' ? 'info' : 'trace',
@@ -68,7 +71,7 @@ export function createPinoResources(
 }
 
 @Injectable()
-class PinoLifecycle implements OnApplicationShutdown {
+export class PinoLifecycle implements OnApplicationShutdown {
   private closed = false;
 
   constructor(

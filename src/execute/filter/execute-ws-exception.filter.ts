@@ -10,7 +10,10 @@ export class ExecuteWsExceptionFilter implements WsExceptionFilter {
     const client = host.switchToWs().getClient();
 
     if (exception instanceof CustomHttpException) {
-      this.logger.error('error', exception.getResponse() as Record<string, unknown>);
+      this.logger.error(
+        'error',
+        exception.getResponse() as Record<string, unknown>,
+      );
 
       const customError = exception.getResponse() as CustomError;
       client.emit('error', {

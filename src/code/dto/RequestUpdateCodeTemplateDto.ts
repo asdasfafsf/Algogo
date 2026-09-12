@@ -5,7 +5,7 @@ import {
   MinLength,
   IsOptional,
   IsEnum,
-  Max,
+  MaxLength,
   IsNotEmpty,
   IsBoolean,
 } from 'class-validator';
@@ -31,7 +31,7 @@ export default class RequestUpdateCodeTemplateDto {
   })
   @IsOptional()
   @IsString({ message: '템플릿 제목은 문자열이어야 합니다.' })
-  @Max(100, { message: '템플릿 제목은 최대 100자까지 허용됩니다.' })
+  @MaxLength(100, { message: '템플릿 제목은 최대 100자까지 허용됩니다.' })
   name?: string;
 
   @ApiProperty({

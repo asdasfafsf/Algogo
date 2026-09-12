@@ -45,7 +45,6 @@ export class ProblemSiteRepository {
     provider: ProblemSiteProvider;
   }) {
     return this.prisma.problemSiteAccount.delete({
-      select: {},
       where: {
         userUuid_provider: {
           userUuid,
