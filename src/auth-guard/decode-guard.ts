@@ -1,6 +1,6 @@
 import { ExecutionContext, Injectable, CanActivate } from '@nestjs/common';
 import { JwtService } from '../jwt/jwt.service';
-import { Request } from 'express';
+import type { Request } from 'express';
 
 @Injectable()
 export class DecodeGuard implements CanActivate {

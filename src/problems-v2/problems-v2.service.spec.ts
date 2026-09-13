@@ -45,8 +45,8 @@ describe('ProblemsV2Service', () => {
           pageNo: 1,
           pageSize: 10,
           sort: PROBLEM_SORT.DEFAULT,
-        } as any;
-        repository.getProblemsSummary.mockResolvedValue({} as any);
+        } as unknown as never;
+        repository.getProblemsSummary.mockResolvedValue({} as unknown as never);
 
         // When
         await service.getProblemsSummary(dto);
@@ -63,8 +63,8 @@ describe('ProblemsV2Service', () => {
           pageNo: 1,
           pageSize: 10,
           sort: PROBLEM_SORT.DEFAULT,
-        } as any;
-        repository.getProblemsSummary.mockResolvedValue({} as any);
+        } as unknown as never;
+        repository.getProblemsSummary.mockResolvedValue({} as unknown as never);
 
         // When
         await service.getProblemsSummary(dto);
@@ -81,8 +81,8 @@ describe('ProblemsV2Service', () => {
           pageNo: 1,
           pageSize: 10,
           sort: PROBLEM_SORT.DEFAULT,
-        } as any;
-        repository.getProblemsSummary.mockResolvedValue({} as any);
+        } as unknown as never;
+        repository.getProblemsSummary.mockResolvedValue({} as unknown as never);
 
         // When
         await service.getProblemsSummary(dto);
@@ -99,8 +99,8 @@ describe('ProblemsV2Service', () => {
           pageNo: 1,
           pageSize: 10,
           sort: PROBLEM_SORT.DEFAULT,
-        } as any;
-        repository.getProblemsSummary.mockResolvedValue({} as any);
+        } as unknown as never;
+        repository.getProblemsSummary.mockResolvedValue({} as unknown as never);
 
         // When
         await service.getProblemsSummary(dto);
@@ -117,8 +117,8 @@ describe('ProblemsV2Service', () => {
           pageNo: 1,
           pageSize: 10,
           sort: PROBLEM_SORT.DEFAULT,
-        } as any;
-        repository.getProblemsSummary.mockResolvedValue({} as any);
+        } as unknown as never;
+        repository.getProblemsSummary.mockResolvedValue({} as unknown as never);
 
         // When
         await service.getProblemsSummary(dto);
@@ -135,8 +135,10 @@ describe('ProblemsV2Service', () => {
           pageNo: 1,
           pageSize: 10,
           sort: PROBLEM_SORT.DEFAULT,
-        } as any;
-        repository.getProblemSummaryByTitle.mockResolvedValue({} as any);
+        } as unknown as never;
+        repository.getProblemSummaryByTitle.mockResolvedValue(
+          {} as unknown as never,
+        );
 
         // When
         await service.getProblemsSummary(dto);
@@ -153,8 +155,10 @@ describe('ProblemsV2Service', () => {
           pageNo: 1,
           pageSize: 10,
           sort: PROBLEM_SORT.DEFAULT,
-        } as any;
-        repository.getProblemSummaryByTitle.mockResolvedValue({} as any);
+        } as unknown as never;
+        repository.getProblemSummaryByTitle.mockResolvedValue(
+          {} as unknown as never,
+        );
 
         // When
         await service.getProblemsSummary(dto);
@@ -172,7 +176,7 @@ describe('ProblemsV2Service', () => {
         pageNo: 1,
         pageSize: 10,
         sort: PROBLEM_SORT.DEFAULT,
-      } as any;
+      } as unknown as never;
       const expectedResult = {
         problemList: [{ uuid: 'test-uuid', title: '알고리즘 문제' }],
         totalCount: 1,
@@ -180,7 +184,7 @@ describe('ProblemsV2Service', () => {
         pageSize: 10,
       };
       repository.getProblemSummaryByTitle.mockResolvedValue(
-        expectedResult as any,
+        expectedResult as unknown as never,
       );
 
       // When
@@ -214,7 +218,7 @@ describe('ProblemsV2Service', () => {
         typeList: [{ name: '수학' }, { name: '구현' }],
         languageLimitList: [{ language: 'C++' }, { language: 'Java' }],
       };
-      repository.getProblem.mockResolvedValue(mockProblem as any);
+      repository.getProblem.mockResolvedValue(mockProblem as unknown as never);
 
       // When
       const result = await service.getProblem(dto);
@@ -238,7 +242,7 @@ describe('ProblemsV2Service', () => {
         typeList: [],
         languageLimitList: [],
       };
-      repository.getProblem.mockResolvedValue(mockProblem as any);
+      repository.getProblem.mockResolvedValue(mockProblem as unknown as never);
 
       // When
       const result = await service.getProblem(dto);
@@ -257,7 +261,7 @@ describe('ProblemsV2Service', () => {
         typeList: [],
         languageLimitList: [],
       };
-      repository.getProblem.mockResolvedValue(mockProblem as any);
+      repository.getProblem.mockResolvedValue(mockProblem as unknown as never);
 
       // When
       const result = await service.getProblem(dto);
@@ -276,7 +280,7 @@ describe('ProblemsV2Service', () => {
         typeList: [],
         languageLimitList: [],
       };
-      repository.getProblem.mockResolvedValue(mockProblem as any);
+      repository.getProblem.mockResolvedValue(mockProblem as unknown as never);
 
       // When
       const result = await service.getProblem(dto);
@@ -304,7 +308,9 @@ describe('ProblemsV2Service', () => {
       const mockProblems = [
         { uuid: 'problem-1', level: 4, userProblemStateList: [] },
       ];
-      repository.getTodayProblems.mockResolvedValue(mockProblems as any);
+      repository.getTodayProblems.mockResolvedValue(
+        mockProblems as unknown as never,
+      );
 
       // When
       await service.getTodayProblems(params);
@@ -345,7 +351,9 @@ describe('ProblemsV2Service', () => {
           { uuid: 'problem-3', level: 2 },
           { uuid: 'problem-4', level: 3 },
         ];
-        repository.getTodayProblems.mockResolvedValue(mockProblems as any);
+        repository.getTodayProblems.mockResolvedValue(
+          mockProblems as unknown as never,
+        );
 
         // When
         const result = await service.getTodayProblems(params);
@@ -363,7 +371,9 @@ describe('ProblemsV2Service', () => {
           { uuid: 'problem-1', level: 4 },
           { uuid: 'problem-2', level: 7 },
         ];
-        repository.getTodayProblems.mockResolvedValue(mockProblems as any);
+        repository.getTodayProblems.mockResolvedValue(
+          mockProblems as unknown as never,
+        );
 
         // When
         const result = await service.getTodayProblems(params);
@@ -381,7 +391,9 @@ describe('ProblemsV2Service', () => {
           { uuid: 'problem-1', level: 16 },
           { uuid: 'problem-2', level: 19 },
         ];
-        repository.getTodayProblems.mockResolvedValue(mockProblems as any);
+        repository.getTodayProblems.mockResolvedValue(
+          mockProblems as unknown as never,
+        );
 
         // When
         const result = await service.getTodayProblems(params);
@@ -399,7 +411,9 @@ describe('ProblemsV2Service', () => {
           { uuid: 'problem-1', level: 20 },
           { uuid: 'problem-2', level: 25 },
         ];
-        repository.getTodayProblems.mockResolvedValue(mockProblems as any);
+        repository.getTodayProblems.mockResolvedValue(
+          mockProblems as unknown as never,
+        );
 
         // When
         const result = await service.getTodayProblems(params);
@@ -421,7 +435,9 @@ describe('ProblemsV2Service', () => {
           userProblemStateList: [{ state: 'SOLVED' }],
         },
       ];
-      repository.getTodayProblems.mockResolvedValue(mockProblems as any);
+      repository.getTodayProblems.mockResolvedValue(
+        mockProblems as unknown as never,
+      );
 
       // When
       const result = await service.getTodayProblems(params);
@@ -442,7 +458,9 @@ describe('ProblemsV2Service', () => {
           userProblemStateList: [{ state: 'IN_PROGRESS' }],
         },
       ];
-      repository.getTodayProblems.mockResolvedValue(mockProblems as any);
+      repository.getTodayProblems.mockResolvedValue(
+        mockProblems as unknown as never,
+      );
 
       // When
       const result = await service.getTodayProblems(params);

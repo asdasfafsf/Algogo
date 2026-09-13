@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
 import { JwtService } from '../jwt/jwt.service';
 import { UsersService } from '../users/users.service';
 import { TokenPayload } from '../common/types/auth.type';
@@ -144,6 +145,7 @@ export class AuthV2Service {
     const refreshToken = await this.jwtService.sign(
       {
         sub: payload.sub,
+        jti: randomUUID(),
       },
       this.jwtConfig.jwtRefreshTokenExpiresIn,
     );

@@ -17,7 +17,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { MeService } from './me.service';
-import { Express } from 'express';
+import type { Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MULTER_OPTION } from './me.constants';
 import { ResponseMeDto } from './dto/ResponseMeDto';

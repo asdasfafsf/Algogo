@@ -1,5 +1,5 @@
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { PrismaService } from '../src/prisma/prisma.service';
 import {
   createTestApp,
@@ -29,9 +29,7 @@ describe('App (e2e)', () => {
     });
 
     it('인증 없는 요청은 401을 반환한다', () => {
-      return request(app.getHttpServer())
-        .get('/api/v1/me')
-        .expect(401);
+      return request(app.getHttpServer()).get('/api/v1/me').expect(401);
     });
 
     it('유효한 토큰으로 인증된 요청이 동작한다', async () => {

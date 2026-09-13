@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Param,
-  Post,
-  Res,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Param, Post, Res, UseGuards } from '@nestjs/common';
 import { DynamicOAuthGuard } from './dynamic-oauth.guard';
 import { OAuthProvider, OAuthRequestUser } from '../common/types/oauth.type';
 import { OauthV2Service } from './oauth-v2.service';
@@ -14,7 +8,7 @@ import { User } from '../common/decorators/contexts/user.decorator';
 import { OAuth } from '../common/decorators/contexts/oauth.decorator';
 import { RequestMetadata } from '../common/decorators/contexts/request-metadata.decorator';
 import { RequestMetadata as Metadata } from '../common/types/request.type';
-import { Response } from 'express';
+import type { Response } from 'express';
 import { TokenCookieService } from '../jwt/token-cookie.service';
 
 @Controller('api/v2/oauth')

@@ -1,0 +1,82 @@
+name: algogo-nest12
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: nest12-local-only
+      MYSQL_DATABASE: algogo_nest12_test
+    ports: ['127.0.0.1::3306']
+    healthcheck:
+      test:
+        ['CMD', 'mysqladmin', 'ping', '-h', '127.0.0.1', '-pnest12-local-only']
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  redis:
+    image: redis:7
+    command: ['redis-server', '--requirepass', 'nest12-local-only']
+    ports: ['127.0.0.1::6379']
+    healthcheck:
+      test: ['CMD', 'redis-cli', '-a', 'nest12-local-only', 'ping']
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  minio:
+    image: minio/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e
+    command: ['server', '/data', '--console-address', ':9001']
+    environment:
+      MINIO_ROOT_USER: nest12-access
+      MINIO_ROOT_PASSWORD: nest12-secret-local-only
+    ports: ['127.0.0.1::9000', '127.0.0.1::9001']
+  compiler:
+    profiles: ['compiler']
+    build:
+      context: ${ALGOGO_COMPILER_PATH:-../algogo-compiler}
+      dockerfile_inline: |
+        FROM node:24.15.0-slim AS build
+        WORKDIR /usr/src/app
+        RUN npm install -g pnpm@10.32.1
+        COPY package.json pnpm-lock.yaml ./
+        RUN pnpm install --frozen-lockfile
+        COPY tsconfig*.json nest-cli.json ./
+        COPY src ./src
+        RUN pnpm build
+        FROM node:24.15.0-slim
+        RUN apt-get update && apt-get install -y --no-install-recommends python3 g++ clang default-jdk-headless procps && rm -rf /var/lib/apt/lists/*
+        WORKDIR /usr/src/app
+        COPY --from=build /usr/src/app/node_modules ./node_modules
+        COPY --from=build /usr/src/app/dist ./dist
+        RUN ln -s . dist/src
+        ENV NODE_PATH=/usr/src/app/dist
+        USER node
+        CMD ["node", "dist/main.js"]
+    environment:
+      NODE_ENV: production
+      TMP_DIR: /tmp/algogo-
+      BULLMQ_HOST: redis
+      BULLMQ_PORT: '6379'
+      BULLMQ_PASSWORD: nest12-local-only
+      BULLMQ_QUEUE_NAME: execute
+    depends_on:
+      redis: { condition: service_healthy }
+    mem_limit: 3g
+    pids_limit: 256
+  api:
+    profiles: ['api']
+    build: { context: ., dockerfile: dockerfile }
+    env_file: .test.env
+    environment:
+      NODE_ENV: production
+      SERVER_PORT: '3000'
+      DATABASE_URL: mysql://root:nest12-local-only@mysql:3306/algogo_nest12_test
+      REDIS_HOST: redis
+      REDIS_PORT: '6379'
+      BULLMQ_HOST: redis
+      BULLMQ_PORT: '6379'
+      BULLMQ_QUEUE_NAME: execute
+      S3_ENDPOINT: http://algogo-nest12-minio-1.orb.local:9000
+    ports: ['127.0.0.1::3000']
+    depends_on:
+      mysql: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      minio: { condition: service_started }

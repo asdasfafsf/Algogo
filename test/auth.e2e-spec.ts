@@ -1,5 +1,5 @@
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { createTestApp, closeTestApp } from './helpers/setup';
@@ -12,6 +12,7 @@ import {
 import { seedTestUser, cleanDatabase } from './helpers/seed';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { JwtService } from '../src/jwt/jwt.service';
+import { AuthV2Service } from '../src/auth-v2/auth-v2.service';
 
 describe('Auth E2E', () => {
   let app: INestApplication;
@@ -35,11 +36,7 @@ describe('Auth E2E', () => {
     });
     const refreshToken = await getRefreshToken(app, { sub: user.uuid });
 
-    await cache.set(
-      `${user.uuid}:${refreshToken}`,
-      true,
-      REFRESH_TOKEN_TTL_MS,
-    );
+    await cache.set(`${user.uuid}:${refreshToken}`, true, REFRESH_TOKEN_TTL_MS);
 
     return { user, accessToken, refreshToken };
   }
@@ -263,6 +260,30 @@ describe('Auth E2E', () => {
       expect(secondRes.body.data).toHaveProperty('refreshToken');
       expect(secondRes.body.data.refreshToken).not.toBe(newRefreshToken);
     });
+  });
+
+  it('같은 발급 시각에도 refresh 토큰을 구분한다', async () => {
+    const service = app.get(AuthV2Service);
+    const now = jest.spyOn(Date, 'now').mockReturnValue(Date.now());
+    try {
+      const first = await service.generateToken({
+        sub: 'token-uniqueness',
+        roles: [],
+      });
+      const second = await service.generateToken({
+        sub: 'token-uniqueness',
+        roles: [],
+      });
+      expect(first.refreshToken).not.toBe(second.refreshToken);
+      const jwt = app.get(JwtService);
+      const a = await jwt.verify(first.refreshToken);
+      const b = await jwt.verify(second.refreshToken);
+      expect(a.iat).toBe(b.iat);
+      expect(a.jti).toBeTruthy();
+      expect(a.jti).not.toBe(b.jti);
+    } finally {
+      now.mockRestore();
+    }
   });
 
   describe('POST /api/v2/auth/logout', () => {

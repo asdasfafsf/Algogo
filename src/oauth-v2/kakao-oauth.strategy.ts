@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { ConfigType } from '@nestjs/config';
 import kakaoOAuthConfig from '../config/kakaoOAuthConfig';
 import { HttpService } from '@nestjs/axios';
@@ -33,7 +33,10 @@ export class KakaoOAuthStrategy extends CustomOAuthStrategy(
   }
 
   async validate(
-    req: Request & { oauth?: Record<string, unknown>; user?: Record<string, unknown> },
+    req: Request & {
+      oauth?: Record<string, unknown>;
+      user?: Record<string, unknown>;
+    },
     accessToken: string,
     refreshToken: string,
   ): Promise<Record<string, unknown>> {
@@ -49,7 +52,9 @@ export class KakaoOAuthStrategy extends CustomOAuthStrategy(
     });
   }
 
-  private async getUserInfo(accessToken: string): Promise<Record<string, unknown>> {
+  private async getUserInfo(
+    accessToken: string,
+  ): Promise<Record<string, unknown>> {
     const url = 'https://kapi.kakao.com/v1/oidc/userinfo';
     const headers = {
       Authorization: `Bearer ${accessToken}`,
@@ -62,7 +67,9 @@ export class KakaoOAuthStrategy extends CustomOAuthStrategy(
 
       return response.data;
     } catch (error: unknown) {
-      this.logger.error('Error fetching Kakao user info', { error: String(error) });
+      this.logger.error('Error fetching Kakao user info', {
+        error: String(error),
+      });
       throw error;
     }
   }

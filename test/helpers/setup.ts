@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CanActivate, INestApplication, ValidationPipe } from '@nestjs/common';
-import * as cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser';
 import { AppModule } from '../../src/app.module';
 
 export async function createTestApp(options?: {
@@ -25,6 +25,8 @@ export async function createTestApp(options?: {
   const module = await builder.compile();
 
   const app = module.createNestApplication();
+
+  app.getHttpAdapter().getInstance().set('query parser', 'extended');
 
   app.use(cookieParser());
   app.useGlobalPipes(

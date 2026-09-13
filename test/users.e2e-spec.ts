@@ -1,5 +1,5 @@
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { createTestApp, closeTestApp } from './helpers/setup';
 import { getAccessToken, createAuthHeaders } from './helpers/auth';
 import { seedTestUser, cleanDatabase } from './helpers/seed';

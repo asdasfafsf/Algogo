@@ -1,5 +1,6 @@
+import { randomUUID } from 'node:crypto';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { createTestApp, closeTestApp } from './helpers/setup';
 import { getAccessToken, createAuthHeaders } from './helpers/auth';
 import { seedTestUser, seedTestProblem, cleanDatabase } from './helpers/seed';
@@ -545,6 +546,44 @@ describe('Code E2E', () => {
 
   describe('문제 코드 (Problem Code)', () => {
     describe('GET /api/v1/code/problem/:problemUuid', () => {
+      it('UUIDv4 문제를 저장하고 조회한다', async () => {
+        const { headers } = await createUserAndToken();
+        const problem = await seedTestProblem(prisma, { uuid: randomUUID() });
+        await request(app.getHttpServer())
+          .put('/api/v1/code/problem')
+          .set(headers)
+          .send({
+            problemUuid: problem.uuid,
+            language: 'Python',
+            content: 'print(4)',
+          })
+          .expect(200);
+        const res = await request(app.getHttpServer())
+          .get(`/api/v1/code/problem/${problem.uuid}`)
+          .set(headers)
+          .expect(200);
+        expect(res.body.data).toEqual([
+          expect.objectContaining({ language: 'Python', content: 'print(4)' }),
+        ]);
+      });
+
+      it('잘못된 UUID는 조회와 저장에서 거부한다', async () => {
+        const { headers } = await createUserAndToken();
+        await request(app.getHttpServer())
+          .get('/api/v1/code/problem/not-a-uuid')
+          .set(headers)
+          .expect(400);
+        await request(app.getHttpServer())
+          .put('/api/v1/code/problem')
+          .set(headers)
+          .send({
+            problemUuid: 'not-a-uuid',
+            language: 'Python',
+            content: 'print(4)',
+          })
+          .expect(400);
+      });
+
       it('저장된 코드가 있음 -- 200과 코드 목록을 반환한다', async () => {
         // Given
         const { user, headers } = await createUserAndToken();

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Algogo 이슈 작업"
+  short_description: "Linear 이슈를 별도 워크트리에서 구현하고 검증하는 작업 절차"
+  default_prompt: "$algogo-work ALGOGO-번호 이슈 작업을 진행해줘."

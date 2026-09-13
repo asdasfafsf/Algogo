@@ -18,7 +18,7 @@ import {
 import { ApiGlobalErrorResponses } from '../common/decorators/swagger/ApiGlobalErrorResponse';
 import { RequestMetadata as Metadata } from '../common/types/request.type';
 import { RequestMetadata } from '../common/decorators/contexts/request-metadata.decorator';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { TokenCookieService } from '../jwt/token-cookie.service';
 import { User } from '../common/decorators/contexts/user.decorator';
 import { AuthGuard } from '../auth-guard/auth.guard';

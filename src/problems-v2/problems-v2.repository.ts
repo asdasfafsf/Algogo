@@ -2,11 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { InquiryProblemsSummaryDto } from './dto/inquiry-problems-summary.dto';
 import { Prisma } from '@prisma/client';
-import { ProblemSort, PROBLEM_SORT } from '../common/constants/problem-sort.constant';
+import { PROBLEM_SORT } from '../common/constants/problem-sort.constant';
 import { getProblemOrderBy } from '../common/utils/problem-order-by.util';
 import { ProblemSummaryDto } from './dto/problem-summary.dto';
 import { USER_PROBLEM_STATE } from '../common/constants/user.constant';
-import { DEFAULT_PAGE_NO, DEFAULT_PAGE_SIZE, FULLTEXT_SEARCH_LIMIT } from '../common/constants/pagination.constant';
+import {
+  DEFAULT_PAGE_NO,
+  DEFAULT_PAGE_SIZE,
+  FULLTEXT_SEARCH_LIMIT,
+} from '../common/constants/pagination.constant';
 import { UserProblemState } from '../common/types/user.type';
 
 @Injectable()
@@ -40,7 +44,9 @@ export class ProblemsV2Repository {
     if (states && states.length > 0 && dto.userUuid) {
       // NONE과 NULL을 동일하게 처리
       const hasNoneState = states.includes(USER_PROBLEM_STATE.NONE);
-      const otherStates = states.filter((state) => state !== USER_PROBLEM_STATE.NONE);
+      const otherStates = states.filter(
+        (state) => state !== USER_PROBLEM_STATE.NONE,
+      );
 
       if (hasNoneState && otherStates.length > 0) {
         // NONE과 다른 상태들이 모두 포함된 경우
@@ -182,7 +188,9 @@ export class ProblemsV2Repository {
     if (states && states.length > 0 && dto.userUuid) {
       // NONE과 NULL을 동일하게 처리
       const hasNoneState = states.includes(USER_PROBLEM_STATE.NONE);
-      const otherStates = states.filter((state) => state !== USER_PROBLEM_STATE.NONE);
+      const otherStates = states.filter(
+        (state) => state !== USER_PROBLEM_STATE.NONE,
+      );
 
       if (hasNoneState && otherStates.length > 0) {
         // NONE과 다른 상태들이 모두 포함된 경우
@@ -222,7 +230,8 @@ export class ProblemsV2Repository {
     }
 
     const orderBy = getProblemOrderBy(sort);
-    const skip = ((pageNo ?? DEFAULT_PAGE_NO) - 1) * (pageSize ?? DEFAULT_PAGE_SIZE);
+    const skip =
+      ((pageNo ?? DEFAULT_PAGE_NO) - 1) * (pageSize ?? DEFAULT_PAGE_SIZE);
     const take = pageSize ?? DEFAULT_PAGE_SIZE;
 
     const totalCount = await this.prismaService.problemV2.count({

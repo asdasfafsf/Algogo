@@ -1,14 +1,14 @@
 import { applyDecorators, Type } from '@nestjs/common';
 import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger';
 import { ResponseDto } from '../../dto/ResponseDto';
-interface CommonApiResponseOptions<T extends Type<any>> {
+interface CommonApiResponseOptions<T extends Type<unknown>> {
   status?: number;
   description?: string;
   model: T;
   isArray?: boolean;
 }
 
-export const CommonApiResponse = <T extends Type<any>>(
+export const CommonApiResponse = <T extends Type<unknown>>(
   opts: CommonApiResponseOptions<T>,
 ) =>
   applyDecorators(

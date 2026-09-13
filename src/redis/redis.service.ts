@@ -60,9 +60,11 @@ export class RedisService implements OnModuleDestroy {
     })) as T;
   }
 
-  onModuleDestroy() {
-    this.redisClient.quit();
-    this.redisPubClient.quit();
-    this.redisSubClient.quit();
+  async onModuleDestroy() {
+    await Promise.all(
+      [this.redisClient, this.redisPubClient, this.redisSubClient]
+        .filter((client) => client.isOpen)
+        .map((client) => client.quit()),
+    );
   }
 }
